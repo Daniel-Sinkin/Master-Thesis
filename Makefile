@@ -1,4 +1,4 @@
-TEX      = pdflatex
+TEX      = lualatex
 BIB      = bibtex
 MAIN     = main
 BUILDDIR = build

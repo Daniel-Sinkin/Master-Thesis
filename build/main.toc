@@ -1,0 +1,53 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{Abstract}{iii}{chapter*.1}%
+\contentsline {chapter}{Acknowledgements}{v}{chapter*.2}%
+\contentsline {chapter}{\nonumberline List of Figures}{ix}{chapter*.4}%
+\contentsline {chapter}{\nonumberline List of Tables}{xi}{chapter*.5}%
+\contentsline {chapter}{\nonumberline Listings}{xiii}{chapter*.6}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Motivation}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Problem Statement}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Contributions}{1}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Outline}{1}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Background}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Tensor Networks}{3}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Tensor Notation and Diagrams}{3}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Tensor Contraction}{3}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Tensor Network Structures}{3}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}GPU Architecture}{3}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Streaming Multiprocessor and Warp Execution}{3}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Memory Hierarchy}{3}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}NVIDIA A100 Ampere Architecture}{3}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}CUDA Programming Model}{3}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Thread Hierarchy and Kernel Launch}{3}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{3}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Memory Coalescing and Bank Conflicts}{3}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{3}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Related Work}{3}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}cuBLAS and cuTENSOR}{3}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}ChASE Eigensolver}{3}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Existing GPU Tensor Network Implementations}{3}{subsection.2.4.3}%
+\contentsline {chapter}{\numberline {3}Design and Methodology}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Target Kernels}{5}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Algorithmic Approach}{5}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Data Layout and Memory Strategy}{5}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Baseline Selection}{5}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Implementation}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Kernel Design}{7}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Shared Memory Tiling}{7}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Occupancy and Launch Configuration}{7}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Integration and Build System}{7}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Results}{9}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Experimental Setup}{9}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Single-GPU Performance}{9}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Profiling Analysis}{9}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Comparison with cuBLAS and cuTENSOR}{9}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Scaling Behaviour}{9}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Discussion}{9}{section.5.6}%
+\contentsline {chapter}{\numberline {6}Conclusion}{11}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Summary}{11}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Limitations}{11}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Future Work}{11}{section.6.3}%
+\contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{13}{appendix.A}%
+\contentsline {chapter}{Declaration of Authorship}{15}{chapter*.7}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
