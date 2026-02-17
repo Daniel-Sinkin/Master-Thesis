@@ -48,6 +48,7 @@
 \contentsline {section}{\numberline {6.1}Summary}{11}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Limitations}{11}{section.6.2}%
 \contentsline {section}{\numberline {6.3}Future Work}{11}{section.6.3}%
-\contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{13}{appendix.A}%
-\contentsline {chapter}{Declaration of Authorship}{15}{chapter*.7}%
+\contentsline {chapter}{\nonumberline Bibliography}{13}{chapter*.7}%
+\contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{15}{appendix.A}%
+\contentsline {chapter}{Declaration of Authorship}{17}{chapter*.8}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

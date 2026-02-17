@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 05:35
+This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 05:36
  restricted system commands enabled.
 **main.tex
 (./main.tex
@@ -94,8 +94,8 @@ ine 2713.
 (/usr/local/texlive/2025/texmf-dist/tex/latex/koma-script/scrsize12pt.clo
 File: scrsize12pt.clo 2024/10/24 v3.43 KOMA-Script font size class option (12pt
 )
-luaotfload | db : Font names database not found, generating new one.
-luaotfload | db : This can take several minutes; please be patient.)
+luaotfload | db : Font names database loaded from /Users/danielsinkin/Library/te
+xlive/2025/texmf-var/luatex-cache/generic/names/luaotfload-names.luc.gz)
 (/usr/local/texlive/2025/texmf-dist/tex/latex/koma-script/typearea.sty
 Package: typearea 2024/10/24 v3.43 KOMA-Script package (type area)
 \ta@bcor=\skip50
@@ -1532,29 +1532,27 @@ tex))
 ]
 Package tocbasic Info: character protrusion at toc deactivated on input line 26
 .
+ (./build/main.toc
 
-No file main.toc.
+[7])
 \tf@toc=\write5
 
 \openout5 = main.toc
 
 
-[7]
-
-[8
-
-
-]
+[8]
 Package tocbasic Info: character protrusion at lof deactivated on input line 27
 .
-
-No file main.lof.
+ (./build/main.lof)
 \tf@lof=\write6
 
 \openout6 = main.lof
 
 
-[9]
+[9
+
+
+]
 
 [10
 
@@ -1562,8 +1560,7 @@ No file main.lof.
 ]
 Package tocbasic Info: character protrusion at lot deactivated on input line 28
 .
-
-No file main.lot.
+ (./build/main.lot)
 \tf@lot=\write7
 
 \openout7 = main.lot
@@ -1577,8 +1574,7 @@ No file main.lot.
 ]
 Package tocbasic Info: character protrusion at lol deactivated on input line 29
 .
-
-No file main.lol.
+ (./build/main.lol)
 \tf@lol=\write8
 
 \openout8 = main.lol
@@ -1591,24 +1587,7 @@ No file main.lol.
 
 ]
 chapter 1.
-(./chapters/01_introduction.tex
-
-LaTeX Warning: Reference `ch:background' on page 1 undefined on input line 11.
-
-
-LaTeX Warning: Reference `ch:design' on page 1 undefined on input line 12.
-
-
-LaTeX Warning: Reference `ch:implementation' on page 1 undefined on input line 
-13.
-
-
-LaTeX Warning: Reference `ch:results' on page 1 undefined on input line 14.
-
-
-LaTeX Warning: Reference `ch:conclusion' on page 1 undefined on input line 15.
-
-)
+(./chapters/01_introduction.tex)
 
 [1
 
@@ -1656,9 +1635,7 @@ chapter 5.
 
 ]
 chapter 6.
-(./chapters/06_conclusion.tex)
-No file main.bbl.
-
+(./chapters/06_conclusion.tex) (./build/main.bbl
 
 [11]
 
@@ -1666,8 +1643,15 @@ No file main.bbl.
 
 
 ]
-chapter A.
+chapter without number
+LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/n' will be
 
+(Font)              scaled to size 10.20007pt on input line 16.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `MonaspaceKrypton-Regular.otf' (encoding: TU).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+)
 
 [13]
 
@@ -1675,8 +1659,17 @@ chapter A.
 
 
 ]
+chapter A.
 
-[15
+
+[15]
+
+[16
+
+
+]
+
+[17
 
 
 ] (./build/main.aux)
@@ -1684,37 +1677,31 @@ chapter A.
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2020/03/25>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 )
 
 Here is how much of LuaTeX's memory you used:
- 41357 strings out of 475506
+ 41429 strings out of 475506
  100000,1648299 words of node,token memory allocated
- 583 words of node memory still in use:
-   7 hlist, 2 vlist, 2 rule, 4 glue, 4 kern, 1 glyph, 13 attribute, 63 glue_spec
-, 8 attribute_list, 2 write nodes
-   avail lists: 1:1,2:990,3:469,4:90,5:142,6:36,7:2074,8:1,9:188,10:9,11:220,12:
-1
- 63383 multiletter control sequences out of 65536+600000
- 57 fonts using 6135799 bytes
- 108i,7n,105p,10898b,1007s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmsans10-bold.otf><
-/usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman17-regular.ot
-f></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman12-bold.ot
-f></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman12-regular
-.otf>
-Output written on main.pdf (29 pages, 37328 bytes).
+ 692 words of node memory still in use:
+   8 hlist, 2 vlist, 2 rule, 1 local_par, 7 glue, 4 kern, 1 penalty, 3 glyph, 21
+ attribute, 67 glue_spec, 12 attribute_list, 2 write, 2 pdf_action nodes
+   avail lists: 2:1975,3:492,4:196,5:235,6:107,7:3863,8:54,9:575,10:15,11:260,12
+:1
+ 63418 multiletter control sequences out of 65536+600000
+ 59 fonts using 6648295 bytes
+ 108i,7n,105p,10898b,1178s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<./fonts/MonaspaceKrypton-Regular.otf></usr/local/texlive/2025/texmf-dist/fonts/
+opentype/public/lm/lmroman12-italic.otf></usr/local/texlive/2025/texmf-dist/font
+s/opentype/public/lm/lmsans10-bold.otf></usr/local/texlive/2025/texmf-dist/fonts
+/opentype/public/lm/lmroman17-regular.otf></usr/local/texlive/2025/texmf-dist/fo
+nts/opentype/public/lm/lmroman12-bold.otf></usr/local/texlive/2025/texmf-dist/fo
+nts/opentype/public/lm/lmroman12-regular.otf>
+Output written on main.pdf (31 pages, 55851 bytes).
 
-PDF statistics: 371 PDF objects out of 1000 (max. 8388607)
- 324 compressed objects within 4 object streams
- 82 named destinations out of 1000 (max. 131072)
- 424 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 474 PDF objects out of 1000 (max. 8388607)
+ 418 compressed objects within 5 object streams
+ 94 named destinations out of 1000 (max. 131072)
+ 432 words of extra memory for PDF output out of 10000 (max. 100000000)
 
