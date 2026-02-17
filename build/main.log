@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 08:48
+This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 09:02
  restricted system commands enabled.
 **main.tex
 (./main.tex
@@ -1557,7 +1557,7 @@ Package tocbasic Info: character protrusion at lof deactivated on input line 28
  (./build/main.lof
 LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/n' will be
 
-(Font)              scaled to size 10.20007pt on input line 6.
+(Font)              scaled to size 10.20007pt on input line 7.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `MonaspaceKrypton-Regular.otf' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
@@ -1637,58 +1637,63 @@ Underfull \hbox (badness 10000) in alignment at lines 40--40
 [][][][][]
  []
 
+<images/FloatingPointBitComparions.pdf, id=287, 1563.33794pt x 481.53947pt>
+File: images/FloatingPointBitComparions.pdf Graphic file (type pdf)
+<use images/FloatingPointBitComparions.pdf>
+Package luatex.def Info: images/FloatingPointBitComparions.pdf  used on input l
+ine 45.
+(luatex.def)             Requested size: 396.91325pt x 122.25822pt.
 
-Underfull \hbox (badness 10000) in alignment at lines 59--59
-[][][][]
- []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
 [3]
-Underfull \hbox (badness 10000) in alignment at lines 83--83
+Underfull \hbox (badness 10000) in alignment at lines 66--66
 [][][][]
  []
 
 
-Underfull \vbox (badness 4084) has occurred while \output is active []
 
+[4<./images/FloatingPointBitComparions.pdf>]
+Underfull \hbox (badness 10000) in alignment at lines 90--90
+[][][][]
+ []
 
-
-[4]
-
-LaTeX Warning: Reference `sec:results' on page 1 undefined on input line 101.
-
-<images/CPUCacheHierarchy.pdf, id=317, 1200.39647pt x 357.64655pt>
-File: images/CPUCacheHierarchy.pdf Graphic file (type pdf)
-<use images/CPUCacheHierarchy.pdf>
-Package luatex.def Info: images/CPUCacheHierarchy.pdf  used on input line 106.
-(luatex.def)             Requested size: 396.91325pt x 118.25291pt.
 
 
 [5]
-<images/A100CacheHierarchy.pdf, id=331, 1041.76651pt x 564.85556pt>
+
+LaTeX Warning: Reference `sec:results' on page 1 undefined on input line 108.
+
+<images/CPUCacheHierarchy.pdf, id=331, 1179.98682pt x 355.53865pt>
+File: images/CPUCacheHierarchy.pdf Graphic file (type pdf)
+<use images/CPUCacheHierarchy.pdf>
+Package luatex.def Info: images/CPUCacheHierarchy.pdf  used on input line 113.
+(luatex.def)             Requested size: 396.91325pt x 119.59036pt.
+<images/A100CacheHierarchy.pdf, id=333, 1041.76651pt x 564.85556pt>
 File: images/A100CacheHierarchy.pdf Graphic file (type pdf)
 <use images/A100CacheHierarchy.pdf>
-Package luatex.def Info: images/A100CacheHierarchy.pdf  used on input line 116.
+Package luatex.def Info: images/A100CacheHierarchy.pdf  used on input line 123.
 
 (luatex.def)             Requested size: 286.65883pt x 155.42625pt.
 
-
-[6<./images/CPUCacheHierarchy.pdf><./images/A100CacheHierarchy.pdf>]
-Underfull \vbox (badness 5893) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-[7]
-<images/GridBlockThreadAddressing.pdf, id=348, 1731.7402pt x 628.51375pt>
+[6<./images/CPUCacheHierarchy.pdf>]
+
+[7<./images/A100CacheHierarchy.pdf>]
+
+[8]
+<images/GridBlockThreadAddressing.pdf, id=362, 1731.10172pt x 628.09167pt>
 File: images/GridBlockThreadAddressing.pdf Graphic file (type pdf)
 <use images/GridBlockThreadAddressing.pdf>
 Package luatex.def Info: images/GridBlockThreadAddressing.pdf  used on input li
-ne 237.
-(luatex.def)             Requested size: 374.86775pt x 136.0485pt.
-
-
-[8] (/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
+ne 244.
+(luatex.def)             Requested size: 374.86775pt x 136.00505pt.
+ (/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2024/09/23 1.10c listings language file
 )
 (/usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
@@ -1699,22 +1704,23 @@ File: lstmisc.sty 2024/09/23 1.10c (Carsten Heinz)
 )
 LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/n' will be
 
-(Font)              scaled to size 8.50006pt on input line 246.
+(Font)              scaled to size 8.50006pt on input line 253.
 LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/b/n' will be
 
-(Font)              scaled to size 8.50006pt on input line 246.
+(Font)              scaled to size 8.50006pt on input line 253.
+
+
+[9<./images/GridBlockThreadAddressing.pdf>]
 LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/it' will b
 e
-(Font)              scaled to size 8.50006pt on input line 256.
+(Font)              scaled to size 8.50006pt on input line 263.
 
-Overfull \hbox (5.63203pt too wide) in paragraph at lines 263--264
+Overfull \hbox (5.63203pt too wide) in paragraph at lines 270--271
 []\TU/lmr/m/n/12 The global thread in-dex is com-puted on line 2 as [][][][][][
 ][][][][][][][][][][][][][][][][][][][][][].
  []
 
 
-
-[9<./images/GridBlockThreadAddressing.pdf>]
 
 [10]
 
@@ -1722,9 +1728,9 @@ Overfull \hbox (5.63203pt too wide) in paragraph at lines 263--264
 
 [12]
 
-[13])
+[13]
 
-[14]
+[14])
 
 [15]
 
@@ -1832,17 +1838,17 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 42188 strings out of 475506
- 476937,1977958 words of node,token memory allocated
- 896 words of node memory still in use:
+ 42204 strings out of 475506
+ 305220,1977958 words of node,token memory allocated
+ 908 words of node memory still in use:
    8 hlist, 2 vlist, 2 rule, 1 local_par, 6 glue, 5 kern, 1 penalty, 1 margin_ke
-rn, 4 glyph, 59 attribute, 70 glue_spec, 31 attribute_list, 2 write, 13 pdf_acti
+rn, 4 glyph, 61 attribute, 70 glue_spec, 32 attribute_list, 2 write, 14 pdf_acti
 on nodes
-   avail lists: 1:3,2:8109,3:485,4:10542,5:8448,6:95,7:10973,8:148,9:22210,10:47
-,11:952,12:1
- 63970 multiletter control sequences out of 65536+600000
+   avail lists: 1:4,2:6284,3:484,4:6195,5:4977,6:97,7:9214,8:148,9:13112,10:47,1
+1:768,12:1
+ 63982 multiletter control sequences out of 65536+600000
  68 fonts using 8327351 bytes
- 108i,20n,138p,10898b,1604s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,20n,138p,10898b,1626s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <./fonts/MonaspaceKrypton-Italic.otf></usr/local/texlive/2025/texmf-dist/fonts/o
 pentype/public/lm/lmroman6-regular.otf><./fonts/MonaspaceKrypton-Bold.otf>{/usr/
 local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}</usr/local/texlive/2
@@ -1862,10 +1868,10 @@ type1/public/lm/lmr8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/
 lm/lmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmsy8.pf
 b></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10
 .pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/esvect/vect10.pfb>
-Output written on main.pdf (47 pages, 346240 bytes).
+Output written on main.pdf (47 pages, 393260 bytes).
 
-PDF statistics: 852 PDF objects out of 1000 (max. 8388607)
- 751 compressed objects within 8 object streams
- 255 named destinations out of 1000 (max. 131072)
+PDF statistics: 856 PDF objects out of 1000 (max. 8388607)
+ 754 compressed objects within 8 object streams
+ 256 named destinations out of 1000 (max. 131072)
  456 words of extra memory for PDF output out of 10000 (max. 100000000)
 

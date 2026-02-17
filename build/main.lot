@@ -2,12 +2,12 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {2.1}{\ignorespaces Bit layout of floating-point formats relevant to GPU computing. FP64, FP32, and FP16 are defined by IEEE 754~\cite {ieee754-2019}; BF16 and TF32 are industry-defined formats (see text). The significand column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}}{4}{table.caption.11}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon $) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}}{4}{table.caption.12}%
-\contentsline {table}{\numberline {2.3}{\ignorespaces Peak floating-point throughput (TFLOPS) of the A100 by format and execution unit. Tensor core figures in parentheses include sparsity acceleration (2:4 structured sparsity). Data from~\cite {nvidia2020gtc-ampere}.}}{5}{table.caption.15}%
-\contentsline {table}{\numberline {2.4}{\ignorespaces Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}}{7}{table.caption.24}%
-\contentsline {table}{\numberline {2.5}{\ignorespaces Theoretical peak floating-point throughput of the A100 GPU.}}{7}{table.caption.27}%
-\contentsline {table}{\numberline {2.6}{\ignorespaces Derived theoretical limits of the A100 architecture.}}{8}{table.caption.30}%
-\contentsline {table}{\numberline {2.7}{\ignorespaces Approximate memory access latency at different hierarchy levels.}}{8}{table.caption.33}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon $) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}}{4}{table.caption.13}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces Peak floating-point throughput (TFLOPS) of the A100 by format and execution unit. Tensor core figures in parentheses include sparsity acceleration (2:4 structured sparsity). Data from~\cite {nvidia2020gtc-ampere}.}}{5}{table.caption.16}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}}{8}{table.caption.25}%
+\contentsline {table}{\numberline {2.5}{\ignorespaces Theoretical peak floating-point throughput of the A100 GPU.}}{8}{table.caption.28}%
+\contentsline {table}{\numberline {2.6}{\ignorespaces Derived theoretical limits of the A100 architecture.}}{9}{table.caption.31}%
+\contentsline {table}{\numberline {2.7}{\ignorespaces Approximate memory access latency at different hierarchy levels.}}{9}{table.caption.34}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

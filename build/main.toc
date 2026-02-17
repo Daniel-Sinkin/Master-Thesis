@@ -20,27 +20,27 @@
 \contentsline {subsection}{\numberline {2.2.1}Streaming Multiprocessor and Warp Execution}{3}{subsection.2.2.1}%
 \contentsline {subsection}{\numberline {2.2.2}Floating-Point Formats and Precision Trade-offs}{3}{subsection.2.2.2}%
 \contentsline {subsubsection}{\nonumberline IEEE 754 Binary Representation}{3}{subsubsection*.10}%
-\contentsline {subsubsection}{\nonumberline A100 Throughput by Precision}{4}{subsubsection*.14}%
-\contentsline {subsubsection}{\nonumberline The Case for Single Precision in Tensor Network Computations}{5}{subsubsection*.17}%
+\contentsline {subsubsection}{\nonumberline A100 Throughput by Precision}{5}{subsubsection*.15}%
+\contentsline {subsubsection}{\nonumberline The Case for Single Precision in Tensor Network Computations}{5}{subsubsection*.18}%
 \contentsline {subsection}{\numberline {2.2.3}Memory Hierarchy}{6}{subsection.2.2.3}%
-\contentsline {paragraph}{\nonumberline GPU Memory Hierarchy}{6}{figure.caption.21}%
+\contentsline {paragraph}{\nonumberline GPU Memory Hierarchy}{7}{figure.caption.22}%
 \contentsline {subsection}{\numberline {2.2.4}NVIDIA A100 Ampere Architecture}{7}{subsection.2.2.4}%
-\contentsline {subsubsection}{\nonumberline Hardware Overview}{7}{subsubsection*.23}%
-\contentsline {subsubsection}{\nonumberline Theoretical Peak Performance}{8}{subsubsection*.26}%
-\contentsline {subsubsection}{\nonumberline Derived Performance Limits}{8}{subsubsection*.29}%
-\contentsline {subsubsection}{\nonumberline Memory Latency}{8}{subsubsection*.32}%
+\contentsline {subsubsection}{\nonumberline Hardware Overview}{7}{subsubsection*.24}%
+\contentsline {subsubsection}{\nonumberline Theoretical Peak Performance}{8}{subsubsection*.27}%
+\contentsline {subsubsection}{\nonumberline Derived Performance Limits}{8}{subsubsection*.30}%
+\contentsline {subsubsection}{\nonumberline Memory Latency}{8}{subsubsection*.33}%
 \contentsline {section}{\numberline {2.3}CUDA Programming Model}{8}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Thread Hierarchy and Kernel Launch}{8}{subsection.2.3.1}%
-\contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{9}{subsubsection*.36}%
-\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{9}{subsubsection*.38}%
-\contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{10}{subsubsection*.40}%
-\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{10}{subsubsection*.42}%
+\contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{10}{subsubsection*.37}%
+\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{10}{subsubsection*.39}%
+\contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{11}{subsubsection*.41}%
+\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{11}{subsubsection*.43}%
 \contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{11}{subsection.2.3.2}%
-\contentsline {subsubsection}{\nonumberline Static and Dynamic Allocation}{11}{subsubsection*.44}%
-\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{11}{subsubsection*.46}%
+\contentsline {subsubsection}{\nonumberline Static and Dynamic Allocation}{12}{subsubsection*.45}%
+\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{12}{subsubsection*.47}%
 \contentsline {subsection}{\numberline {2.3.3}Memory Coalescing and Bank Conflicts}{13}{subsection.2.3.3}%
-\contentsline {subsubsection}{\nonumberline Global Memory Coalescing}{13}{subsubsection*.48}%
-\contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{13}{subsubsection*.50}%
+\contentsline {subsubsection}{\nonumberline Global Memory Coalescing}{13}{subsubsection*.49}%
+\contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{14}{subsubsection*.51}%
 \contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{14}{subsection.2.3.4}%
 \contentsline {section}{\numberline {2.4}Related Work}{15}{section.2.4}%
 \contentsline {subsection}{\numberline {2.4.1}cuBLAS and cuTENSOR}{15}{subsection.2.4.1}%
@@ -67,7 +67,7 @@
 \contentsline {section}{\numberline {6.1}Summary}{23}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Limitations}{23}{section.6.2}%
 \contentsline {section}{\numberline {6.3}Future Work}{23}{section.6.3}%
-\contentsline {chapter}{\nonumberline Bibliography}{25}{chapter*.51}%
+\contentsline {chapter}{\nonumberline Bibliography}{25}{chapter*.52}%
 \contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{27}{appendix.A}%
-\contentsline {chapter}{Declaration of Authorship}{29}{chapter*.52}%
+\contentsline {chapter}{Declaration of Authorship}{29}{chapter*.53}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
