@@ -100,8 +100,8 @@
 \@writefile{lot}{\contentsline {table}{\numberline {2.2}{\ignorespaces Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon $) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}}{4}{table.caption.13}\protected@file@percent }
 \newlabel{tab:fp-properties}{{2.2}{4}{Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon $) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit)}{table.caption.13}{}}
 \newlabel{tab:fp-properties@cref}{{[table][2][2]2.2}{[1][4][]4}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Memory hierarchy of a modern CPU, showing the register file and cache levels (L1, L2, L3) before main memory (DRAM).}}{4}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:fp-bit-patterns}{{2.1}{4}{Memory hierarchy of a modern CPU, showing the register file and cache levels (L1, L2, L3) before main memory (DRAM)}{figure.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Bit layout comparison of FP64, FP32, TF32, BF16, and FP16, with exponent and significand fields drawn to scale.}}{4}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:fp-bit-patterns}{{2.1}{4}{Bit layout comparison of FP64, FP32, TF32, BF16, and FP16, with exponent and significand fields drawn to scale}{figure.caption.12}{}}
 \newlabel{fig:fp-bit-patterns@cref}{{[figure][1][2]2.1}{[1][3][]4}{}{}{}}
 \citation{nvidia2020gtc-ampere}
 \citation{nvidia2020gtc-ampere}
@@ -161,11 +161,11 @@
 \@writefile{lot}{\contentsline {table}{\numberline {2.8}{\ignorespaces GPU-to-NUMA affinity on a JURECA-DC compute node.}}{10}{table.caption.40}\protected@file@percent }
 \newlabel{tab:gpu-numa-affinity}{{2.8}{10}{GPU-to-NUMA affinity on a JURECA-DC compute node}{table.caption.40}{}}
 \newlabel{tab:gpu-numa-affinity@cref}{{[table][8][2]2.8}{[1][10][]10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2).}}{10}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:gpu-topology}{{2.5}{10}{Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2)}{figure.caption.41}{}}
+\newlabel{fig:gpu-topology@cref}{{[figure][5][2]2.5}{[1][10][]10}{}{}{}}
 \BKM@entry{id=24,dest={73656374696F6E2E322E33},srcline={296},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030555C303030445C303030415C3030305C3034305C303030505C303030725C3030306F5C303030675C303030725C303030615C3030306D5C3030306D5C303030695C3030306E5C303030675C3030305C3034305C3030304D5C3030306F5C303030645C303030655C3030306C}
 \BKM@entry{id=25,dest={73756273656374696F6E2E322E332E31},srcline={300},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030545C303030685C303030725C303030655C303030615C303030645C3030305C3034305C303030485C303030695C303030655C303030725C303030615C303030725C303030635C303030685C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C3030305C3034305C3030304C5C303030615C303030755C3030306E5C303030635C30303068}
-\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2).}}{11}{figure.caption.41}\protected@file@percent }
-\newlabel{fig:gpu-topology}{{2.5}{11}{Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2)}{figure.caption.41}{}}
-\newlabel{fig:gpu-topology@cref}{{[figure][5][2]2.5}{[1][10][]11}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}CUDA Programming Model}{11}{section.2.3}\protected@file@percent }
 \newlabel{sec:cuda}{{2.3}{11}{CUDA Programming Model}{section.2.3}{}}
 \newlabel{sec:cuda@cref}{{[section][3][2]2.3}{[1][11][]11}{}{}{}}
@@ -174,24 +174,24 @@
 \newlabel{sec:cuda-threads@cref}{{[subsection][1][2,3]2.3.1}{[1][11][]11}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2.6}{\ignorespaces CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt  {threadIdx} and \texttt  {blockIdx}.}}{12}{figure.caption.42}\protected@file@percent }
 \newlabel{fig:cuda-thread-hierarchy}{{2.6}{12}{CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt {threadIdx} and \texttt {blockIdx}}{figure.caption.42}{}}
-\newlabel{fig:cuda-thread-hierarchy@cref}{{[figure][6][2]2.6}{[1][12][]12}{}{}{}}
+\newlabel{fig:cuda-thread-hierarchy@cref}{{[figure][6][2]2.6}{[1][11][]12}{}{}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{12}{subsubsection*.44}\protected@file@percent }
 \newlabel{lst:vecadd}{{2.1}{12}{Element-wise vector addition kernel and its host-side launch}{lstlisting.2.1}{}}
 \newlabel{lst:vecadd@cref}{{[listing][1][2]2.1}{[1][12][]12}{}{}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2.1}{\ignorespaces Element-wise vector addition kernel and its host-side launch.}}{12}{lstlisting.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{13}{subsubsection*.46}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{12}{subsubsection*.46}\protected@file@percent }
 \newlabel{lst:transpose-2d}{{2.2}{13}{Matrix transpose using two-dimensional grid and block addressing}{lstlisting.2.2}{}}
-\newlabel{lst:transpose-2d@cref}{{[listing][2][2]2.2}{[1][13][]13}{}{}{}}
+\newlabel{lst:transpose-2d@cref}{{[listing][2][2]2.2}{[1][12][]13}{}{}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2.2}{\ignorespaces Matrix transpose using two-dimensional grid and block addressing.}}{13}{lstlisting.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{13}{subsubsection*.48}\protected@file@percent }
 \newlabel{sec:block-size}{{2.3.1}{13}{Block Size Selection and Hardware Constraints}{subsubsection*.48}{}}
 \newlabel{sec:block-size@cref}{{[subsection][1][2,3]2.3.1}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{13}{subsubsection*.50}\protected@file@percent }
+\newlabel{sec:linearisation}{{2.3.1}{13}{Linearisation of Multidimensional Indices}{subsubsection*.50}{}}
+\newlabel{sec:linearisation@cref}{{[subsection][1][2,3]2.3.1}{[1][13][]13}{}{}{}}
 \BKM@entry{id=26,dest={73756273656374696F6E2E322E332E32},srcline={386},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030535C303030685C303030615C303030725C303030655C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030535C303030795C3030306E5C303030635C303030685C303030725C3030306F5C3030306E5C303030695C303030735C303030615C303030745C303030695C3030306F5C3030306E}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{14}{subsubsection*.50}\protected@file@percent }
-\newlabel{sec:linearisation}{{2.3.1}{14}{Linearisation of Multidimensional Indices}{subsubsection*.50}{}}
-\newlabel{sec:linearisation@cref}{{[subsection][1][2,3]2.3.1}{[1][14][]14}{}{}{}}
 \newlabel{eq:row-major}{{2.2}{14}{Linearisation of Multidimensional Indices}{equation.2.2}{}}
-\newlabel{eq:row-major@cref}{{[equation][2][2]2.2}{[1][14][]14}{}{}{}}
+\newlabel{eq:row-major@cref}{{[equation][2][2]2.2}{[1][13][]14}{}{}{}}
 \newlabel{eq:col-major}{{2.3}{14}{Linearisation of Multidimensional Indices}{equation.2.3}{}}
 \newlabel{eq:col-major@cref}{{[equation][3][2]2.3}{[1][14][]14}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{14}{subsection.2.3.2}\protected@file@percent }
@@ -204,9 +204,9 @@
 \newlabel{lst:shmem-dynamic}{{2.4}{14}{Dynamic shared memory allocation}{lstlisting.2.4}{}}
 \newlabel{lst:shmem-dynamic@cref}{{[listing][4][2]2.4}{[1][14][]14}{}{}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2.4}{\ignorespaces Dynamic shared memory allocation.}}{14}{lstlisting.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{15}{subsubsection*.54}\protected@file@percent }
-\newlabel{sec:tiled-matmul}{{2.3.2}{15}{Tiled Matrix Multiplication}{subsubsection*.54}{}}
-\newlabel{sec:tiled-matmul@cref}{{[subsection][2][2,3]2.3.2}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{14}{subsubsection*.54}\protected@file@percent }
+\newlabel{sec:tiled-matmul}{{2.3.2}{14}{Tiled Matrix Multiplication}{subsubsection*.54}{}}
+\newlabel{sec:tiled-matmul@cref}{{[subsection][2][2,3]2.3.2}{[1][14][]14}{}{}{}}
 \newlabel{lst:tiled-matmul}{{2.5}{15}{Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$}{lstlisting.2.5}{}}
 \newlabel{lst:tiled-matmul@cref}{{[listing][5][2]2.5}{[1][15][]15}{}{}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2.5}{\ignorespaces Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$.}}{15}{lstlisting.2.5}\protected@file@percent }
@@ -222,29 +222,29 @@
 \newlabel{lst:non-coalesced@cref}{{[listing][7][2]2.7}{[1][16][]16}{}{}{}}
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {2.7}{\ignorespaces Non-coalesced access pattern: consecutive threads read elements separated by stride $N$.}}{16}{lstlisting.2.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{16}{subsubsection*.58}\protected@file@percent }
+\newlabel{lst:bank-conflict}{{2.8}{16}{Bank conflict when accessing a column of a 32-wide shared array, and the padding fix}{lstlisting.2.8}{}}
+\newlabel{lst:bank-conflict@cref}{{[listing][8][2]2.8}{[1][16][]16}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.8}{\ignorespaces Bank conflict when accessing a column of a 32-wide shared array, and the padding fix.}}{16}{lstlisting.2.8}\protected@file@percent }
 \BKM@entry{id=28,dest={73756273656374696F6E2E322E332E34},srcline={501},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030505C303030655C303030725C303030665C3030306F5C303030725C3030306D5C303030615C3030306E5C303030635C303030655C3030305C3034305C303030505C303030725C3030306F5C303030665C303030695C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030775C303030695C303030745C303030685C3030305C3034305C3030304E5C303030735C303030695C303030675C303030685C303030745C3030305C3034305C303030435C3030306F5C3030306D5C303030705C303030755C303030745C30303065}
-\newlabel{lst:bank-conflict}{{2.8}{17}{Bank conflict when accessing a column of a 32-wide shared array, and the padding fix}{lstlisting.2.8}{}}
-\newlabel{lst:bank-conflict@cref}{{[listing][8][2]2.8}{[1][17][]17}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.8}{\ignorespaces Bank conflict when accessing a column of a 32-wide shared array, and the padding fix.}}{17}{lstlisting.2.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{17}{subsection.2.3.4}\protected@file@percent }
-\newlabel{sec:nsight}{{2.3.4}{17}{Performance Profiling with Nsight Compute}{subsection.2.3.4}{}}
-\newlabel{sec:nsight@cref}{{[subsection][4][2,3]2.3.4}{[1][17][]17}{}{}{}}
 \BKM@entry{id=29,dest={73656374696F6E2E322E34},srcline={520},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030525C303030655C3030306C5C303030615C303030745C303030655C303030645C3030305C3034305C303030575C3030306F5C303030725C3030306B}
 \BKM@entry{id=30,dest={73756273656374696F6E2E322E342E31},srcline={522},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030635C303030755C303030425C3030304C5C303030415C303030535C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030635C303030755C303030545C303030455C3030304E5C303030535C3030304F5C30303052}
 \BKM@entry{id=31,dest={73756273656374696F6E2E322E342E32},srcline={524},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030685C303030415C303030535C303030455C3030305C3034305C303030455C303030695C303030675C303030655C3030306E5C303030735C3030306F5C3030306C5C303030765C303030655C30303072}
 \BKM@entry{id=32,dest={73756273656374696F6E2E322E342E33},srcline={526},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030455C303030785C303030695C303030735C303030745C303030695C3030306E5C303030675C3030305C3034305C303030475C303030505C303030555C3030305C3034305C303030545C303030655C3030306E5C303030735C3030306F5C303030725C3030305C3034305C3030304E5C303030655C303030745C303030775C3030306F5C303030725C3030306B5C3030305C3034305C303030495C3030306D5C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030745C303030695C3030306F5C3030306E5C30303073}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{17}{subsection.2.3.4}\protected@file@percent }
+\newlabel{sec:nsight}{{2.3.4}{17}{Performance Profiling with Nsight Compute}{subsection.2.3.4}{}}
+\newlabel{sec:nsight@cref}{{[subsection][4][2,3]2.3.4}{[1][17][]17}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.4}Related Work}{18}{section.2.4}\protected@file@percent }
 \newlabel{sec:related-work}{{2.4}{18}{Related Work}{section.2.4}{}}
-\newlabel{sec:related-work@cref}{{[section][4][2]2.4}{[1][18][]18}{}{}{}}
+\newlabel{sec:related-work@cref}{{[section][4][2]2.4}{[1][17][]18}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}cuBLAS and cuTENSOR}{18}{subsection.2.4.1}\protected@file@percent }
 \newlabel{sec:cublas-cutensor}{{2.4.1}{18}{cuBLAS and cuTENSOR}{subsection.2.4.1}{}}
-\newlabel{sec:cublas-cutensor@cref}{{[subsection][1][2,4]2.4.1}{[1][18][]18}{}{}{}}
+\newlabel{sec:cublas-cutensor@cref}{{[subsection][1][2,4]2.4.1}{[1][17][]18}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}ChASE Eigensolver}{18}{subsection.2.4.2}\protected@file@percent }
 \newlabel{sec:chase}{{2.4.2}{18}{ChASE Eigensolver}{subsection.2.4.2}{}}
-\newlabel{sec:chase@cref}{{[subsection][2][2,4]2.4.2}{[1][18][]18}{}{}{}}
+\newlabel{sec:chase@cref}{{[subsection][2][2,4]2.4.2}{[1][17][]18}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Existing GPU Tensor Network Implementations}{18}{subsection.2.4.3}\protected@file@percent }
 \newlabel{sec:existing-tn-gpu}{{2.4.3}{18}{Existing GPU Tensor Network Implementations}{subsection.2.4.3}{}}
-\newlabel{sec:existing-tn-gpu@cref}{{[subsection][3][2,4]2.4.3}{[1][18][]18}{}{}{}}
+\newlabel{sec:existing-tn-gpu@cref}{{[subsection][3][2,4]2.4.3}{[1][17][]18}{}{}{}}
 \BKM@entry{id=33,dest={636861707465722E33},srcline={50},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030445C303030655C303030735C303030695C303030675C3030306E5C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304D5C303030655C303030745C303030685C3030306F5C303030645C3030306F5C3030306C5C3030306F5C303030675C30303079}
 \BKM@entry{id=34,dest={73656374696F6E2E332E31},srcline={2},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030545C303030615C303030725C303030675C303030655C303030745C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C30303073}
 \BKM@entry{id=35,dest={73656374696F6E2E332E32},srcline={4},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030415C3030306C5C303030675C3030306F5C303030725C303030695C303030745C303030685C3030306D5C303030695C303030635C3030305C3034305C303030415C303030705C303030705C303030725C3030306F5C303030615C303030635C30303068}

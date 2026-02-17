@@ -35,12 +35,12 @@
 \contentsline {section}{\numberline {2.3}CUDA Programming Model}{11}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Thread Hierarchy and Kernel Launch}{11}{subsection.2.3.1}%
 \contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{12}{subsubsection*.44}%
-\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{13}{subsubsection*.46}%
+\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{12}{subsubsection*.46}%
 \contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{13}{subsubsection*.48}%
-\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{14}{subsubsection*.50}%
+\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{13}{subsubsection*.50}%
 \contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{14}{subsection.2.3.2}%
 \contentsline {subsubsection}{\nonumberline Static and Dynamic Allocation}{14}{subsubsection*.52}%
-\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{15}{subsubsection*.54}%
+\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{14}{subsubsection*.54}%
 \contentsline {subsection}{\numberline {2.3.3}Memory Coalescing and Bank Conflicts}{16}{subsection.2.3.3}%
 \contentsline {subsubsection}{\nonumberline Global Memory Coalescing}{16}{subsubsection*.56}%
 \contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{16}{subsubsection*.58}%
