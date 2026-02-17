@@ -11,6 +11,50 @@
 
 \subsection{Streaming Multiprocessor and Warp Execution}\label{sec:sm-warps}
 
+The Streaming Multiprocessor (SM) is the fundamental compute unit of the GPU. Each 
+A100 GPU contains 108 SMs, and all CUDA threads ultimately execute on one of them. 
+Understanding the internal structure of an SM is essential for reasoning about 
+occupancy, register pressure, and warp scheduling.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{SMBreakdown}
+  \caption{Internal structure of an A100 Streaming Multiprocessor at three levels 
+  of detail. \textbf{Left:} the SM contains four processing blocks sharing an L1 
+  data cache and shared memory. \textbf{Centre:} each processing block includes a 
+  warp scheduler, register file slice, execution units, LD/ST units, SFUs, and a 
+  texture unit. \textbf{Right:} the execution units comprise 16 INT32 cores, 16 
+  FP32 cores, 8 FP64 cores, and one tensor core.}
+  \label{fig:sm-breakdown}
+\end{figure}
+
+Each SM is partitioned into four \emph{processing blocks} (also called 
+sub-partitions). As shown in \cref{fig:sm-breakdown}, each processing block 
+contains:
+
+\begin{itemize}
+  \item One \textbf{warp scheduler} with a single dispatch unit, capable of 
+    issuing one instruction per cycle from the warp it selects.
+  \item A slice of the \textbf{register file} (\num{16384} 32-bit registers 
+    per block, \num{65536} per SM).
+  \item \textbf{Execution units:} 16 INT32 cores, 16 FP32 cores, 8 FP64 
+    cores, and one third-generation tensor core.
+  \item \textbf{8 LD/ST units} for issuing memory load and store operations.
+  \item \textbf{4 SFUs} (Special Function Units) for transcendental operations 
+    such as \texttt{sin}, \texttt{exp}, and reciprocal square root.
+  \item \todo{This is wrong} One \textbf{texture unit} for read-only cached memory access.
+  \item An \textbf{L0 instruction cache} private to the processing block.
+\end{itemize}
+
+The four processing blocks share the SM's L1 data cache and its configurable 
+shared memory (up to \SI{164}{\kilo\byte} on the A100). Threads are grouped into 
+\emph{warps} of 32 and assigned to processing blocks at launch time. Each warp 
+scheduler selects one of its resident warps per cycle and issues a single 
+instruction to the appropriate execution unit. Because the four schedulers operate 
+independently, an SM can have four instructions from four different warps in flight 
+simultaneously, which is the primary mechanism for hiding memory and instruction 
+latency.
+
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
 Scientific computing on GPUs has historically defaulted to 64-bit double precision (FP64), matching the convention established by decades of CPU-based numerical software. However, the A100 architecture supports a range of floating-point formats with dramatically different throughput characteristics, and for many workloads---including tensor contractions---FP32 or even reduced-precision formats offer sufficient accuracy at a fraction of the cost. This section reviews the relevant formats and motivates the precision choices made in this thesis.
@@ -154,7 +198,7 @@ Warp schedulers per SM & \num{4} \\
 Maximum threads per SM & \num{2048} \\
 Maximum warps per SM & \num{64} \\
 Maximum blocks per SM & \num{32} \\
-Register file size per SM (32-bit registers) & \num{256000} \\
+Register file size per SM (32-bit registers) & \num{65536} \\
 Shared memory per SM (KB) & \num{164} \\
 L2 cache size (MB) & \num{40} \\
 HBM memory capacity (GB) & \num{80} \\
