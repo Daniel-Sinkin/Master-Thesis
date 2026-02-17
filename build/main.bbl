@@ -1,4 +1,21 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
 \begin{thebibliography}{WDADN22}
+
+\bibitem[HM22]{higham2022mixed}
+Nicholas~J. Higham and Theo Mary.
+\newblock Mixed precision algorithms in numerical linear algebra.
+\newblock {\em Acta Numerica}, 31:347--414, 2022.
+
+\bibitem[{IEE}19]{ieee754-2019}
+{IEEE}.
+\newblock {IEEE} standard for floating-point arithmetic, 2019.
+
+\bibitem[KMM{\etalchar{+}}19]{kalamkar2019bfloat16}
+Dhiraj Kalamkar, Dheevatsa Mudigere, Naveen Mellempudi, Dipankar Das, Kunal
+  Banerjee, Sasikanth Avancha, Dharma~Teja Vooturi, Nataraj Jammalamadaka,
+  Jianyu Huang, Hector Yuen, et~al.
+\newblock A study of {BFLOAT16} for deep learning training.
+\newblock In {\em arXiv preprint arXiv:1905.12322}, 2019.
 
 \bibitem[{NVI}20]{nvidia2020a100}
 {NVIDIA Corporation}.
@@ -29,6 +46,13 @@
 {NVIDIA Corporation}.
 \newblock {cuBLASDx}: Device side {BLAS} extensions, 2025.
 \newblock \url{https://docs.nvidia.com/cuda/cublasdx/}.
+
+\bibitem[RH20]{nvidia2020gtc-ampere}
+Ronny Ramirez and William Hsu.
+\newblock Optimizing applications for {NVIDIA} {Ampere} {GPU} architecture.
+\newblock GTC 2020, Session S21819, 2020.
+\newblock
+  \url{https://developer.download.nvidia.com/video/gputechconf/gtc/2020/presentations/s21819-optimizing-applications-for-nvidia-ampere-gpu-architecture.pdf}.
 
 \bibitem[SSK17]{springer2017tensor}
 Paul Springer, Tong Su, and Tamara~G. Kolda.
