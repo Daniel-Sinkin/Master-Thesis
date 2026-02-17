@@ -1,0 +1,104 @@
+\chapter{Experimental Environment and Reproducibility}\label{app:reproducibility}
+
+All experiments reported in this thesis were conducted on a single compute node of the JURECA-DC cluster at the Jülich Supercomputing Centre (JSC). The hardware and software configuration is detailed below to facilitate reproducibility.
+
+\section{Hardware Configuration}
+
+\begin{table}[H]
+\centering
+\caption{Compute node hardware specification.}
+\label{tab:repro-hardware}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Component & Specification \\
+\midrule
+GPUs & $4\times$ NVIDIA A100-SXM4-40GB \\
+GPU memory per device & \SI{40}{\giga\byte} HBM2e \\
+GPU interconnect & NVLink 3.0, 4 links per GPU pair \\
+NVLink bandwidth per link & \SI{25}{\giga\byte\per\second} (uni-directional) \\
+PCIe & Gen\,4 $\times$16 \\
+CPUs & $2\times$ AMD EPYC 7742, 64 cores per socket \\
+CPU threads (total) & 256 (SMT-2) \\
+NUMA domains & 8 \\
+Host memory & \SI{503}{\gibi\byte} DDR4 \\
+Network & $2\times$ Mellanox ConnectX (mlx5), HDR InfiniBand (\SI{200}{\giga\bit\per\second}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The four GPUs are fully connected via NVLink\,3.0 with four links between every pair (NV4 topology), providing \SI{100}{\giga\byte\per\second} of uni-directional bandwidth between any two devices. Each GPU is associated with a distinct NUMA domain; GPU-affine memory allocation was used where applicable.
+
+\section{Software Environment}
+
+\begin{table}[H]
+\centering
+\caption{Software versions used for all experiments. Components marked with ${}^{\dagger}$ are loaded via the JSC module system.}
+\label{tab:repro-software}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Software & Version \\
+\midrule
+Operating system & Rocky Linux 9.7 (Blue Onyx) \\
+Linux kernel & 5.14.0-611.16.1.el9\_7.x86\_64 \\
+NVIDIA driver & 590.48.01 \\
+CUDA Toolkit${}^{\dagger}$ & 12.6.20 \\
+GCC${}^{\dagger}$ & 13.3.0 \\
+CMake${}^{\dagger}$ & 3.29.3 \\
+C++ standard & C++20 \\
+Python & 3.9.25 \\
+\midrule
+\multicolumn{2}{l}{\textit{NVIDIA Libraries}} \\
+\midrule
+MATHDx${}^{\dagger}$ & 25.06.0 \\
+cuBLASDx & 0.4.0 (bundled with MATHDx) \\
+CUTLASS & 3.9.0 (bundled with MATHDx) \\
+cuBLAS & Bundled with CUDA Toolkit 12.6 \\
+% cuTENSOR — add row here if used
+\midrule
+\multicolumn{2}{l}{\textit{Profiling Tools}} \\
+\midrule
+Nsight Compute (ncu)${}^{\dagger}$ & 2024.3.0.0 (build 34567288) \\
+Nsight Systems (nsys)${}^{\dagger}$ & TBD \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The NVIDIA driver (590.48.01) reports forward-compatibility with CUDA\,13.1; however, all code was compiled against the CUDA\,12.6 toolkit. CUTLASS and cuBLASDx require compute capability 8.0 (Ampere) or higher; all kernels were compiled with \texttt{-DCMAKE\_CUDA\_ARCHITECTURES=80}.
+
+\section{GPU Topology}\label{sec:repro-topology}
+
+\Cref{tab:gpu-topology} summarises the interconnect topology as reported by \texttt{nvidia-smi topo -m}. All GPU pairs are connected via NV4 (four bonded NVLinks). The two network interfaces (mlx5\_0, mlx5\_1) are each PCIe-local to one GPU (GPU\,1 and GPU\,2 respectively), which is relevant for multi-node communication patterns.
+
+\begin{table}[H]
+\centering
+\caption{GPU interconnect topology. NV4 = four bonded NVLinks; PIX = single PCIe bridge; SYS = traverses PCIe and inter-NUMA interconnect.}
+\label{tab:gpu-topology}
+\begin{tabular}{l c c c c l l}
+\toprule
+ & GPU\,0 & GPU\,1 & GPU\,2 & GPU\,3 & CPU affinity & NUMA \\
+\midrule
+GPU\,0 & --- & NV4 & NV4 & NV4 & 48--63, 176--191 & 3 \\
+GPU\,1 & NV4 & --- & NV4 & NV4 & 16--31, 144--159 & 1 \\
+GPU\,2 & NV4 & NV4 & --- & NV4 & 112--127, 240--255 & 7 \\
+GPU\,3 & NV4 & NV4 & NV4 & --- & 80--95, 208--223 & 5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Build and Run Procedure}
+
+The project uses CMake as its build system. A minimal build on JURECA-DC proceeds as follows:
+
+\begin{lstlisting}[language=bash, caption={Build commands for JURECA-DC.}, label={lst:repro-build}]
+# Load required modules (JURECA-DC, Stages/2025)
+module load Stages/2025
+module load CUDA/12.6 GCC/13.3.0 CMake/3.29.3 MATHDx/25.06.0
+
+git clone https://github.com/<your-repo>.git && cd <your-repo>
+mkdir build && cd build
+cmake .. -DCMAKE_CUDA_ARCHITECTURES=80 -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+\end{lstlisting}
+
+\section{Measurement Methodology}
+\section{Data Availability}

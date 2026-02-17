@@ -43,7 +43,7 @@ FP16 (half)    & 16 & 1 & 5  & 10 \\
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{FloatingPointBitComparions}
-  \caption{Memory hierarchy of a modern CPU, showing the register file and cache levels (L1, L2, L3) before main memory (DRAM).}
+  \caption{Bit layout comparison of FP64, FP32, TF32, BF16, and FP16, with exponent and significand fields drawn to scale.}
   \label{fig:fp-bit-patterns}
 \end{figure}
 
@@ -228,6 +228,70 @@ HBM global memory & \num{500} \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsection{Compute Node Topology}\label{sec:node-topology}
+
+The performance of GPU-accelerated applications depends not only on the GPU itself but also on the topology of the compute node---how CPUs, GPUs, and memory are interconnected. This subsection describes the node architecture of the JURECA-DC system used throughout this thesis, which is representative of modern multi-GPU HPC nodes.
+
+\subsubsection{CPU and NUMA Topology}
+
+Each compute node contains two AMD EPYC 7742 processors (Rome, Zen\,2 microarchitecture), each with 64 physical cores. The chips are built from a chiplet design: each socket consists of a central I/O die (cIOD) connected to eight Core Complex Dies (CCDs). Each CCD contains two Core Complexes (CCXes), and each CCX contains four cores sharing a \SI{16}{\mega\byte} L3 cache. The hierarchy is shown in \cref{fig:numa-cpu-node}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{NumaCPUNode}
+  \caption{NUMA and chiplet hierarchy of a single AMD EPYC 7742 socket. Each socket contains 8 CCDs grouped into 4 NUMA domains (NPS=4 configuration). Each CCD holds two CCXes, each with 4 cores and a private \SI{16}{\mega\byte} L3 cache. All CCDs connect to a central I/O die that houses the memory controllers and PCIe root complexes.}
+  \label{fig:numa-cpu-node}
+\end{figure}
+
+The BIOS is configured with NPS=4, which exposes four NUMA domains per socket (eight in total across the node). Each NUMA domain encompasses two CCDs (16 cores, 32 threads with SMT) and a quarter of the socket's memory controllers. This configuration allows the operating system and runtime to make NUMA-aware allocation decisions. The latency hierarchy within a socket, from fastest to slowest, is:
+
+\begin{enumerate}
+  \item \textbf{Intra-CCX:} cores sharing the same \SI{16}{\mega\byte} L3 cache communicate through it at low latency.
+  \item \textbf{Intra-CCD, cross-CCX:} cores in different CCXes of the same CCD must communicate through the I/O die, as each CCX has its own independent L3.
+  \item \textbf{Cross-CCD, same socket:} traffic between CCDs in different NUMA domains routes through the I/O die's internal Infinity Fabric switches.
+  \item \textbf{Cross-socket:} traffic between the two sockets traverses AMD's Infinity Fabric inter-socket links (xGMI), incurring the highest latency.
+\end{enumerate}
+
+\subsubsection{GPU Interconnect Topology}
+
+Each node has four NVIDIA A100-SXM4-40GB GPUs arranged in a fully connected mesh via NVLink\,3.0. Every GPU pair is connected by four NVLink bridges (denoted NV4 in NVIDIA's topology notation), providing \SI{100}{\giga\byte\per\second} of uni-directional bandwidth between any two devices. This symmetric, all-to-all connectivity means that multi-GPU tensor contractions do not suffer from topology-dependent bandwidth asymmetries.
+
+Each GPU is physically attached via PCIe Gen\,4 $\times$16 to a specific NUMA domain on one of the two CPU sockets:
+
+\begin{table}[H]
+\centering
+\caption{GPU-to-NUMA affinity on a JURECA-DC compute node.}
+\label{tab:gpu-numa-affinity}
+\begin{tabular}{l l l l}
+\toprule
+GPU & Socket & NUMA domain & CPU cores (physical) \\
+\midrule
+GPU\,0 & 0 & 3 & 48--63 \\
+GPU\,1 & 0 & 1 & 16--31 \\
+GPU\,2 & 1 & 7 & 112--127 \\
+GPU\,3 & 1 & 5 & 80--95 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The full topology, including the three classes of CPU--GPU data paths, is illustrated in \cref{fig:gpu-topology}. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{GPUTopology}
+  \caption{Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow$ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow$ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow$ NUMA\,2).}
+  \label{fig:gpu-topology}
+\end{figure}
+
+The distinction between these paths matters for host--device data transfers. A \texttt{cudaMemcpy} initiated from a CPU thread pinned to a GPU's local NUMA domain takes the shortest PCIe path through the I/O die. If the source thread or memory allocation resides on the wrong NUMA domain---or worse, the wrong socket---the transfer must additionally traverse Infinity Fabric, increasing latency. For GPU-to-GPU communication, NVLink bypasses the CPU subsystem entirely, making the CPU topology irrelevant for peer-to-peer transfers.
+
+In practice, this topology has two implications for the work in this thesis:
+
+\begin{itemize}
+  \item \textbf{Single-GPU kernels:} the CPU topology is largely invisible, since kernel launch overhead is small and tensor data resides in GPU memory throughout the computation.
+  \item \textbf{Multi-GPU contractions:} data distribution and inter-GPU communication use NVLink exclusively. Host-side orchestration threads are pinned to the appropriate NUMA domain to minimise any residual host--device transfer overhead.
+\end{itemize}
 
 \section{CUDA Programming Model}\label{sec:cuda}
 

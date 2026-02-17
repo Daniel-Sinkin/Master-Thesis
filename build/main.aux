@@ -134,8 +134,7 @@
 \newlabel{sec:a100}{{2.2.4}{7}{NVIDIA A100 Ampere Architecture}{subsection.2.2.4}{}}
 \newlabel{sec:a100@cref}{{[subsection][4][2,2]2.2.4}{[1][7][]7}{}{}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Hardware Overview}{7}{subsubsection*.24}\protected@file@percent }
-\BKM@entry{id=23,dest={73656374696F6E2E322E33},srcline={232},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030555C303030445C303030415C3030305C3034305C303030505C303030725C3030306F5C303030675C303030725C303030615C3030306D5C3030306D5C303030695C3030306E5C303030675C3030305C3034305C3030304D5C3030306F5C303030645C303030655C3030306C}
-\BKM@entry{id=24,dest={73756273656374696F6E2E322E332E31},srcline={236},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030545C303030685C303030725C303030655C303030615C303030645C3030305C3034305C303030485C303030695C303030655C303030725C303030615C303030725C303030635C303030685C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C3030305C3034305C3030304C5C303030615C303030755C3030306E5C303030635C30303068}
+\BKM@entry{id=23,dest={73756273656374696F6E2E322E322E35},srcline={232},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C3030306F5C3030306D5C303030705C303030755C303030745C303030655C3030305C3034305C3030304E5C3030306F5C303030645C303030655C3030305C3034305C303030545C3030306F5C303030705C3030306F5C3030306C5C3030306F5C303030675C30303079}
 \@writefile{lot}{\contentsline {table}{\numberline {2.4}{\ignorespaces Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}}{8}{table.caption.25}\protected@file@percent }
 \newlabel{tab:a100-specs}{{2.4}{8}{Key hardware specifications of the NVIDIA A100 (SXM4-80GB)}{table.caption.25}{}}
 \newlabel{tab:a100-specs@cref}{{[table][4][2]2.4}{[1][7][]8}{}{}{}}
@@ -145,191 +144,207 @@
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Theoretical Peak Performance}{8}{subsubsection*.27}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Derived Performance Limits}{8}{subsubsection*.30}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\nonumberline Memory Latency}{8}{subsubsection*.33}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2.3}CUDA Programming Model}{8}{section.2.3}\protected@file@percent }
-\newlabel{sec:cuda}{{2.3}{8}{CUDA Programming Model}{section.2.3}{}}
-\newlabel{sec:cuda@cref}{{[section][3][2]2.3}{[1][8][]8}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Thread Hierarchy and Kernel Launch}{8}{subsection.2.3.1}\protected@file@percent }
-\newlabel{sec:cuda-threads}{{2.3.1}{8}{Thread Hierarchy and Kernel Launch}{subsection.2.3.1}{}}
-\newlabel{sec:cuda-threads@cref}{{[subsection][1][2,3]2.3.1}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.5}Compute Node Topology}{8}{subsection.2.2.5}\protected@file@percent }
+\newlabel{sec:node-topology}{{2.2.5}{8}{Compute Node Topology}{subsection.2.2.5}{}}
+\newlabel{sec:node-topology@cref}{{[subsection][5][2,2]2.2.5}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline CPU and NUMA Topology}{8}{subsubsection*.36}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {2.6}{\ignorespaces Derived theoretical limits of the A100 architecture.}}{9}{table.caption.31}\protected@file@percent }
 \newlabel{tab:a100-derived}{{2.6}{9}{Derived theoretical limits of the A100 architecture}{table.caption.31}{}}
 \newlabel{tab:a100-derived@cref}{{[table][6][2]2.6}{[1][7][]9}{}{}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {2.7}{\ignorespaces Approximate memory access latency at different hierarchy levels.}}{9}{table.caption.34}\protected@file@percent }
 \newlabel{tab:a100-memory-latency}{{2.7}{9}{Approximate memory access latency at different hierarchy levels}{table.caption.34}{}}
 \newlabel{tab:a100-memory-latency@cref}{{[table][7][2]2.7}{[1][7][]9}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt  {threadIdx} and \texttt  {blockIdx}.}}{9}{figure.caption.35}\protected@file@percent }
-\newlabel{fig:cuda-thread-hierarchy}{{2.4}{9}{CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt {threadIdx} and \texttt {blockIdx}}{figure.caption.35}{}}
-\newlabel{fig:cuda-thread-hierarchy@cref}{{[figure][4][2]2.4}{[1][9][]9}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{10}{subsubsection*.37}\protected@file@percent }
-\newlabel{lst:vecadd}{{2.1}{10}{Element-wise vector addition kernel and its host-side launch}{lstlisting.2.1}{}}
-\newlabel{lst:vecadd@cref}{{[listing][1][2]2.1}{[1][10][]10}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.1}{\ignorespaces Element-wise vector addition kernel and its host-side launch.}}{10}{lstlisting.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{10}{subsubsection*.39}\protected@file@percent }
-\newlabel{lst:transpose-2d}{{2.2}{10}{Matrix transpose using two-dimensional grid and block addressing}{lstlisting.2.2}{}}
-\newlabel{lst:transpose-2d@cref}{{[listing][2][2]2.2}{[1][10][]10}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.2}{\ignorespaces Matrix transpose using two-dimensional grid and block addressing.}}{10}{lstlisting.2.2}\protected@file@percent }
-\BKM@entry{id=25,dest={73756273656374696F6E2E322E332E32},srcline={322},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030535C303030685C303030615C303030725C303030655C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030535C303030795C3030306E5C303030635C303030685C303030725C3030306F5C3030306E5C303030695C303030735C303030615C303030745C303030695C3030306F5C3030306E}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{11}{subsubsection*.41}\protected@file@percent }
-\newlabel{sec:block-size}{{2.3.1}{11}{Block Size Selection and Hardware Constraints}{subsubsection*.41}{}}
-\newlabel{sec:block-size@cref}{{[subsection][1][2,3]2.3.1}{[1][10][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{11}{subsubsection*.43}\protected@file@percent }
-\newlabel{sec:linearisation}{{2.3.1}{11}{Linearisation of Multidimensional Indices}{subsubsection*.43}{}}
-\newlabel{sec:linearisation@cref}{{[subsection][1][2,3]2.3.1}{[1][11][]11}{}{}{}}
-\newlabel{eq:row-major}{{2.2}{11}{Linearisation of Multidimensional Indices}{equation.2.2}{}}
-\newlabel{eq:row-major@cref}{{[equation][2][2]2.2}{[1][11][]11}{}{}{}}
-\newlabel{eq:col-major}{{2.3}{11}{Linearisation of Multidimensional Indices}{equation.2.3}{}}
-\newlabel{eq:col-major@cref}{{[equation][3][2]2.3}{[1][11][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{11}{subsection.2.3.2}\protected@file@percent }
-\newlabel{sec:shared-memory}{{2.3.2}{11}{Shared Memory and Synchronisation}{subsection.2.3.2}{}}
-\newlabel{sec:shared-memory@cref}{{[subsection][2][2,3]2.3.2}{[1][11][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Static and Dynamic Allocation}{12}{subsubsection*.45}\protected@file@percent }
-\newlabel{lst:shmem-static}{{2.3}{12}{Static shared memory allocation for a tile}{lstlisting.2.3}{}}
-\newlabel{lst:shmem-static@cref}{{[listing][3][2]2.3}{[1][12][]12}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.3}{\ignorespaces Static shared memory allocation for a tile.}}{12}{lstlisting.2.3}\protected@file@percent }
-\newlabel{lst:shmem-dynamic}{{2.4}{12}{Dynamic shared memory allocation}{lstlisting.2.4}{}}
-\newlabel{lst:shmem-dynamic@cref}{{[listing][4][2]2.4}{[1][12][]12}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.4}{\ignorespaces Dynamic shared memory allocation.}}{12}{lstlisting.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{12}{subsubsection*.47}\protected@file@percent }
-\newlabel{sec:tiled-matmul}{{2.3.2}{12}{Tiled Matrix Multiplication}{subsubsection*.47}{}}
-\newlabel{sec:tiled-matmul@cref}{{[subsection][2][2,3]2.3.2}{[1][12][]12}{}{}{}}
-\newlabel{lst:tiled-matmul}{{2.5}{12}{Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$}{lstlisting.2.5}{}}
-\newlabel{lst:tiled-matmul@cref}{{[listing][5][2]2.5}{[1][12][]12}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.5}{\ignorespaces Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$.}}{12}{lstlisting.2.5}\protected@file@percent }
-\BKM@entry{id=26,dest={73756273656374696F6E2E322E332E33},srcline={397},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030435C3030306F5C303030615C3030306C5C303030655C303030735C303030635C303030695C3030306E5C303030675C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030425C303030615C3030306E5C3030306B5C3030305C3034305C303030435C3030306F5C3030306E5C303030665C3030306C5C303030695C303030635C303030745C30303073}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Memory Coalescing and Bank Conflicts}{13}{subsection.2.3.3}\protected@file@percent }
-\newlabel{sec:coalescing}{{2.3.3}{13}{Memory Coalescing and Bank Conflicts}{subsection.2.3.3}{}}
-\newlabel{sec:coalescing@cref}{{[subsection][3][2,3]2.3.3}{[1][13][]13}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Global Memory Coalescing}{13}{subsubsection*.49}\protected@file@percent }
-\BKM@entry{id=27,dest={73756273656374696F6E2E322E332E34},srcline={437},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030505C303030655C303030725C303030665C3030306F5C303030725C3030306D5C303030615C3030306E5C303030635C303030655C3030305C3034305C303030505C303030725C3030306F5C303030665C303030695C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030775C303030695C303030745C303030685C3030305C3034305C3030304E5C303030735C303030695C303030675C303030685C303030745C3030305C3034305C303030435C3030306F5C3030306D5C303030705C303030755C303030745C30303065}
-\newlabel{lst:coalesced}{{2.6}{14}{Coalesced access pattern: consecutive threads read consecutive columns}{lstlisting.2.6}{}}
-\newlabel{lst:coalesced@cref}{{[listing][6][2]2.6}{[1][14][]14}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.6}{\ignorespaces Coalesced access pattern: consecutive threads read consecutive columns.}}{14}{lstlisting.2.6}\protected@file@percent }
-\newlabel{lst:non-coalesced}{{2.7}{14}{Non-coalesced access pattern: consecutive threads read elements separated by stride $N$}{lstlisting.2.7}{}}
-\newlabel{lst:non-coalesced@cref}{{[listing][7][2]2.7}{[1][14][]14}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.7}{\ignorespaces Non-coalesced access pattern: consecutive threads read elements separated by stride $N$.}}{14}{lstlisting.2.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{14}{subsubsection*.51}\protected@file@percent }
-\newlabel{lst:bank-conflict}{{2.8}{14}{Bank conflict when accessing a column of a 32-wide shared array, and the padding fix}{lstlisting.2.8}{}}
-\newlabel{lst:bank-conflict@cref}{{[listing][8][2]2.8}{[1][14][]14}{}{}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.8}{\ignorespaces Bank conflict when accessing a column of a 32-wide shared array, and the padding fix.}}{14}{lstlisting.2.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{14}{subsection.2.3.4}\protected@file@percent }
-\newlabel{sec:nsight}{{2.3.4}{14}{Performance Profiling with Nsight Compute}{subsection.2.3.4}{}}
-\newlabel{sec:nsight@cref}{{[subsection][4][2,3]2.3.4}{[1][14][]14}{}{}{}}
-\BKM@entry{id=28,dest={73656374696F6E2E322E34},srcline={456},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030525C303030655C3030306C5C303030615C303030745C303030655C303030645C3030305C3034305C303030575C3030306F5C303030725C3030306B}
-\BKM@entry{id=29,dest={73756273656374696F6E2E322E342E31},srcline={458},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030635C303030755C303030425C3030304C5C303030415C303030535C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030635C303030755C303030545C303030455C3030304E5C303030535C3030304F5C30303052}
-\BKM@entry{id=30,dest={73756273656374696F6E2E322E342E32},srcline={460},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030685C303030415C303030535C303030455C3030305C3034305C303030455C303030695C303030675C303030655C3030306E5C303030735C3030306F5C3030306C5C303030765C303030655C30303072}
-\BKM@entry{id=31,dest={73756273656374696F6E2E322E342E33},srcline={462},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030455C303030785C303030695C303030735C303030745C303030695C3030306E5C303030675C3030305C3034305C303030475C303030505C303030555C3030305C3034305C303030545C303030655C3030306E5C303030735C3030306F5C303030725C3030305C3034305C3030304E5C303030655C303030745C303030775C3030306F5C303030725C3030306B5C3030305C3034305C303030495C3030306D5C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030745C303030695C3030306F5C3030306E5C30303073}
-\@writefile{toc}{\contentsline {section}{\numberline {2.4}Related Work}{15}{section.2.4}\protected@file@percent }
-\newlabel{sec:related-work}{{2.4}{15}{Related Work}{section.2.4}{}}
-\newlabel{sec:related-work@cref}{{[section][4][2]2.4}{[1][15][]15}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}cuBLAS and cuTENSOR}{15}{subsection.2.4.1}\protected@file@percent }
-\newlabel{sec:cublas-cutensor}{{2.4.1}{15}{cuBLAS and cuTENSOR}{subsection.2.4.1}{}}
-\newlabel{sec:cublas-cutensor@cref}{{[subsection][1][2,4]2.4.1}{[1][15][]15}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}ChASE Eigensolver}{15}{subsection.2.4.2}\protected@file@percent }
-\newlabel{sec:chase}{{2.4.2}{15}{ChASE Eigensolver}{subsection.2.4.2}{}}
-\newlabel{sec:chase@cref}{{[subsection][2][2,4]2.4.2}{[1][15][]15}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Existing GPU Tensor Network Implementations}{15}{subsection.2.4.3}\protected@file@percent }
-\newlabel{sec:existing-tn-gpu}{{2.4.3}{15}{Existing GPU Tensor Network Implementations}{subsection.2.4.3}{}}
-\newlabel{sec:existing-tn-gpu@cref}{{[subsection][3][2,4]2.4.3}{[1][15][]15}{}{}{}}
-\BKM@entry{id=32,dest={636861707465722E33},srcline={50},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030445C303030655C303030735C303030695C303030675C3030306E5C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304D5C303030655C303030745C303030685C3030306F5C303030645C3030306F5C3030306C5C3030306F5C303030675C30303079}
-\BKM@entry{id=33,dest={73656374696F6E2E332E31},srcline={2},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030545C303030615C303030725C303030675C303030655C303030745C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C30303073}
-\BKM@entry{id=34,dest={73656374696F6E2E332E32},srcline={4},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030415C3030306C5C303030675C3030306F5C303030725C303030695C303030745C303030685C3030306D5C303030695C303030635C3030305C3034305C303030415C303030705C303030705C303030725C3030306F5C303030615C303030635C30303068}
-\BKM@entry{id=35,dest={73656374696F6E2E332E33},srcline={6},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030445C303030615C303030745C303030615C3030305C3034305C3030304C5C303030615C303030795C3030306F5C303030755C303030745C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030535C303030745C303030725C303030615C303030745C303030655C303030675C30303079}
-\BKM@entry{id=36,dest={73656374696F6E2E332E34},srcline={8},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030425C303030615C303030735C303030655C3030306C5C303030695C3030306E5C303030655C3030305C3034305C303030535C303030655C3030306C5C303030655C303030635C303030745C303030695C3030306F5C3030306E}
-\@writefile{toc}{\contentsline {chapter}{\numberline {3}Design and Methodology}{17}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces NUMA and chiplet hierarchy of a single AMD EPYC 7742 socket. Each socket contains 8 CCDs grouped into 4 NUMA domains (NPS=4 configuration). Each CCD holds two CCXes, each with 4 cores and a private \SI {16}{\mega \byte } L3 cache. All CCDs connect to a central I/O die that houses the memory controllers and PCIe root complexes.}}{9}{figure.caption.37}\protected@file@percent }
+\newlabel{fig:numa-cpu-node}{{2.4}{9}{NUMA and chiplet hierarchy of a single AMD EPYC 7742 socket. Each socket contains 8 CCDs grouped into 4 NUMA domains (NPS=4 configuration). Each CCD holds two CCXes, each with 4 cores and a private \SI {16}{\mega \byte } L3 cache. All CCDs connect to a central I/O die that houses the memory controllers and PCIe root complexes}{figure.caption.37}{}}
+\newlabel{fig:numa-cpu-node@cref}{{[figure][4][2]2.4}{[1][8][]9}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline GPU Interconnect Topology}{10}{subsubsection*.39}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2.8}{\ignorespaces GPU-to-NUMA affinity on a JURECA-DC compute node.}}{10}{table.caption.40}\protected@file@percent }
+\newlabel{tab:gpu-numa-affinity}{{2.8}{10}{GPU-to-NUMA affinity on a JURECA-DC compute node}{table.caption.40}{}}
+\newlabel{tab:gpu-numa-affinity@cref}{{[table][8][2]2.8}{[1][10][]10}{}{}{}}
+\BKM@entry{id=24,dest={73656374696F6E2E322E33},srcline={296},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030555C303030445C303030415C3030305C3034305C303030505C303030725C3030306F5C303030675C303030725C303030615C3030306D5C3030306D5C303030695C3030306E5C303030675C3030305C3034305C3030304D5C3030306F5C303030645C303030655C3030306C}
+\BKM@entry{id=25,dest={73756273656374696F6E2E322E332E31},srcline={300},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030545C303030685C303030725C303030655C303030615C303030645C3030305C3034305C303030485C303030695C303030655C303030725C303030615C303030725C303030635C303030685C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C3030305C3034305C3030304C5C303030615C303030755C3030306E5C303030635C30303068}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2).}}{11}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:gpu-topology}{{2.5}{11}{Compute node topology showing the four A100 GPUs (centre) connected via NVLink\,3.0, with the two CPU sockets on either side. Three representative host--device paths are highlighted: a fast local PCIe path (GPU\,1 $\leftrightarrow $ NUMA\,1), an intra-socket Infinity Fabric path (GPU\,0 $\leftrightarrow $ NUMA\,3), and a cross-socket Infinity Fabric path (GPU\,3 $\leftrightarrow $ NUMA\,2)}{figure.caption.41}{}}
+\newlabel{fig:gpu-topology@cref}{{[figure][5][2]2.5}{[1][10][]11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}CUDA Programming Model}{11}{section.2.3}\protected@file@percent }
+\newlabel{sec:cuda}{{2.3}{11}{CUDA Programming Model}{section.2.3}{}}
+\newlabel{sec:cuda@cref}{{[section][3][2]2.3}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Thread Hierarchy and Kernel Launch}{11}{subsection.2.3.1}\protected@file@percent }
+\newlabel{sec:cuda-threads}{{2.3.1}{11}{Thread Hierarchy and Kernel Launch}{subsection.2.3.1}{}}
+\newlabel{sec:cuda-threads@cref}{{[subsection][1][2,3]2.3.1}{[1][11][]11}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.6}{\ignorespaces CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt  {threadIdx} and \texttt  {blockIdx}.}}{12}{figure.caption.42}\protected@file@percent }
+\newlabel{fig:cuda-thread-hierarchy}{{2.6}{12}{CUDA execution hierarchy showing the mapping of grids to thread blocks and threads. Threads are organised in up to three dimensions and identified using the built-in variables \texttt {threadIdx} and \texttt {blockIdx}}{figure.caption.42}{}}
+\newlabel{fig:cuda-thread-hierarchy@cref}{{[figure][6][2]2.6}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Kernel Syntax and Launch Configuration}{12}{subsubsection*.44}\protected@file@percent }
+\newlabel{lst:vecadd}{{2.1}{12}{Element-wise vector addition kernel and its host-side launch}{lstlisting.2.1}{}}
+\newlabel{lst:vecadd@cref}{{[listing][1][2]2.1}{[1][12][]12}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.1}{\ignorespaces Element-wise vector addition kernel and its host-side launch.}}{12}{lstlisting.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Two-Dimensional Grid Addressing}{13}{subsubsection*.46}\protected@file@percent }
+\newlabel{lst:transpose-2d}{{2.2}{13}{Matrix transpose using two-dimensional grid and block addressing}{lstlisting.2.2}{}}
+\newlabel{lst:transpose-2d@cref}{{[listing][2][2]2.2}{[1][13][]13}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.2}{\ignorespaces Matrix transpose using two-dimensional grid and block addressing.}}{13}{lstlisting.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Block Size Selection and Hardware Constraints}{13}{subsubsection*.48}\protected@file@percent }
+\newlabel{sec:block-size}{{2.3.1}{13}{Block Size Selection and Hardware Constraints}{subsubsection*.48}{}}
+\newlabel{sec:block-size@cref}{{[subsection][1][2,3]2.3.1}{[1][13][]13}{}{}{}}
+\BKM@entry{id=26,dest={73756273656374696F6E2E322E332E32},srcline={386},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030535C303030685C303030615C303030725C303030655C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030535C303030795C3030306E5C303030635C303030685C303030725C3030306F5C3030306E5C303030695C303030735C303030615C303030745C303030695C3030306F5C3030306E}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Linearisation of Multidimensional Indices}{14}{subsubsection*.50}\protected@file@percent }
+\newlabel{sec:linearisation}{{2.3.1}{14}{Linearisation of Multidimensional Indices}{subsubsection*.50}{}}
+\newlabel{sec:linearisation@cref}{{[subsection][1][2,3]2.3.1}{[1][14][]14}{}{}{}}
+\newlabel{eq:row-major}{{2.2}{14}{Linearisation of Multidimensional Indices}{equation.2.2}{}}
+\newlabel{eq:row-major@cref}{{[equation][2][2]2.2}{[1][14][]14}{}{}{}}
+\newlabel{eq:col-major}{{2.3}{14}{Linearisation of Multidimensional Indices}{equation.2.3}{}}
+\newlabel{eq:col-major@cref}{{[equation][3][2]2.3}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Shared Memory and Synchronisation}{14}{subsection.2.3.2}\protected@file@percent }
+\newlabel{sec:shared-memory}{{2.3.2}{14}{Shared Memory and Synchronisation}{subsection.2.3.2}{}}
+\newlabel{sec:shared-memory@cref}{{[subsection][2][2,3]2.3.2}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Static and Dynamic Allocation}{14}{subsubsection*.52}\protected@file@percent }
+\newlabel{lst:shmem-static}{{2.3}{14}{Static shared memory allocation for a tile}{lstlisting.2.3}{}}
+\newlabel{lst:shmem-static@cref}{{[listing][3][2]2.3}{[1][14][]14}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.3}{\ignorespaces Static shared memory allocation for a tile.}}{14}{lstlisting.2.3}\protected@file@percent }
+\newlabel{lst:shmem-dynamic}{{2.4}{14}{Dynamic shared memory allocation}{lstlisting.2.4}{}}
+\newlabel{lst:shmem-dynamic@cref}{{[listing][4][2]2.4}{[1][14][]14}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.4}{\ignorespaces Dynamic shared memory allocation.}}{14}{lstlisting.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Tiled Matrix Multiplication}{15}{subsubsection*.54}\protected@file@percent }
+\newlabel{sec:tiled-matmul}{{2.3.2}{15}{Tiled Matrix Multiplication}{subsubsection*.54}{}}
+\newlabel{sec:tiled-matmul@cref}{{[subsection][2][2,3]2.3.2}{[1][15][]15}{}{}{}}
+\newlabel{lst:tiled-matmul}{{2.5}{15}{Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$}{lstlisting.2.5}{}}
+\newlabel{lst:tiled-matmul@cref}{{[listing][5][2]2.5}{[1][15][]15}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.5}{\ignorespaces Tiled matrix multiplication using shared memory. Each block computes one tile of the output matrix $C$.}}{15}{lstlisting.2.5}\protected@file@percent }
+\BKM@entry{id=27,dest={73756273656374696F6E2E322E332E33},srcline={461},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030435C3030306F5C303030615C3030306C5C303030655C303030735C303030635C303030695C3030306E5C303030675C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030425C303030615C3030306E5C3030306B5C3030305C3034305C303030435C3030306F5C3030306E5C303030665C3030306C5C303030695C303030635C303030745C30303073}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Memory Coalescing and Bank Conflicts}{16}{subsection.2.3.3}\protected@file@percent }
+\newlabel{sec:coalescing}{{2.3.3}{16}{Memory Coalescing and Bank Conflicts}{subsection.2.3.3}{}}
+\newlabel{sec:coalescing@cref}{{[subsection][3][2,3]2.3.3}{[1][16][]16}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Global Memory Coalescing}{16}{subsubsection*.56}\protected@file@percent }
+\newlabel{lst:coalesced}{{2.6}{16}{Coalesced access pattern: consecutive threads read consecutive columns}{lstlisting.2.6}{}}
+\newlabel{lst:coalesced@cref}{{[listing][6][2]2.6}{[1][16][]16}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.6}{\ignorespaces Coalesced access pattern: consecutive threads read consecutive columns.}}{16}{lstlisting.2.6}\protected@file@percent }
+\newlabel{lst:non-coalesced}{{2.7}{16}{Non-coalesced access pattern: consecutive threads read elements separated by stride $N$}{lstlisting.2.7}{}}
+\newlabel{lst:non-coalesced@cref}{{[listing][7][2]2.7}{[1][16][]16}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.7}{\ignorespaces Non-coalesced access pattern: consecutive threads read elements separated by stride $N$.}}{16}{lstlisting.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\nonumberline Shared Memory Bank Conflicts}{16}{subsubsection*.58}\protected@file@percent }
+\BKM@entry{id=28,dest={73756273656374696F6E2E322E332E34},srcline={501},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030505C303030655C303030725C303030665C3030306F5C303030725C3030306D5C303030615C3030306E5C303030635C303030655C3030305C3034305C303030505C303030725C3030306F5C303030665C303030695C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030775C303030695C303030745C303030685C3030305C3034305C3030304E5C303030735C303030695C303030675C303030685C303030745C3030305C3034305C303030435C3030306F5C3030306D5C303030705C303030755C303030745C30303065}
+\newlabel{lst:bank-conflict}{{2.8}{17}{Bank conflict when accessing a column of a 32-wide shared array, and the padding fix}{lstlisting.2.8}{}}
+\newlabel{lst:bank-conflict@cref}{{[listing][8][2]2.8}{[1][17][]17}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2.8}{\ignorespaces Bank conflict when accessing a column of a 32-wide shared array, and the padding fix.}}{17}{lstlisting.2.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Performance Profiling with Nsight Compute}{17}{subsection.2.3.4}\protected@file@percent }
+\newlabel{sec:nsight}{{2.3.4}{17}{Performance Profiling with Nsight Compute}{subsection.2.3.4}{}}
+\newlabel{sec:nsight@cref}{{[subsection][4][2,3]2.3.4}{[1][17][]17}{}{}{}}
+\BKM@entry{id=29,dest={73656374696F6E2E322E34},srcline={520},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030525C303030655C3030306C5C303030615C303030745C303030655C303030645C3030305C3034305C303030575C3030306F5C303030725C3030306B}
+\BKM@entry{id=30,dest={73756273656374696F6E2E322E342E31},srcline={522},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030635C303030755C303030425C3030304C5C303030415C303030535C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030635C303030755C303030545C303030455C3030304E5C303030535C3030304F5C30303052}
+\BKM@entry{id=31,dest={73756273656374696F6E2E322E342E32},srcline={524},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030435C303030685C303030415C303030535C303030455C3030305C3034305C303030455C303030695C303030675C303030655C3030306E5C303030735C3030306F5C3030306C5C303030765C303030655C30303072}
+\BKM@entry{id=32,dest={73756273656374696F6E2E322E342E33},srcline={526},srcfile={2E2F63686170746572732F30325F6261636B67726F756E642E746578}}{5C3337365C3337375C303030455C303030785C303030695C303030735C303030745C303030695C3030306E5C303030675C3030305C3034305C303030475C303030505C303030555C3030305C3034305C303030545C303030655C3030306E5C303030735C3030306F5C303030725C3030305C3034305C3030304E5C303030655C303030745C303030775C3030306F5C303030725C3030306B5C3030305C3034305C303030495C3030306D5C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030745C303030695C3030306F5C3030306E5C30303073}
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}Related Work}{18}{section.2.4}\protected@file@percent }
+\newlabel{sec:related-work}{{2.4}{18}{Related Work}{section.2.4}{}}
+\newlabel{sec:related-work@cref}{{[section][4][2]2.4}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}cuBLAS and cuTENSOR}{18}{subsection.2.4.1}\protected@file@percent }
+\newlabel{sec:cublas-cutensor}{{2.4.1}{18}{cuBLAS and cuTENSOR}{subsection.2.4.1}{}}
+\newlabel{sec:cublas-cutensor@cref}{{[subsection][1][2,4]2.4.1}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}ChASE Eigensolver}{18}{subsection.2.4.2}\protected@file@percent }
+\newlabel{sec:chase}{{2.4.2}{18}{ChASE Eigensolver}{subsection.2.4.2}{}}
+\newlabel{sec:chase@cref}{{[subsection][2][2,4]2.4.2}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.3}Existing GPU Tensor Network Implementations}{18}{subsection.2.4.3}\protected@file@percent }
+\newlabel{sec:existing-tn-gpu}{{2.4.3}{18}{Existing GPU Tensor Network Implementations}{subsection.2.4.3}{}}
+\newlabel{sec:existing-tn-gpu@cref}{{[subsection][3][2,4]2.4.3}{[1][18][]18}{}{}{}}
+\BKM@entry{id=33,dest={636861707465722E33},srcline={50},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030445C303030655C303030735C303030695C303030675C3030306E5C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304D5C303030655C303030745C303030685C3030306F5C303030645C3030306F5C3030306C5C3030306F5C303030675C30303079}
+\BKM@entry{id=34,dest={73656374696F6E2E332E31},srcline={2},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030545C303030615C303030725C303030675C303030655C303030745C3030305C3034305C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C30303073}
+\BKM@entry{id=35,dest={73656374696F6E2E332E32},srcline={4},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030415C3030306C5C303030675C3030306F5C303030725C303030695C303030745C303030685C3030306D5C303030695C303030635C3030305C3034305C303030415C303030705C303030705C303030725C3030306F5C303030615C303030635C30303068}
+\BKM@entry{id=36,dest={73656374696F6E2E332E33},srcline={6},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030445C303030615C303030745C303030615C3030305C3034305C3030304C5C303030615C303030795C3030306F5C303030755C303030745C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030535C303030745C303030725C303030615C303030745C303030655C303030675C30303079}
+\BKM@entry{id=37,dest={73656374696F6E2E332E34},srcline={8},srcfile={2E2F63686170746572732F30335F64657369676E2E746578}}{5C3337365C3337375C303030425C303030615C303030735C303030655C3030306C5C303030695C3030306E5C303030655C3030305C3034305C303030535C303030655C3030306C5C303030655C303030635C303030745C303030695C3030306F5C3030306E}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}Design and Methodology}{19}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
-\newlabel{ch:design}{{3}{17}{Design and Methodology}{chapter.3}{}}
-\newlabel{ch:design@cref}{{[chapter][3][]3}{[1][17][]17}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}Target Kernels}{17}{section.3.1}\protected@file@percent }
-\newlabel{sec:target-kernels}{{3.1}{17}{Target Kernels}{section.3.1}{}}
-\newlabel{sec:target-kernels@cref}{{[section][1][3]3.1}{[1][17][]17}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}Algorithmic Approach}{17}{section.3.2}\protected@file@percent }
-\newlabel{sec:algorithmic-approach}{{3.2}{17}{Algorithmic Approach}{section.3.2}{}}
-\newlabel{sec:algorithmic-approach@cref}{{[section][2][3]3.2}{[1][17][]17}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Data Layout and Memory Strategy}{17}{section.3.3}\protected@file@percent }
-\newlabel{sec:data-layout}{{3.3}{17}{Data Layout and Memory Strategy}{section.3.3}{}}
-\newlabel{sec:data-layout@cref}{{[section][3][3]3.3}{[1][17][]17}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}Baseline Selection}{17}{section.3.4}\protected@file@percent }
-\newlabel{sec:baseline}{{3.4}{17}{Baseline Selection}{section.3.4}{}}
-\newlabel{sec:baseline@cref}{{[section][4][3]3.4}{[1][17][]17}{}{}{}}
-\BKM@entry{id=37,dest={636861707465722E34},srcline={53},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030495C3030306D5C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030745C303030695C3030306F5C3030306E}
-\BKM@entry{id=38,dest={73656374696F6E2E342E31},srcline={2},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C3030305C3034305C303030445C303030655C303030735C303030695C303030675C3030306E}
-\BKM@entry{id=39,dest={73656374696F6E2E342E32},srcline={4},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C303030535C303030685C303030615C303030725C303030655C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030545C303030695C3030306C5C303030695C3030306E5C30303067}
-\BKM@entry{id=40,dest={73656374696F6E2E342E33},srcline={6},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C3030304F5C303030635C303030635C303030755C303030705C303030615C3030306E5C303030635C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304C5C303030615C303030755C3030306E5C303030635C303030685C3030305C3034305C303030435C3030306F5C3030306E5C303030665C303030695C303030675C303030755C303030725C303030615C303030745C303030695C3030306F5C3030306E}
-\BKM@entry{id=41,dest={73656374696F6E2E342E34},srcline={8},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C303030495C3030306E5C303030745C303030655C303030675C303030725C303030615C303030745C303030695C3030306F5C3030306E5C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030425C303030755C303030695C3030306C5C303030645C3030305C3034305C303030535C303030795C303030735C303030745C303030655C3030306D}
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Implementation}{19}{chapter.4}\protected@file@percent }
+\newlabel{ch:design}{{3}{19}{Design and Methodology}{chapter.3}{}}
+\newlabel{ch:design@cref}{{[chapter][3][]3}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Target Kernels}{19}{section.3.1}\protected@file@percent }
+\newlabel{sec:target-kernels}{{3.1}{19}{Target Kernels}{section.3.1}{}}
+\newlabel{sec:target-kernels@cref}{{[section][1][3]3.1}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Algorithmic Approach}{19}{section.3.2}\protected@file@percent }
+\newlabel{sec:algorithmic-approach}{{3.2}{19}{Algorithmic Approach}{section.3.2}{}}
+\newlabel{sec:algorithmic-approach@cref}{{[section][2][3]3.2}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Data Layout and Memory Strategy}{19}{section.3.3}\protected@file@percent }
+\newlabel{sec:data-layout}{{3.3}{19}{Data Layout and Memory Strategy}{section.3.3}{}}
+\newlabel{sec:data-layout@cref}{{[section][3][3]3.3}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Baseline Selection}{19}{section.3.4}\protected@file@percent }
+\newlabel{sec:baseline}{{3.4}{19}{Baseline Selection}{section.3.4}{}}
+\newlabel{sec:baseline@cref}{{[section][4][3]3.4}{[1][19][]19}{}{}{}}
+\BKM@entry{id=38,dest={636861707465722E34},srcline={53},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030495C3030306D5C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030745C303030695C3030306F5C3030306E}
+\BKM@entry{id=39,dest={73656374696F6E2E342E31},srcline={2},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C3030304B5C303030655C303030725C3030306E5C303030655C3030306C5C3030305C3034305C303030445C303030655C303030735C303030695C303030675C3030306E}
+\BKM@entry{id=40,dest={73656374696F6E2E342E32},srcline={4},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C303030535C303030685C303030615C303030725C303030655C303030645C3030305C3034305C3030304D5C303030655C3030306D5C3030306F5C303030725C303030795C3030305C3034305C303030545C303030695C3030306C5C303030695C3030306E5C30303067}
+\BKM@entry{id=41,dest={73656374696F6E2E342E33},srcline={6},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C3030304F5C303030635C303030635C303030755C303030705C303030615C3030306E5C303030635C303030795C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C3030304C5C303030615C303030755C3030306E5C303030635C303030685C3030305C3034305C303030435C3030306F5C3030306E5C303030665C303030695C303030675C303030755C303030725C303030615C303030745C303030695C3030306F5C3030306E}
+\BKM@entry{id=42,dest={73656374696F6E2E342E34},srcline={8},srcfile={2E2F63686170746572732F30345F696D706C656D656E746174696F6E2E746578}}{5C3337365C3337375C303030495C3030306E5C303030745C303030655C303030675C303030725C303030615C303030745C303030695C3030306F5C3030306E5C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030425C303030755C303030695C3030306C5C303030645C3030305C3034305C303030535C303030795C303030735C303030745C303030655C3030306D}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Implementation}{21}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
-\newlabel{ch:implementation}{{4}{19}{Implementation}{chapter.4}{}}
-\newlabel{ch:implementation@cref}{{[chapter][4][]4}{[1][19][]19}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kernel Design}{19}{section.4.1}\protected@file@percent }
-\newlabel{sec:kernel-design}{{4.1}{19}{Kernel Design}{section.4.1}{}}
-\newlabel{sec:kernel-design@cref}{{[section][1][4]4.1}{[1][19][]19}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Shared Memory Tiling}{19}{section.4.2}\protected@file@percent }
-\newlabel{sec:tiling}{{4.2}{19}{Shared Memory Tiling}{section.4.2}{}}
-\newlabel{sec:tiling@cref}{{[section][2][4]4.2}{[1][19][]19}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Occupancy and Launch Configuration}{19}{section.4.3}\protected@file@percent }
-\newlabel{sec:occupancy}{{4.3}{19}{Occupancy and Launch Configuration}{section.4.3}{}}
-\newlabel{sec:occupancy@cref}{{[section][3][4]4.3}{[1][19][]19}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.4}Integration and Build System}{19}{section.4.4}\protected@file@percent }
-\newlabel{sec:build-system}{{4.4}{19}{Integration and Build System}{section.4.4}{}}
-\newlabel{sec:build-system@cref}{{[section][4][4]4.4}{[1][19][]19}{}{}{}}
-\BKM@entry{id=42,dest={636861707465722E35},srcline={56},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030525C303030655C303030735C303030755C3030306C5C303030745C30303073}
-\BKM@entry{id=43,dest={73656374696F6E2E352E31},srcline={2},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030455C303030785C303030705C303030655C303030725C303030695C3030306D5C303030655C3030306E5C303030745C303030615C3030306C5C3030305C3034305C303030535C303030655C303030745C303030755C30303070}
-\BKM@entry{id=44,dest={73656374696F6E2E352E32},srcline={4},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030535C303030695C3030306E5C303030675C3030306C5C303030655C3030302D5C303030475C303030505C303030555C3030305C3034305C303030505C303030655C303030725C303030665C3030306F5C303030725C3030306D5C303030615C3030306E5C303030635C30303065}
-\BKM@entry{id=45,dest={73656374696F6E2E352E33},srcline={6},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030505C303030725C3030306F5C303030665C303030695C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030415C3030306E5C303030615C3030306C5C303030795C303030735C303030695C30303073}
-\BKM@entry{id=46,dest={73656374696F6E2E352E34},srcline={8},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030435C3030306F5C3030306D5C303030705C303030615C303030725C303030695C303030735C3030306F5C3030306E5C3030305C3034305C303030775C303030695C303030745C303030685C3030305C3034305C303030635C303030755C303030425C3030304C5C303030415C303030535C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030635C303030755C303030545C303030455C3030304E5C303030535C3030304F5C30303052}
-\BKM@entry{id=47,dest={73656374696F6E2E352E35},srcline={10},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030535C303030635C303030615C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030425C303030655C303030685C303030615C303030765C303030695C3030306F5C303030755C30303072}
-\BKM@entry{id=48,dest={73656374696F6E2E352E36},srcline={12},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030445C303030695C303030735C303030635C303030755C303030735C303030735C303030695C3030306F5C3030306E}
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{21}{chapter.5}\protected@file@percent }
+\newlabel{ch:implementation}{{4}{21}{Implementation}{chapter.4}{}}
+\newlabel{ch:implementation@cref}{{[chapter][4][]4}{[1][21][]21}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kernel Design}{21}{section.4.1}\protected@file@percent }
+\newlabel{sec:kernel-design}{{4.1}{21}{Kernel Design}{section.4.1}{}}
+\newlabel{sec:kernel-design@cref}{{[section][1][4]4.1}{[1][21][]21}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Shared Memory Tiling}{21}{section.4.2}\protected@file@percent }
+\newlabel{sec:tiling}{{4.2}{21}{Shared Memory Tiling}{section.4.2}{}}
+\newlabel{sec:tiling@cref}{{[section][2][4]4.2}{[1][21][]21}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Occupancy and Launch Configuration}{21}{section.4.3}\protected@file@percent }
+\newlabel{sec:occupancy}{{4.3}{21}{Occupancy and Launch Configuration}{section.4.3}{}}
+\newlabel{sec:occupancy@cref}{{[section][3][4]4.3}{[1][21][]21}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Integration and Build System}{21}{section.4.4}\protected@file@percent }
+\newlabel{sec:build-system}{{4.4}{21}{Integration and Build System}{section.4.4}{}}
+\newlabel{sec:build-system@cref}{{[section][4][4]4.4}{[1][21][]21}{}{}{}}
+\BKM@entry{id=43,dest={636861707465722E35},srcline={56},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030525C303030655C303030735C303030755C3030306C5C303030745C30303073}
+\BKM@entry{id=44,dest={73656374696F6E2E352E31},srcline={2},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030455C303030785C303030705C303030655C303030725C303030695C3030306D5C303030655C3030306E5C303030745C303030615C3030306C5C3030305C3034305C303030535C303030655C303030745C303030755C30303070}
+\BKM@entry{id=45,dest={73656374696F6E2E352E32},srcline={4},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030535C303030695C3030306E5C303030675C3030306C5C303030655C3030302D5C303030475C303030505C303030555C3030305C3034305C303030505C303030655C303030725C303030665C3030306F5C303030725C3030306D5C303030615C3030306E5C303030635C30303065}
+\BKM@entry{id=46,dest={73656374696F6E2E352E33},srcline={6},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030505C303030725C3030306F5C303030665C303030695C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030415C3030306E5C303030615C3030306C5C303030795C303030735C303030695C30303073}
+\BKM@entry{id=47,dest={73656374696F6E2E352E34},srcline={8},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030435C3030306F5C3030306D5C303030705C303030615C303030725C303030695C303030735C3030306F5C3030306E5C3030305C3034305C303030775C303030695C303030745C303030685C3030305C3034305C303030635C303030755C303030425C3030304C5C303030415C303030535C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030635C303030755C303030545C303030455C3030304E5C303030535C3030304F5C30303052}
+\BKM@entry{id=48,dest={73656374696F6E2E352E35},srcline={10},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030535C303030635C303030615C3030306C5C303030695C3030306E5C303030675C3030305C3034305C303030425C303030655C303030685C303030615C303030765C303030695C3030306F5C303030755C30303072}
+\BKM@entry{id=49,dest={73656374696F6E2E352E36},srcline={12},srcfile={2E2F63686170746572732F30355F726573756C74732E746578}}{5C3337365C3337375C303030445C303030695C303030735C303030635C303030755C303030735C303030735C303030695C3030306F5C3030306E}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{23}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
-\newlabel{ch:results}{{5}{21}{Results}{chapter.5}{}}
-\newlabel{ch:results@cref}{{[chapter][5][]5}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}Experimental Setup}{21}{section.5.1}\protected@file@percent }
-\newlabel{sec:experimental-setup}{{5.1}{21}{Experimental Setup}{section.5.1}{}}
-\newlabel{sec:experimental-setup@cref}{{[section][1][5]5.1}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Single-GPU Performance}{21}{section.5.2}\protected@file@percent }
-\newlabel{sec:single-gpu}{{5.2}{21}{Single-GPU Performance}{section.5.2}{}}
-\newlabel{sec:single-gpu@cref}{{[section][2][5]5.2}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Profiling Analysis}{21}{section.5.3}\protected@file@percent }
-\newlabel{sec:profiling}{{5.3}{21}{Profiling Analysis}{section.5.3}{}}
-\newlabel{sec:profiling@cref}{{[section][3][5]5.3}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.4}Comparison with cuBLAS and cuTENSOR}{21}{section.5.4}\protected@file@percent }
-\newlabel{sec:comparison}{{5.4}{21}{Comparison with cuBLAS and cuTENSOR}{section.5.4}{}}
-\newlabel{sec:comparison@cref}{{[section][4][5]5.4}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.5}Scaling Behaviour}{21}{section.5.5}\protected@file@percent }
-\newlabel{sec:scaling}{{5.5}{21}{Scaling Behaviour}{section.5.5}{}}
-\newlabel{sec:scaling@cref}{{[section][5][5]5.5}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.6}Discussion}{21}{section.5.6}\protected@file@percent }
-\newlabel{sec:discussion}{{5.6}{21}{Discussion}{section.5.6}{}}
-\newlabel{sec:discussion@cref}{{[section][6][5]5.6}{[1][21][]21}{}{}{}}
-\BKM@entry{id=49,dest={636861707465722E36},srcline={59},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030435C3030306F5C3030306E5C303030635C3030306C5C303030755C303030735C303030695C3030306F5C3030306E}
-\BKM@entry{id=50,dest={73656374696F6E2E362E31},srcline={2},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C303030535C303030755C3030306D5C3030306D5C303030615C303030725C30303079}
-\BKM@entry{id=51,dest={73656374696F6E2E362E32},srcline={4},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C3030304C5C303030695C3030306D5C303030695C303030745C303030615C303030745C303030695C3030306F5C3030306E5C30303073}
-\BKM@entry{id=52,dest={73656374696F6E2E362E33},srcline={6},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C303030465C303030755C303030745C303030755C303030725C303030655C3030305C3034305C303030575C3030306F5C303030725C3030306B}
+\newlabel{ch:results}{{5}{23}{Results}{chapter.5}{}}
+\newlabel{ch:results@cref}{{[chapter][5][]5}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Experimental Setup}{23}{section.5.1}\protected@file@percent }
+\newlabel{sec:experimental-setup}{{5.1}{23}{Experimental Setup}{section.5.1}{}}
+\newlabel{sec:experimental-setup@cref}{{[section][1][5]5.1}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Single-GPU Performance}{23}{section.5.2}\protected@file@percent }
+\newlabel{sec:single-gpu}{{5.2}{23}{Single-GPU Performance}{section.5.2}{}}
+\newlabel{sec:single-gpu@cref}{{[section][2][5]5.2}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Profiling Analysis}{23}{section.5.3}\protected@file@percent }
+\newlabel{sec:profiling}{{5.3}{23}{Profiling Analysis}{section.5.3}{}}
+\newlabel{sec:profiling@cref}{{[section][3][5]5.3}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Comparison with cuBLAS and cuTENSOR}{23}{section.5.4}\protected@file@percent }
+\newlabel{sec:comparison}{{5.4}{23}{Comparison with cuBLAS and cuTENSOR}{section.5.4}{}}
+\newlabel{sec:comparison@cref}{{[section][4][5]5.4}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.5}Scaling Behaviour}{23}{section.5.5}\protected@file@percent }
+\newlabel{sec:scaling}{{5.5}{23}{Scaling Behaviour}{section.5.5}{}}
+\newlabel{sec:scaling@cref}{{[section][5][5]5.5}{[1][23][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.6}Discussion}{23}{section.5.6}\protected@file@percent }
+\newlabel{sec:discussion}{{5.6}{23}{Discussion}{section.5.6}{}}
+\newlabel{sec:discussion@cref}{{[section][6][5]5.6}{[1][23][]23}{}{}{}}
+\BKM@entry{id=50,dest={636861707465722E36},srcline={59},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030435C3030306F5C3030306E5C303030635C3030306C5C303030755C303030735C303030695C3030306F5C3030306E}
+\BKM@entry{id=51,dest={73656374696F6E2E362E31},srcline={2},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C303030535C303030755C3030306D5C3030306D5C303030615C303030725C30303079}
+\BKM@entry{id=52,dest={73656374696F6E2E362E32},srcline={4},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C3030304C5C303030695C3030306D5C303030695C303030745C303030615C303030745C303030695C3030306F5C3030306E5C30303073}
+\BKM@entry{id=53,dest={73656374696F6E2E362E33},srcline={6},srcfile={2E2F63686170746572732F30365F636F6E636C7573696F6E2E746578}}{5C3337365C3337375C303030465C303030755C303030745C303030755C303030725C303030655C3030305C3034305C303030575C3030306F5C303030725C3030306B}
 \bibstyle{alpha}
 \citation{*}
 \bibdata{references}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion}{23}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion}{25}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
-\newlabel{ch:conclusion}{{6}{23}{Conclusion}{chapter.6}{}}
-\newlabel{ch:conclusion@cref}{{[chapter][6][]6}{[1][23][]23}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.1}Summary}{23}{section.6.1}\protected@file@percent }
-\newlabel{sec:summary}{{6.1}{23}{Summary}{section.6.1}{}}
-\newlabel{sec:summary@cref}{{[section][1][6]6.1}{[1][23][]23}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Limitations}{23}{section.6.2}\protected@file@percent }
-\newlabel{sec:limitations}{{6.2}{23}{Limitations}{section.6.2}{}}
-\newlabel{sec:limitations@cref}{{[section][2][6]6.2}{[1][23][]23}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.3}Future Work}{23}{section.6.3}\protected@file@percent }
-\newlabel{sec:future-work}{{6.3}{23}{Future Work}{section.6.3}{}}
-\newlabel{sec:future-work@cref}{{[section][3][6]6.3}{[1][23][]23}{}{}{}}
-\BKM@entry{id=53,dest={636861707465722A2E3532},srcline={2},srcfile={2E2F6275696C642F6D61696E2E62626C}}{5C3337365C3337375C303030425C303030695C303030625C3030306C5C303030695C3030306F5C303030675C303030725C303030615C303030705C303030685C30303079}
+\newlabel{ch:conclusion}{{6}{25}{Conclusion}{chapter.6}{}}
+\newlabel{ch:conclusion@cref}{{[chapter][6][]6}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Summary}{25}{section.6.1}\protected@file@percent }
+\newlabel{sec:summary}{{6.1}{25}{Summary}{section.6.1}{}}
+\newlabel{sec:summary@cref}{{[section][1][6]6.1}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Limitations}{25}{section.6.2}\protected@file@percent }
+\newlabel{sec:limitations}{{6.2}{25}{Limitations}{section.6.2}{}}
+\newlabel{sec:limitations@cref}{{[section][2][6]6.2}{[1][25][]25}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Future Work}{25}{section.6.3}\protected@file@percent }
+\newlabel{sec:future-work}{{6.3}{25}{Future Work}{section.6.3}{}}
+\newlabel{sec:future-work@cref}{{[section][3][6]6.3}{[1][25][]25}{}{}{}}
+\BKM@entry{id=54,dest={636861707465722A2E3539},srcline={2},srcfile={2E2F6275696C642F6D61696E2E62626C}}{5C3337365C3337375C303030425C303030695C303030625C3030306C5C303030695C3030306F5C303030675C303030725C303030615C303030705C303030685C30303079}
 \bibcite{higham2022mixed}{HM22}
 \bibcite{ieee754-2019}{{IEE}19}
 \bibcite{kalamkar2019bfloat16}{KMM{$^{+}$}19}
@@ -343,21 +358,56 @@
 \bibcite{springer2017tensor}{SSK17}
 \bibcite{wu2022chase-gpu}{WDADN22}
 \bibcite{wu2023chase-nccl}{WDN23}
-\@writefile{toc}{\contentsline {chapter}{\nonumberline Bibliography}{25}{chapter*.52}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\nonumberline Bibliography}{27}{chapter*.59}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
 \bibcite{winkelmann2019chase}{WSDN19}
 \bibcite{wu2019phd}{Wu19}
-\BKM@entry{id=54,dest={617070656E6469782E41},srcline={67},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030535C303030755C303030705C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030725C303030795C3030305C3034305C303030425C303030655C3030306E5C303030635C303030685C3030306D5C303030615C303030725C3030306B5C30303073}
-\@writefile{toc}{\contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{27}{appendix.A}\protected@file@percent }
+\newlabel{ch:irepro}{{6.3}{29}{Future Work}{chapter*.60}{}}
+\newlabel{ch:irepro@cref}{{[section][0][6]6.0}{[1][29][]29}{}{}{}}
+\BKM@entry{id=55,dest={636861707465722E37},srcline={1},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030455C303030785C303030705C303030655C303030725C303030695C3030306D5C303030655C3030306E5C303030745C303030615C3030306C5C3030305C3034305C303030455C3030306E5C303030765C303030695C303030725C3030306F5C3030306E5C3030306D5C303030655C3030306E5C303030745C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030525C303030655C303030705C303030725C3030306F5C303030645C303030755C303030635C303030695C303030625C303030695C3030306C5C303030695C303030745C30303079}
+\BKM@entry{id=56,dest={73656374696F6E2E372E31},srcline={5},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030485C303030615C303030725C303030645C303030775C303030615C303030725C303030655C3030305C3034305C303030435C3030306F5C3030306E5C303030665C303030695C303030675C303030755C303030725C303030615C303030745C303030695C3030306F5C3030306E}
+\BKM@entry{id=57,dest={73656374696F6E2E372E32},srcline={31},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030535C3030306F5C303030665C303030745C303030775C303030615C303030725C303030655C3030305C3034305C303030455C3030306E5C303030765C303030695C303030725C3030306F5C3030306E5C3030306D5C303030655C3030306E5C30303074}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Experimental Environment and Reproducibility}{31}{chapter.7}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{lol}{\addvspace {10\p@ }}
-\newlabel{app:benchmarks}{{A}{27}{Supplementary Benchmarks}{appendix.A}{}}
-\newlabel{app:benchmarks@cref}{{[chapter][1][]A}{[1][27][]27}{}{}{}}
-\BKM@entry{id=55,dest={636861707465722A2E3533},srcline={72},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030445C303030655C303030635C3030306C5C303030615C303030725C303030615C303030745C303030695C3030306F5C3030306E5C3030305C3034305C3030306F5C303030665C3030305C3034305C303030415C303030755C303030745C303030685C3030306F5C303030725C303030735C303030685C303030695C30303070}
-\@writefile{toc}{\contentsline {chapter}{Declaration of Authorship}{29}{chapter*.53}\protected@file@percent }
+\newlabel{app:reproducibility}{{7}{31}{Experimental Environment and Reproducibility}{chapter.7}{}}
+\newlabel{app:reproducibility@cref}{{[chapter][7][]7}{[1][31][]31}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Hardware Configuration}{31}{section.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7.1}{\ignorespaces Compute node hardware specification.}}{31}{table.caption.61}\protected@file@percent }
+\newlabel{tab:repro-hardware}{{7.1}{31}{Compute node hardware specification}{table.caption.61}{}}
+\newlabel{tab:repro-hardware@cref}{{[table][1][7]7.1}{[1][31][]31}{}{}{}}
+\BKM@entry{id=58,dest={73656374696F6E2E372E33},srcline={68},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030475C303030505C303030555C3030305C3034305C303030545C3030306F5C303030705C3030306F5C3030306C5C3030306F5C303030675C30303079}
+\BKM@entry{id=59,dest={73656374696F6E2E372E34},srcline={88},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030425C303030755C303030695C3030306C5C303030645C3030305C3034305C303030615C3030306E5C303030645C3030305C3034305C303030525C303030755C3030306E5C3030305C3034305C303030505C303030725C3030306F5C303030635C303030655C303030645C303030755C303030725C30303065}
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Software Environment}{32}{section.7.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7.2}{\ignorespaces Software versions used for all experiments. Components marked with ${}^{\dagger }$ are loaded via the JSC module system.}}{32}{table.caption.62}\protected@file@percent }
+\newlabel{tab:repro-software}{{7.2}{32}{Software versions used for all experiments. Components marked with ${}^{\dagger }$ are loaded via the JSC module system}{table.caption.62}{}}
+\newlabel{tab:repro-software@cref}{{[table][2][7]7.2}{[1][31][]32}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}GPU Topology}{32}{section.7.3}\protected@file@percent }
+\newlabel{sec:repro-topology}{{7.3}{32}{GPU Topology}{section.7.3}{}}
+\newlabel{sec:repro-topology@cref}{{[section][3][7]7.3}{[1][32][]32}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.3}{\ignorespaces GPU interconnect topology. NV4 = four bonded NVLinks; PIX = single PCIe bridge; SYS = traverses PCIe and inter-NUMA interconnect.}}{32}{table.caption.63}\protected@file@percent }
+\newlabel{tab:gpu-topology}{{7.3}{32}{GPU interconnect topology. NV4 = four bonded NVLinks; PIX = single PCIe bridge; SYS = traverses PCIe and inter-NUMA interconnect}{table.caption.63}{}}
+\newlabel{tab:gpu-topology@cref}{{[table][3][7]7.3}{[1][32][]32}{}{}{}}
+\BKM@entry{id=60,dest={73656374696F6E2E372E35},srcline={103},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C3030304D5C303030655C303030615C303030735C303030755C303030725C303030655C3030306D5C303030655C3030306E5C303030745C3030305C3034305C3030304D5C303030655C303030745C303030685C3030306F5C303030645C3030306F5C3030306C5C3030306F5C303030675C30303079}
+\BKM@entry{id=61,dest={73656374696F6E2E372E36},srcline={104},srcfile={2E2F7465782F726570726F2E746578}}{5C3337365C3337375C303030445C303030615C303030745C303030615C3030305C3034305C303030415C303030765C303030615C303030695C3030306C5C303030615C303030625C303030695C3030306C5C303030695C303030745C30303079}
+\@writefile{toc}{\contentsline {section}{\numberline {7.4}Build and Run Procedure}{33}{section.7.4}\protected@file@percent }
+\newlabel{lst:repro-build}{{7.1}{33}{Build commands for JURECA-DC}{lstlisting.7.1}{}}
+\newlabel{lst:repro-build@cref}{{[listing][1][7]7.1}{[1][33][]33}{}{}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {7.1}{\ignorespaces Build commands for JURECA-DC.}}{33}{lstlisting.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.5}Measurement Methodology}{33}{section.7.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.6}Data Availability}{33}{section.7.6}\protected@file@percent }
+\BKM@entry{id=62,dest={617070656E6469782E41},srcline={70},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030535C303030755C303030705C303030705C3030306C5C303030655C3030306D5C303030655C3030306E5C303030745C303030615C303030725C303030795C3030305C3034305C303030425C303030655C3030306E5C303030635C303030685C3030306D5C303030615C303030725C3030306B5C30303073}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{35}{appendix.A}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{lol}{\addvspace {10\p@ }}
+\newlabel{app:benchmarks}{{A}{35}{Supplementary Benchmarks}{appendix.A}{}}
+\newlabel{app:benchmarks@cref}{{[chapter][1][]A}{[1][35][]35}{}{}{}}
+\BKM@entry{id=63,dest={636861707465722A2E3634},srcline={75},srcfile={2E2F6D61696E2E746578}}{5C3337365C3337375C303030445C303030655C303030635C3030306C5C303030615C303030725C303030615C303030745C303030695C3030306F5C3030306E5C3030305C3034305C3030306F5C303030665C3030305C3034305C303030415C303030755C303030745C303030685C3030306F5C303030725C303030735C303030685C303030695C30303070}
+\@writefile{toc}{\contentsline {chapter}{Declaration of Authorship}{37}{chapter*.64}\protected@file@percent }
 \global\csname @altsecnumformattrue\endcsname
 \global\@namedef{scr@dte@chapter@lastmaxnumwidth}{17.26793pt}
 \global\@namedef{scr@dte@section@lastmaxnumwidth}{23.08795pt}
@@ -369,4 +419,4 @@
 \@writefile{lof}{\providecommand\tocbasic@end@toc@file{}\tocbasic@end@toc@file}
 \@writefile{lot}{\providecommand\tocbasic@end@toc@file{}\tocbasic@end@toc@file}
 \@writefile{lol}{\providecommand\tocbasic@end@toc@file{}\tocbasic@end@toc@file}
-\gdef \@abspage@last{47}
+\gdef \@abspage@last{55}

@@ -8,10 +8,15 @@
 \contentsline {table}{\numberline {2.5}{\ignorespaces Theoretical peak floating-point throughput of the A100 GPU.}}{8}{table.caption.28}%
 \contentsline {table}{\numberline {2.6}{\ignorespaces Derived theoretical limits of the A100 architecture.}}{9}{table.caption.31}%
 \contentsline {table}{\numberline {2.7}{\ignorespaces Approximate memory access latency at different hierarchy levels.}}{9}{table.caption.34}%
+\contentsline {table}{\numberline {2.8}{\ignorespaces GPU-to-NUMA affinity on a JURECA-DC compute node.}}{10}{table.caption.40}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {7.1}{\ignorespaces Compute node hardware specification.}}{31}{table.caption.61}%
+\contentsline {table}{\numberline {7.2}{\ignorespaces Software versions used for all experiments. Components marked with ${}^{\dagger }$ are loaded via the JSC module system.}}{32}{table.caption.62}%
+\contentsline {table}{\numberline {7.3}{\ignorespaces GPU interconnect topology. NV4 = four bonded NVLinks; PIX = single PCIe bridge; SYS = traverses PCIe and inter-NUMA interconnect.}}{32}{table.caption.63}%
 \addvspace {10\p@ }
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
