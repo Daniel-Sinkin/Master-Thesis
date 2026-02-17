@@ -1,0 +1,128 @@
+% ── Encoding & Language ───────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+\usepackage{lmodern}
+\usepackage{fontspec}
+\setmonofont[
+  Path=fonts/,
+  Scale=0.85,
+  BoldFont=MonaspaceKrypton-Bold.otf,
+  ItalicFont=MonaspaceKrypton-Italic.otf,
+  BoldItalicFont=MonaspaceKrypton-BoldItalic.otf
+]{MonaspaceKrypton-Regular.otf}
+
+\usepackage[
+  inner=3cm,
+  outer=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm,
+  footskip=1cm
+]{geometry}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{booktabs} 
+\usepackage{tabularx}
+
+\usepackage{xcolor}
+\usepackage{listings}
+
+\definecolor{lstbg}{RGB}{248,248,248}
+\definecolor{lstframe}{RGB}{200,200,200}
+\definecolor{lstkeyword}{RGB}{0,92,197}
+\definecolor{lstcomment}{RGB}{0,128,0}
+\definecolor{lststring}{RGB}{163,21,21}
+\definecolor{lstnumber}{RGB}{150,150,150}
+\definecolor{lstcuda}{RGB}{170,55,0}
+
+\lstdefinelanguage{CUDA}[]{C++}{
+  morekeywords=[1]{
+    __global__, __device__, __host__, __shared__, __constant__,
+    __restrict__, __launch_bounds__,
+    dim3, cudaError_t, cudaStream_t, cudaEvent_t
+  },
+  morekeywords=[2]{
+    blockIdx, blockDim, threadIdx, gridDim, warpSize,
+    cudaMalloc, cudaFree, cudaMemcpy, cudaMemcpyAsync,
+    cudaDeviceSynchronize, cudaStreamSynchronize,
+    cudaEventCreate, cudaEventRecord, cudaEventElapsedTime,
+    cudaGetDeviceProperties, cudaSetDevice,
+    __syncthreads, __syncwarp, __shfl_sync, __shfl_down_sync,
+    atomicAdd, atomicCAS, atomicExch,
+    cublasCreate, cublasDgemm, cublasDestroy,
+    cooperative_groups
+  },
+  sensitive=true,
+}
+
+\lstdefinestyle{thesis}{
+  backgroundcolor=\color{lstbg},
+  frame=single,
+  rulecolor=\color{lstframe},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=[1]\color{lstkeyword}\bfseries,
+  keywordstyle=[2]\color{lstcuda},
+  commentstyle=\color{lstcomment}\itshape,
+  stringstyle=\color{lststring},
+  numberstyle=\tiny\color{lstnumber},
+  numbers=left,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
+  tabsize=4,
+  upquote=true,
+  xleftmargin=1.5em,
+  framexleftmargin=1em,
+  captionpos=b
+}
+\lstset{style=thesis}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}  % \cref{fig:x} -> "Figure 1.2"
+
+\usepackage{siunitx}            % \SI{1555}{\giga\byte\per\second}
+\sisetup{per-mode=symbol}
+
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{todonotes}          % \todo{fix this}
+
+\newcommand{\BigO}{\mathcal{O}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\flops}{\text{FLOPS}}
+\newcommand{\tflops}{\text{TFLOPS}}
+\newcommand{\gbps}{\text{GB/s}}
+
+\newcommand{\tensor}[1]{\mathcal{#1}}
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+
+\hypersetup{
+  pdftitle={GPU-Accelerated Tensor Network Algorithms},
+  pdfauthor={Daniel Sinkin},
+  pdfsubject={Master Thesis},
+}

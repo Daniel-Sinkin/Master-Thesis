@@ -1,0 +1,71 @@
+\documentclass[
+  a4paper,
+  12pt,
+  twoside,
+  openright,
+  bibliography=totoc,
+  listof=totoc
+]{scrreprt}
+
+\input{tex/preamble}
+
+\begin{document}
+
+\pagenumbering{roman}
+
+\input{tex/titlepage}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\lipsum[1]
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+TODO
+
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+
+\cleardoublepage
+
+\pagenumbering{arabic}
+
+\chapter{Introduction}\label{ch:introduction}
+\input{chapters/01_introduction}
+
+\chapter{Background}\label{ch:background}
+\input{chapters/02_background}
+
+\chapter{Design and Methodology}\label{ch:design}
+\input{chapters/03_design}
+
+\chapter{Implementation}\label{ch:implementation}
+\input{chapters/04_implementation}
+
+\chapter{Results}\label{ch:results}
+\input{chapters/05_results}
+
+\chapter{Conclusion}\label{ch:conclusion}
+\input{chapters/06_conclusion}
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\appendix
+\chapter{Supplementary Benchmarks}\label{app:benchmarks}
+TODO
+
+\cleardoublepage
+\chapter*{Declaration of Authorship}
+\addcontentsline{toc}{chapter}{Declaration of Authorship}
+I hereby declare that I have created this work completely on my own and used
+no other sources or tools than the ones listed, and that I have marked any
+quotes accordingly.
+
+\vspace{2cm}
+\noindent
+Aachen, \today \hfill Daniel Sinkin
+
+\end{document}
