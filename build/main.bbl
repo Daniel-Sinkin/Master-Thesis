@@ -25,6 +25,19 @@
 \newblock {cuTENSOR}: A high-performance tensor primitives library, 2024.
 \newblock \url{https://developer.nvidia.com/cutensor}.
 
+\bibitem[{NVI}25]{cublasdx}
+{NVIDIA Corporation}.
+\newblock {cuBLASDx}: Device side {BLAS} extensions, 2025.
+\newblock \url{https://docs.nvidia.com/cuda/cublasdx/}.
+
+\bibitem[SSK17]{springer2017tensor}
+Paul Springer, Tong Su, and Tamara~G. Kolda.
+\newblock Tensor contractions with extended {BLAS} kernels on {CPU} and {GPU}.
+\newblock In {\em IEEE 24th International Conference on High Performance
+  Computing (HiPC)}. IEEE, 2017.
+\newblock
+  \url{https://research.nvidia.com/sites/default/files/pubs/2017-10_Tensor-Contractions-with/tensors_hipc.pdf}.
+
 \bibitem[WDADN22]{wu2022chase-gpu}
 Xinzhe Wu, Davor Davidovi\'{c}, Sebastian Achilles, and Edoardo Di~Napoli.
 \newblock {ChASE}: a distributed hybrid {CPU-GPU} eigensolver for large-scale

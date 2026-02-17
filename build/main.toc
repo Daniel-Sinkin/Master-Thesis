@@ -4,6 +4,8 @@
 \contentsline {chapter}{\nonumberline List of Figures}{ix}{chapter*.4}%
 \contentsline {chapter}{\nonumberline List of Tables}{xi}{chapter*.5}%
 \contentsline {chapter}{\nonumberline Listings}{xiii}{chapter*.6}%
+\contentsline {chapter}{List of Symbols}{xv}{chapter*.7}%
+\contentsline {chapter}{List of Abbreviations}{xvii}{chapter*.8}%
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Motivation}{1}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Problem Statement}{1}{section.1.2}%
@@ -48,7 +50,7 @@
 \contentsline {section}{\numberline {6.1}Summary}{11}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Limitations}{11}{section.6.2}%
 \contentsline {section}{\numberline {6.3}Future Work}{11}{section.6.3}%
-\contentsline {chapter}{\nonumberline Bibliography}{13}{chapter*.7}%
+\contentsline {chapter}{\nonumberline Bibliography}{13}{chapter*.9}%
 \contentsline {chapter}{\numberline {A}Supplementary Benchmarks}{15}{appendix.A}%
-\contentsline {chapter}{Declaration of Authorship}{17}{chapter*.8}%
+\contentsline {chapter}{Declaration of Authorship}{17}{chapter*.10}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
