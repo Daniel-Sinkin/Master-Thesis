@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 05:48
+This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 05:57
  restricted system commands enabled.
 **main.tex
 (./main.tex
@@ -1294,40 +1294,45 @@ s/tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
 )
 \c@@todonotes@numberoftodonotes=\count385
-)) (./build/main.aux)
+)
+(/usr/local/texlive/2025/texmf-dist/tex/latex/esvect/esvect.sty
+Package: esvect 
+\symesvector=\mathgroup9
+))
+(./build/main.aux)
 \openout1 = main.aux
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-Package scrbase Info: activating english \abstractname on input line 12.
-Package scrbase Info: activating english \partname on input line 12.
-Package scrbase Info: activating english \chaptername on input line 12.
-Package scrbase Info: activating english \appendixname on input line 12.
-Package scrbase Info: activating english \figurename on input line 12.
-Package scrbase Info: activating english \tablename on input line 12.
-Package scrbase Info: activating english \contentsname on input line 12.
-Package scrbase Info: activating english \listfigurename on input line 12.
-Package scrbase Info: activating english \listtablename on input line 12.
-Package scrbase Info: activating english \bibname on input line 12.
-Package scrbase Info: activating english \indexname on input line 12.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 13.
+LaTeX Font Info:    ... okay on input line 13.
+Package scrbase Info: activating english \abstractname on input line 13.
+Package scrbase Info: activating english \partname on input line 13.
+Package scrbase Info: activating english \chaptername on input line 13.
+Package scrbase Info: activating english \appendixname on input line 13.
+Package scrbase Info: activating english \figurename on input line 13.
+Package scrbase Info: activating english \tablename on input line 13.
+Package scrbase Info: activating english \contentsname on input line 13.
+Package scrbase Info: activating english \listfigurename on input line 13.
+Package scrbase Info: activating english \listtablename on input line 13.
+Package scrbase Info: activating english \bibname on input line 13.
+Package scrbase Info: activating english \indexname on input line 13.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: luatex
@@ -1390,9 +1395,9 @@ Package caption Info: hyperref package is loaded.
 Package caption Info: listings package is loaded.
 Package caption Info: End \AtBeginDocument code.
 \c@lstlisting=\count392
-Package tocbasic Info: setting babel extension for `lol' on input line 12.
+Package tocbasic Info: setting babel extension for `lol' on input line 13.
 \scr@dte@lstlisting@maxnumwidth=\skip84
-Package hyperref Info: Link coloring OFF on input line 12.
+Package hyperref Info: Link coloring OFF on input line 13.
 
 (./build/main.out) (./build/main.out)
 \@outlinefile=\write4
@@ -1405,7 +1410,7 @@ Class scrreprt Info: loading recommended package `bookmark'.
 (scrreprt)           `bookmarkpackage=false' before \begin{document} and
 (scrreprt)           you can avoid this message adding:
 (scrreprt)             \usepackage{bookmark}
-(scrreprt)           before \begin{document} on input line 12.
+(scrreprt)           before \begin{document} on input line 13.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/bookmark/bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
@@ -1421,21 +1426,21 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 12.
-LaTeX Info: Redefining \microtypecontext on input line 12.
-Package microtype Info: Applying patch `item' on input line 12.
-Package microtype Info: Applying patch `toc' on input line 12.
-Package microtype Info: Applying patch `eqnum' on input line 12.
-Package microtype Info: Applying patch `footnote' on input line 12.
-Package microtype Info: Applying patch `verbatim' on input line 12.
-LaTeX Info: Redefining \microtypesetup on input line 12.
+or `english'. on input line 13.
+LaTeX Info: Redefining \microtypecontext on input line 13.
+Package microtype Info: Applying patch `item' on input line 13.
+Package microtype Info: Applying patch `toc' on input line 13.
+Package microtype Info: Applying patch `eqnum' on input line 13.
+Package microtype Info: Applying patch `footnote' on input line 13.
+Package microtype Info: Applying patch `verbatim' on input line 13.
+LaTeX Info: Redefining \microtypesetup on input line 13.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 12.
+LaTeX Info: Redefining \showhyphens on input line 13.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of spacing.
 Package microtype Info: No adjustment of kerning.
@@ -1496,6 +1501,12 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 (/usr/local/texlive/2025/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
+LaTeX Font Info:    Trying to load font information for U+esvect on input line 
+33.
+
+(/usr/local/texlive/2025/texmf-dist/tex/latex/esvect/uesvect.fd
+File: uesvect.fd 
+)
 
 [1
 
@@ -1530,7 +1541,7 @@ tex))
 
 
 ]
-Package tocbasic Info: character protrusion at toc deactivated on input line 26
+Package tocbasic Info: character protrusion at toc deactivated on input line 27
 .
  (./build/main.toc
 
@@ -1541,7 +1552,7 @@ Package tocbasic Info: character protrusion at toc deactivated on input line 26
 
 
 [8]
-Package tocbasic Info: character protrusion at lof deactivated on input line 27
+Package tocbasic Info: character protrusion at lof deactivated on input line 28
 .
  (./build/main.lof)
 \tf@lof=\write6
@@ -1558,7 +1569,7 @@ Package tocbasic Info: character protrusion at lof deactivated on input line 27
 
 
 ]
-Package tocbasic Info: character protrusion at lot deactivated on input line 28
+Package tocbasic Info: character protrusion at lot deactivated on input line 29
 .
  (./build/main.lot)
 \tf@lot=\write7
@@ -1572,7 +1583,7 @@ Package tocbasic Info: character protrusion at lot deactivated on input line 28
 
 
 ]
-Package tocbasic Info: character protrusion at lol deactivated on input line 29
+Package tocbasic Info: character protrusion at lol deactivated on input line 30
 .
  (./build/main.lol)
 \tf@lol=\write8
@@ -1696,16 +1707,16 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 41467 strings out of 475506
+ 41530 strings out of 475506
  100000,1648299 words of node,token memory allocated
  704 words of node memory still in use:
    8 hlist, 2 vlist, 2 rule, 1 local_par, 7 glue, 4 kern, 1 penalty, 3 glyph, 23
  attribute, 67 glue_spec, 13 attribute_list, 2 write, 3 pdf_action nodes
    avail lists: 2:1902,3:480,4:196,5:252,6:103,7:4927,8:102,9:551,10:15,11:300,1
 2:1
- 63436 multiletter control sequences out of 65536+600000
- 59 fonts using 6648295 bytes
- 108i,8n,105p,10898b,1178s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 63489 multiletter control sequences out of 65536+600000
+ 62 fonts using 6789799 bytes
+ 108i,20n,105p,10898b,1178s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <./fonts/MonaspaceKrypton-Regular.otf></usr/local/texlive/2025/texmf-dist/fonts/
 opentype/public/lm/lmroman12-italic.otf>{/usr/local/texlive/2025/texmf-dist/font
 s/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/
@@ -1717,11 +1728,12 @@ f></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman17-regular
 lar.otf></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></u
 sr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></usr/local/te
 xlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/t
-exmf-dist/fonts/type1/public/lm/lmsy10.pfb>
-Output written on main.pdf (35 pages, 82478 bytes).
+exmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2025/texmf-dist/f
+onts/type1/public/esvect/vect10.pfb>
+Output written on main.pdf (35 pages, 84232 bytes).
 
-PDF statistics: 525 PDF objects out of 1000 (max. 8388607)
- 461 compressed objects within 5 object streams
+PDF statistics: 529 PDF objects out of 1000 (max. 8388607)
+ 464 compressed objects within 5 object streams
  102 named destinations out of 1000 (max. 131072)
  448 words of extra memory for PDF output out of 10000 (max. 100000000)
 
