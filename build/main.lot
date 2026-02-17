@@ -1,6 +1,10 @@
 \babel@toc {english}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}}{5}{table.caption.15}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Theoretical peak floating-point throughput of the A100 GPU.}}{5}{table.caption.18}%
+\contentsline {table}{\numberline {2.3}{\ignorespaces Derived theoretical limits of the A100 architecture.}}{6}{table.caption.21}%
+\contentsline {table}{\numberline {2.4}{\ignorespaces Approximate memory access latency at different hierarchy levels.}}{6}{table.caption.24}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

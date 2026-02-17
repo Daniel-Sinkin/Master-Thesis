@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 05:57
+This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2026.2.11)  17 FEB 2026 08:01
  restricted system commands enabled.
 **main.tex
 (./main.tex
@@ -1554,7 +1554,15 @@ Package tocbasic Info: character protrusion at toc deactivated on input line 27
 [8]
 Package tocbasic Info: character protrusion at lof deactivated on input line 28
 .
- (./build/main.lof)
+ (./build/main.lof
+LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/n' will be
+
+(Font)              scaled to size 10.20007pt on input line 6.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `MonaspaceKrypton-Regular.otf' (encoding: TU).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+)
 \tf@lof=\write6
 
 \openout6 = main.lof
@@ -1624,25 +1632,36 @@ chapter 1.
 
 ]
 chapter 2.
-(./chapters/02_background.tex)
+(./chapters/02_background.tex
+<images/CPUCacheHierarchy.pdf, id=237, 1200.39647pt x 357.64655pt>
+File: images/CPUCacheHierarchy.pdf Graphic file (type pdf)
+<use images/CPUCacheHierarchy.pdf>
+Package luatex.def Info: images/CPUCacheHierarchy.pdf  used on input line 17.
+(luatex.def)             Requested size: 286.65883pt x 85.40579pt.
+<images/A100CacheHierarchy.pdf, id=239, 1041.76651pt x 564.85556pt>
+File: images/A100CacheHierarchy.pdf Graphic file (type pdf)
+<use images/A100CacheHierarchy.pdf>
+Package luatex.def Info: images/A100CacheHierarchy.pdf  used on input line 27.
+(luatex.def)             Requested size: 286.65883pt x 155.42625pt.
 
-[3]
 
-[4
+[3<./images/CPUCacheHierarchy.pdf><./images/A100CacheHierarchy.pdf>]
+
+[4]
+<images/GridBlockThreadAddressing.pdf, id=254, 1731.7402pt x 628.51375pt>
+File: images/GridBlockThreadAddressing.pdf Graphic file (type pdf)
+<use images/GridBlockThreadAddressing.pdf>
+Package luatex.def Info: images/GridBlockThreadAddressing.pdf  used on input li
+ne 152.
+(luatex.def)             Requested size: 374.86775pt x 136.0485pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-]
-chapter 3.
-(./chapters/03_design.tex)
 
 [5]
 
-[6
-
-
-]
-chapter 4.
-(./chapters/04_implementation.tex)
+[6<./images/GridBlockThreadAddressing.pdf>])
 
 [7]
 
@@ -1650,8 +1669,8 @@ chapter 4.
 
 
 ]
-chapter 5.
-(./chapters/05_results.tex)
+chapter 3.
+(./chapters/03_design.tex)
 
 [9]
 
@@ -1659,8 +1678,8 @@ chapter 5.
 
 
 ]
-chapter 6.
-(./chapters/06_conclusion.tex) (./build/main.bbl
+chapter 4.
+(./chapters/04_implementation.tex)
 
 [11]
 
@@ -1668,15 +1687,8 @@ chapter 6.
 
 
 ]
-chapter without number
-LaTeX Font Info:    Font shape `TU/MonaspaceKrypton-Regular.otf(0)/m/n' will be
-
-(Font)              scaled to size 10.20007pt on input line 16.
-Package microtype Info: Loading generic protrusion settings for font family
-(microtype)             `MonaspaceKrypton-Regular.otf' (encoding: TU).
-(microtype)             For optimal results, create family-specific settings.
-(microtype)             See the microtype manual for details.
-)
+chapter 5.
+(./chapters/05_results.tex)
 
 [13]
 
@@ -1684,8 +1696,8 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 
 ]
-chapter A.
-
+chapter 6.
+(./chapters/06_conclusion.tex) (./build/main.bbl
 
 [15]
 
@@ -1693,8 +1705,26 @@ chapter A.
 
 
 ]
+chapter without number
+)
 
-[17
+[17]
+
+[18
+
+
+]
+chapter A.
+
+
+[19]
+
+[20
+
+
+]
+
+[21
 
 
 ] (./build/main.aux)
@@ -1707,21 +1737,21 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 41530 strings out of 475506
+ 41647 strings out of 475506
  100000,1648299 words of node,token memory allocated
- 704 words of node memory still in use:
-   8 hlist, 2 vlist, 2 rule, 1 local_par, 7 glue, 4 kern, 1 penalty, 3 glyph, 23
- attribute, 67 glue_spec, 13 attribute_list, 2 write, 3 pdf_action nodes
-   avail lists: 2:1902,3:480,4:196,5:252,6:103,7:4927,8:102,9:551,10:15,11:300,1
+ 765 words of node memory still in use:
+   8 hlist, 2 vlist, 2 rule, 1 local_par, 6 glue, 5 kern, 1 penalty, 3 glyph, 33
+ attribute, 70 glue_spec, 18 attribute_list, 2 write, 6 pdf_action nodes
+   avail lists: 2:1961,3:480,4:196,5:418,6:100,7:8416,8:102,9:749,10:15,11:672,1
 2:1
- 63489 multiletter control sequences out of 65536+600000
+ 63576 multiletter control sequences out of 65536+600000
  62 fonts using 6789799 bytes
  108i,20n,105p,10898b,1178s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<./fonts/MonaspaceKrypton-Regular.otf></usr/local/texlive/2025/texmf-dist/fonts/
-opentype/public/lm/lmroman12-italic.otf>{/usr/local/texlive/2025/texmf-dist/font
-s/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/
-lm-mathit.enc}{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.e
-nc}</usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmsans10-bold.ot
+</usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman12-italic.ot
+f>{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/t
+exlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2025
+/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}<./fonts/MonaspaceKrypton-Regular.o
+tf></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmsans10-bold.ot
 f></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman17-regular
 .otf></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman12-bold
 .otf></usr/local/texlive/2025/texmf-dist/fonts/opentype/public/lm/lmroman12-regu
@@ -1730,10 +1760,10 @@ sr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></usr/local/te
 xlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2025/t
 exmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2025/texmf-dist/f
 onts/type1/public/esvect/vect10.pfb>
-Output written on main.pdf (35 pages, 84232 bytes).
+Output written on main.pdf (39 pages, 246184 bytes).
 
-PDF statistics: 529 PDF objects out of 1000 (max. 8388607)
- 464 compressed objects within 5 object streams
- 102 named destinations out of 1000 (max. 131072)
+PDF statistics: 585 PDF objects out of 1000 (max. 8388607)
+ 512 compressed objects within 6 object streams
+ 123 named destinations out of 1000 (max. 131072)
  448 words of extra memory for PDF output out of 10000 (max. 100000000)
 
