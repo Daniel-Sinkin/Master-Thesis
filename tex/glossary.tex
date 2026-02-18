@@ -1,0 +1,52 @@
+% tex/glossary.tex
+\begin{description}[style=nextline, leftmargin=3.5cm, labelwidth=3.2cm]
+
+  \item[Arithmetic intensity]
+    The ratio of floating-point operations to bytes transferred from memory, typically measured in FLOPs/byte. Determines whether a kernel is compute-bound or memory-bound (see \emph{roofline model}).
+
+  \item[Bank conflict]
+    A shared memory access pattern in which multiple threads in a warp address different words in the same memory bank, forcing the accesses to be serialised.
+
+  \item[Bond dimension]
+    In tensor networks, the size of an index shared between two tensors. Larger bond dimensions permit more accurate representations but increase computational and memory cost.
+
+  \item[Coalescing]
+    The hardware mechanism by which individual memory requests from threads in a warp are combined into a minimal number of cache-line transactions. Requires consecutive threads to access consecutive addresses.
+
+  \item[Contraction]
+    The generalisation of matrix multiplication to tensors: a pairwise summation over one or more shared indices between two tensors, producing a new tensor.
+
+  \item[Kernel]
+    A function written in CUDA that executes in parallel across many GPU threads. Launched from the host (CPU) and runs on the device (GPU).
+
+  \item[Machine epsilon]
+    The smallest floating-point number $\varepsilon$ such that $1 + \varepsilon \neq 1$ in a given format. Characterises the relative spacing of representable values near~1.
+
+  \item[Mixed precision]
+    A computational strategy that uses lower-precision arithmetic (e.g.\ FP16, BF16, TF32) for the bulk of computation while maintaining higher-precision accumulators (e.g.\ FP32) to preserve numerical accuracy.
+
+  \item[Occupancy]
+    The ratio of active warps on an SM to the maximum number of warps the SM supports. Higher occupancy generally improves latency hiding but is not always necessary for peak performance.
+
+  \item[Roofline model]
+    A performance model that bounds achievable throughput by the minimum of peak compute throughput and peak memory bandwidth multiplied by arithmetic intensity. Used to classify kernels as compute-bound or memory-bound.
+
+  \item[Shared memory]
+    Fast, on-chip memory visible to all threads within a CUDA thread block. Used as a programmer-managed cache and for inter-thread communication.
+
+  \item[SIMT]
+    Single Instruction, Multiple Threads. NVIDIA's execution model in which a warp of 32 threads executes the same instruction simultaneously, similar to SIMD in Flynn's taxonomy but with the ability for individual threads to follow divergent control-flow paths (at the cost of serialisation).
+
+  \item[Tensor core]
+    A specialised hardware unit on NVIDIA GPUs that performs small matrix multiply-accumulate operations (e.g.\ $4 \times 4$ or $8 \times 8$) in a single cycle, providing significantly higher throughput than standard CUDA cores for supported precisions.
+
+  \item[Tiling]
+    A loop transformation that partitions a computation into smaller blocks (tiles) to improve data locality and reuse in caches or shared memory.
+
+  \item[Warp]
+    A group of 32 threads that execute in lock-step on the same SM processing block. The warp is the fundamental scheduling unit on NVIDIA GPUs.
+
+  \item[Warp divergence]
+    A performance penalty that occurs when threads within a warp take different branches of a conditional. The hardware serialises the divergent paths, reducing effective parallelism.
+
+\end{description}
