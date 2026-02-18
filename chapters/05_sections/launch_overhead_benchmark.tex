@@ -1,0 +1,92 @@
+% chapters/05_sections/launch_overhead_benchmark.tex
+\section{Kernel Launch Overhead Benchmark}\label{sec:launch-overhead-benchmark}
+
+As discussed in \cref{sec:kernel-launch-mechanics}, each CUDA kernel launch
+incurs a fixed overhead of several microseconds regardless of the kernel's
+computational workload. For the small GEMM operations typical of tensor network
+contractions, this overhead can dominate the total runtime. This section
+quantifies the effect and validates the kernel fusion strategy adopted in this
+thesis.
+
+\subsection{Setup}
+
+We compare two strategies for executing 1000 identical $n \times n$
+double-precision GEMM operations on a single A100-SXM4-40GB GPU:
+
+\begin{enumerate}
+  \item \textbf{Separate launches:} each GEMM is dispatched as an individual
+    cuBLASDx kernel, incurring the full launch overhead 1000 times.
+  \item \textbf{Fused kernel:} a single kernel is launched once and performs
+    all 1000 GEMM operations sequentially using cuBLASDx's device-side
+    API~\cite{cublasdx}, amortising the launch cost to a single invocation.
+\end{enumerate}
+
+Matrix sizes range from $n = 1$ to $n = 32$ (square matrices, $m = n = k$),
+covering the regime of small GEMMs representative of tensor contractions with
+low to moderate bond dimensions. All matrices use column-major layout and FP64
+precision. Timings are recorded using CUDA events with device synchronisation.
+
+\subsection{Results}
+
+\Cref{tab:launch-overhead} reports the measured total execution time for both
+strategies, along with the derived speedup factor and the fraction of the
+separate-launch time attributable to overhead.
+\Cref{fig:kernel-fusion-benchmark} visualises the same data.
+
+\begin{table}[t]
+\centering
+\caption{Total execution time for 1000 GEMM operations ($n \times n$, FP64) on
+  an A100 GPU. \emph{Separate} denotes 1000 individual kernel launches;
+  \emph{Fused} denotes a single kernel performing all 1000 operations
+  internally. The overhead column gives the fraction of the separate-launch
+  time attributable to launch overhead rather than computation.}
+\label{tab:launch-overhead}
+\begin{tabularx}{\textwidth}{r r r r r}
+\toprule
+$n$ & Separate ($\mu$s) & Fused ($\mu$s) & Speedup & Overhead (\%) \\
+\midrule
+1   & 8022  & 172   & 46.7$\times$ & 97.9 \\
+2   & 7941  & 185   & 43.0$\times$ & 97.7 \\
+4   & 7835  & 180   & 43.5$\times$ & 97.7 \\
+8   & 7895  & 180   & 43.8$\times$ & 97.7 \\
+13  & 8477  & 355   & 23.9$\times$ & 95.8 \\
+16  & 8104  & 347   & 23.4$\times$ & 95.7 \\
+23  & 9217  & 717   & 12.9$\times$ & 92.2 \\
+32  & 9752  & 1380  & 7.1$\times$  & 85.9 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{kernel_fusion_benchmark}
+  \caption{Total time for 1000 GEMM operations as a function of matrix size,
+    comparing 1000 separate kernel launches (red) against a single fused
+    kernel (blue). The near-constant red curve below $n = 16$ confirms that
+    launch overhead dominates over actual computation for small matrices.}
+  \label{fig:kernel-fusion-benchmark}
+\end{figure}
+
+\subsection{Discussion}
+
+Two observations follow from the data. First, the total time for separate
+launches is nearly constant across all matrix sizes, varying only from
+$8022\;\mu\text{s}$ at $n = 1$ to $9752\;\mu\text{s}$ at $n = 32$. This
+confirms that the per-launch overhead of approximately $8\;\mu\text{s}$
+dominates the total runtime: the actual GEMM computation contributes less than
+$3\%$ of the measured time for $n \leq 8$. Only at $n = 32$ does the
+computation begin to represent a meaningful fraction ($14\%$) of the total.
+
+Second, the fused kernel eliminates this overhead almost entirely. At $n = 1$,
+where the GEMM itself is trivial, fusion yields a $46.7\times$ speedup. As the
+matrix size increases and the per-GEMM computation grows, the relative benefit
+of fusion decreases---but even at $n = 32$, the fused kernel remains
+$7.1\times$ faster.
+
+These results directly motivate the kernel fusion strategy employed throughout
+this thesis. Tensor network algorithms typically require many contractions of
+modest size, placing them squarely in the regime where launch overhead
+dominates. By fusing these contractions into a single kernel using cuBLASDx's
+device-side GEMM API, the launch cost is paid once rather than once per
+contraction. The design and implementation of the fused kernels are described in
+\cref{sec:kernel-design}.

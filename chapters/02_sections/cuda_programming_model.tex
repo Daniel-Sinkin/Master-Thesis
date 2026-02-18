@@ -221,3 +221,64 @@ Key metrics reported by Nsight Compute that are relevant to the optimisations di
 \end{itemize}
 
 Throughout the implementation chapters of this thesis, Nsight Compute profiles are used to validate performance models, confirm that kernels are operating in the expected regime (compute-bound or memory-bound), and guide iterative optimisation of tensor contraction kernels.
+
+\subsection{Kernel Launch Mechanics}\label{sec:kernel-launch-mechanics}
+
+The triple-chevron syntax \texttt{<<<gridDim, blockDim>>>} conceals a
+multi-stage pipeline that spans both host and device~\cite{nvidia-cuda-guide}.
+Understanding this pipeline is essential for reasoning about the cost of
+launching many small kernels, which is the regime encountered in tensor network
+contractions.
+
+When the host executes a kernel launch, the following sequence of operations
+takes place:
+
+\begin{enumerate}
+  \item \textbf{Argument marshalling.} The kernel's parameters---device
+    pointers, scalars, dimensions---are packed into a parameter buffer and
+    validated against the current CUDA context.
+  \item \textbf{Command enqueueing.} The launch command, containing the kernel
+    function pointer, grid and block dimensions, dynamic shared memory size,
+    and the parameter buffer, is placed into the stream's command queue. The
+    host-side API call returns immediately; the launch is \emph{asynchronous}
+    from the host's perspective.
+  \item \textbf{Driver serialisation.} The CUDA driver serialises the queued
+    command into the GPU's hardware command buffer.
+  \item \textbf{Block distribution.} The GPU's global block scheduler (referred
+    to as the \emph{GigaThread engine} in NVIDIA's architecture
+    whitepapers~\cite{nvidia2020a100}) dequeues the launch and begins
+    distributing thread blocks to SMs. For each block, the scheduler verifies
+    that the target SM has sufficient free resources---registers, shared
+    memory, warp slots, and block slots---before making the assignment. Once
+    assigned, a block remains on its SM until all of its warps complete
+    execution; blocks do not migrate between
+    SMs~\cite{nvidia-cuda-guide}.
+  \item \textbf{Warp execution.} Within the assigned SM, the block's threads
+    are partitioned into warps and handed to the processing block's warp
+    scheduler, which begins issuing instructions as described in
+    \cref{sec:sm-warps}.
+\end{enumerate}
+
+Steps 1--4 incur a fixed cost that is largely independent of the kernel's
+computational workload. On the A100, this cost is typically in the range of
+$5$--$10\;\mu\text{s}$ per launch. For large kernels that execute for
+milliseconds, the overhead is negligible. For small kernels, however, the
+launch cost can exceed the computation time by an order of magnitude or more.
+This has a direct implication for workloads that require many small operations,
+such as batches of low-dimensional GEMM calls arising from tensor
+contractions: launching each operation as a separate kernel wastes the
+majority of the wall-clock time on launch overhead rather than useful
+computation.
+
+\subsubsection{Kernel Fusion}\label{sec:kernel-fusion}
+
+The standard mitigation for launch overhead is \emph{kernel fusion}: combining
+multiple logically independent operations into a single kernel, so that the
+launch cost is paid once rather than once per operation. In the context of this
+thesis, fusion is achieved using cuBLASDx~\cite{cublasdx}, which provides a
+device-side GEMM API that can be called from within a user-written kernel. This
+allows multiple GEMM operations to be executed sequentially (or cooperatively)
+inside a single kernel invocation, eliminating the per-operation launch cost
+entirely. The cuBLASDx library is introduced in
+\cref{sec:cublas-cublasdx-cutensor}, and the performance impact of fusion is
+quantified experimentally in \cref{sec:launch-overhead-benchmark}.
