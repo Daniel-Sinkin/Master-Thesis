@@ -60,29 +60,15 @@ latency.
 Scientific computing on GPUs has historically defaulted to 64-bit double precision (FP64), matching the convention established by decades of CPU-based numerical software. However, the A100 architecture supports a range of floating-point formats with dramatically different throughput characteristics, and for many workloads---including tensor contractions---FP32 or even reduced-precision formats offer sufficient accuracy at a fraction of the cost. This section reviews the relevant formats and motivates the precision choices made in this thesis.
 
 \subsubsection{IEEE 754 Binary Representation}
-
 The IEEE 754 standard~\cite{ieee754-2019} defines the binary floating-point formats used across virtually all modern hardware. Each format encodes a real number as
 \begin{equation}\label{eq:ieee754}
   (-1)^{s} \times 2^{e - \text{bias}} \times (1 + f),
 \end{equation}
-where $s$ is a sign bit, $e$ is an unsigned integer stored in the exponent field, the \emph{bias} centres the exponent range around zero, and $f$ is the fractional part of the significand (with an implicit leading 1 for normal numbers). The three fields are packed into a fixed-width bit string as shown in \cref{tab:fp-bit-layout}.
-
-\begin{table}[t]
-\centering
-\caption{Bit layout of floating-point formats relevant to GPU computing. FP64, FP32, and FP16 are defined by IEEE 754~\cite{ieee754-2019}; BF16 and TF32 are industry-defined formats (see text). The significand column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}
-\label{tab:fp-bit-layout}
-\begin{tabularx}{\textwidth}{l r r r r}
-\toprule
-Format & Total bits & Sign & Exponent & Significand (fraction) \\
-\midrule
-FP64 (double) & 64 & 1 & 11 & 52 \\
-FP32 (single) & 32 & 1 & 8  & 23 \\
-TF32           & 19 & 1 & 8  & 10 \\
-BF16 (bfloat16)& 16 & 1 & 8  & 7  \\
-FP16 (half)    & 16 & 1 & 5  & 10 \\
-\bottomrule
-\end{tabularx}
-\end{table}
+where $s$ is a sign bit, $e$ is an unsigned integer stored in the exponent field, the \emph{bias} centres the exponent range around zero, and $f$ is the fractional part of the significand (with an implicit leading 1 for normal numbers). The three fields are packed into a fixed-width bit string as shown in \cref{tab:fp-bit-layout}. The bias can be computed as
+\[
+    2^{k - 1} - 1
+\]
+where k is the number of exponent bits. For example for 
 
 \begin{figure}[H]
   \centering
@@ -90,6 +76,27 @@ FP16 (half)    & 16 & 1 & 5  & 10 \\
   \caption{Bit layout comparison of FP64, FP32, TF32, BF16, and FP16, with exponent and significand fields drawn to scale.}
   \label{fig:fp-bit-patterns}
 \end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Bit layout of floating-point formats relevant to GPU computing. FP64, FP32, and FP16 are defined by IEEE 754~\cite{ieee754-2019}; BF16 and TF32 are industry-defined formats (see text). The mantissa column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}
+\label{tab:fp-bit-layout}
+\begin{tabularx}{\textwidth}{l r r r r r}
+\toprule
+Format & Total bits & Sign & Exponent & Bias & Mantissa\footnotemark[1] \\
+\midrule
+FP64 (double) & 64 & 1 & 11 & 1023 & 52 \\
+FP32 (single) & 32 & 1 & 8  & 127  & 23 \\
+TF32           & 19 & 1 & 8  & 127  & 10 \\
+BF16 (bfloat16)& 16 & 1 & 8  & 127  & 7  \\
+FP16 (half)    & 16 & 1 & 5  & 15   & 10 \\
+FP8 (E5M2)\footnotemark[2] & 8 & 1 & 5 & 15 & 2 \\
+FP8 (E4M3)\footnotemark[2] & 8 & 1 & 4 & 7  & 3 \\
+\bottomrule
+\end{tabularx}
+\footnotetext[1]{IEEE 754 uses the term \emph{significand}; \emph{mantissa} is used here as it is more widely recognised.}
+\footnotetext[2]{FP8 formats are not supported on the A100 (Ampere); they were introduced with the H100 (Hopper) architecture.}
+\end{table}
 
 The number of exponent bits determines the \emph{dynamic range} (the ratio of the largest to smallest representable magnitudes), while the number of significand bits determines the \emph{precision} (the spacing between adjacent representable values). These properties are summarised in \cref{tab:fp-properties}.
 
@@ -113,6 +120,69 @@ FP16  & $65504$                         & $\approx 6.1 \times 10^{-5}$   & $\app
 Two aspects of this table merit attention. First, TF32 and BF16 share the same 8-bit exponent as FP32, so they retain the full FP32 dynamic range despite having far fewer significand bits. TF32 was introduced specifically for the Ampere tensor cores: inputs are stored as ordinary FP32 values, but the tensor core hardware internally truncates to 10 significand bits before performing the multiply-accumulate, with the accumulation itself carried out in full FP32~\cite{nvidia2020a100}. The programmer does not need to convert data explicitly; the truncation is transparent.
 
 Second, FP16 has a severely limited dynamic range (maximum value $65504$), which makes it unsuitable for many scientific workloads without careful scaling. BF16 (``brain floating point''), originally developed for deep learning training on Google's TPUs~\cite{kalamkar2019bfloat16}, avoids this limitation by retaining the FP32 exponent range at the cost of reduced precision (7 fraction bits versus 10 for FP16).
+
+\subsubsection{Examples}
+\paragraph{Example: Absorption in FP16 addition.}
+Consider adding $1024.0$ and $0.5$ in half precision.
+The value $1024.0 = 1.0 \times 2^{10}$ is stored as
+\[
+    \underbrace{0}_{\text{sign}} \;|\; \underbrace{11001}_{\text{exp}=25} \;|\; \underbrace{0000000000}_{\text{mantissa}},
+\]
+while $0.5 = 1.0 \times 2^{-1}$ is stored as
+\[
+    \underbrace{0}_{\text{sign}} \;|\; \underbrace{01110}_{\text{exp}=14} \;|\; \underbrace{0000000000}_{\text{mantissa}}.
+\]
+To perform the addition, the hardware aligns the exponents by shifting the smaller operand's significand to the right by $10 - (-1) = 11$ positions:
+\[
+    0.5 = \underbrace{0.00000000001}_{\text{11 places after the radix point}} \times 2^{10}.
+\]
+Since FP16 retains only 10 fraction bits after the implicit leading~1, the shifted significand falls entirely outside the representable precision and is rounded to zero. The result is $1024.0$---the smaller operand has been \emph{absorbed}.
+
+Had the same computation been carried out in FP32 (23 fraction bits), the shift of 11~places is well within the available precision and the result is correctly obtained as $1024.5$. This example illustrates why mixed-precision strategies---performing arithmetic at higher precision than the storage format---can recover accuracy at modest cost.
+
+\paragraph{Example: TF32 truncation in a matrix multiply.}
+The A100 tensor cores accept FP32 inputs but internally truncate the significand from 23 to 10 fraction bits before performing the multiply, while the accumulation remains in full FP32. To see the effect, consider two $2 \times 2$ matrices with entries drawn from familiar constants:
+\[
+    A = \begin{pmatrix} 3.1415927 & 1.2345679 \\ 2.7182817 & 0.9876543 \end{pmatrix}, \qquad
+    B = \begin{pmatrix} 0.9876543 & 2.7182817 \\ 1.2345679 & 3.1415927 \end{pmatrix}.
+\]
+After TF32 truncation, the entries lose their lower 13 significand bits:
+\[
+    \tilde{A} = \begin{pmatrix} 3.1406250 & 1.2343750 \\ 2.7167969 & 0.9873047 \end{pmatrix}, \qquad
+    \tilde{B} = \begin{pmatrix} 0.9873047 & 2.7167969 \\ 1.2343750 & 3.1406250 \end{pmatrix}.
+\]
+The tensor core computes $C_{\text{TF32}} = \tilde{A}\,\tilde{B}$ with the multiplies at TF32 precision and the accumulation in FP32, giving
+\[
+    C_{\text{TF32}} =
+    \begin{pmatrix} 4.6244 & 12.4091 \\ 3.9010 & 10.4817 \end{pmatrix},
+\]
+whereas exact FP32 arithmetic yields
+\[
+    C_{\text{FP32}} = A\,B =
+    \begin{pmatrix} 4.6270 & 12.4182 \\ 3.9040 & 10.4919 \end{pmatrix}.
+\]
+The relative error in each entry is on the order of $5 \times 10^{-4}$ to $10^{-3}$, consistent with TF32's machine epsilon of $\varepsilon \approx 9.8 \times 10^{-4}$.
+
+In practice, the entries of typical tensor contractions are not deliberately crafted to maximise the impact of truncation, and the FP32 accumulation across many products causes individual truncation errors to partially cancel. Empirical studies consistently report that TF32 is a drop-in replacement for FP32 in deep-learning training~\cite{nvidia2020a100}; whether the same holds for a given scientific workload must be verified on a case-by-case basis, as we do in \cref{sec:precision-experiments}.
+
+\paragraph{Remark: Fused multiply-add and single rounding.}
+Modern GPU floating-point units implement the \emph{fused multiply-add} (FMA) operation
+\[
+    \operatorname{fma}(a, b, c) = \operatorname{round}(a \times b + c),
+\]
+where the product $a \times b$ is computed to \emph{full} (unrounded) precision before the addition and only a single rounding step is applied to the final result. By contrast, the non-fused sequence
+\[
+    t = \operatorname{round}(a \times b), \qquad r = \operatorname{round}(t + c)
+\]
+incurs two rounding errors. The difference is most visible when $a \times b$ and $c$ are of similar magnitude but opposite sign, so that their sum is much smaller than either operand.
+
+As a concrete example, let $a = b = 1 + 2^{-12}$ and $c = -(1 + 2^{-11})$, all exactly representable in FP32. The exact product is
+\[
+    a \times b = (1 + 2^{-12})^2 = 1 + 2^{-11} + 2^{-24},
+\]
+so the exact result is $a \times b + c = 2^{-24} \approx 5.96 \times 10^{-8}$. In the non-fused path, the intermediate rounding of $a \times b$ to FP32 discards the $2^{-24}$ term (which is below one unit in the last place at magnitude ${\approx}\,1$), yielding $t = 1 + 2^{-11}$, and consequently $r = t + c = 0$---a complete loss of the true result. The FMA, retaining the full product before the addition, returns $2^{-24}$ correctly.
+
+This property is directly relevant to tensor core computation: the multiply-accumulate $D = A \times B + C$ is implemented as a sequence of fused multiply-adds, and the single-rounding semantics mean that the accumulated dot products are more accurate than a na\"ive loop of separate multiplies and additions would be.
 
 \subsubsection{A100 Throughput by Precision}\label{sec:a100-fp-throughput}
 
