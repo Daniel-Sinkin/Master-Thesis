@@ -1,2 +1,32 @@
 % chapters/03_sections/baseline_selection
 \section{Baseline Selection}\label{sec:baseline}
+
+To make performance claims meaningful, all custom kernels are compared against
+well-defined baselines under matched problem sizes, precision, and memory
+layout assumptions.
+
+\subsection{Primary Baselines}
+
+\begin{itemize}
+  \item \textbf{cuBLAS:} reference for GEMM-like contraction kernels.
+  \item \textbf{cuTENSOR:} reference for direct tensor contraction and
+    permutation-centric workflows.
+  \item \textbf{cuBLASDx compositions:} reference for device-side small-GEMM
+    execution where launch amortisation is central.
+\end{itemize}
+
+\subsection{Fairness Criteria}
+
+Each comparison uses:
+
+\begin{enumerate}
+  \item identical input tensors and dimensions,
+  \item identical precision modes and accumulation rules,
+  \item warm-up runs and repeated measurements for variance control,
+  \item consistent stream and synchronisation semantics.
+\end{enumerate}
+
+Reported metrics include median runtime, throughput (GFLOP/s or TFLOP/s),
+effective memory bandwidth, and speedup relative to the strongest baseline per
+workload.
+

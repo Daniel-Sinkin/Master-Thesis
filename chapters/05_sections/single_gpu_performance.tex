@@ -1,2 +1,30 @@
 % chapters/05_sections/single_gpu_performance
 \section{Single-GPU Performance}\label{sec:single-gpu}
+
+This section reports single-device performance for the target kernel set and
+compares custom implementations against cuBLAS/cuTENSOR baselines.
+
+\subsection{Metrics}
+
+The primary metrics are:
+
+\begin{itemize}
+  \item runtime per operation,
+  \item achieved throughput (GFLOP/s or TFLOP/s),
+  \item effective memory bandwidth,
+  \item speedup relative to the strongest baseline.
+\end{itemize}
+
+\subsection{Evaluation Dimensions}
+
+Results are stratified by:
+
+\begin{enumerate}
+  \item problem size regime (small, medium),
+  \item precision mode (FP64, FP32, optional TF32),
+  \item kernel variant (baseline, memory-optimised, fused).
+\end{enumerate}
+
+This decomposition makes it possible to separate gains from arithmetic
+optimisation versus gains from reduced launch overhead.
+

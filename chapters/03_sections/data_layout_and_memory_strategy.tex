@@ -1,3 +1,38 @@
 % chapters/03_sections/data_layout_and_memory_strategy.tex
 \section{Data Layout and Memory Strategy}\label{sec:data-layout}
 
+Data layout is treated as a first-class optimisation variable rather than a
+post-processing detail. For contraction-heavy workloads, memory access patterns
+often dominate arithmetic cost; therefore layout decisions are made jointly with
+kernel design.
+
+\subsection{Layout Principles}
+
+The implementation follows four layout rules:
+
+\begin{enumerate}
+  \item keep the innermost thread-mapped dimension contiguous in memory to
+    preserve coalesced global accesses,
+  \item minimise explicit transpose and permutation kernels by selecting a
+    stable canonical in-memory layout,
+  \item perform reshape/pack operations in fused paths when possible,
+  \item use alignment-friendly leading dimensions to improve transaction
+    efficiency and vectorised loads.
+\end{enumerate}
+
+\subsection{Memory-Level Strategy}
+
+The memory strategy mirrors the A100 hierarchy:
+
+\begin{itemize}
+  \item \textbf{Registers:} accumulate partial results and keep loop-invariant
+    scalars local.
+  \item \textbf{Shared memory:} stage reused tiles and remove redundant global
+    loads.
+  \item \textbf{L2/HBM:} organise global accesses as contiguous bursts and avoid
+    strided warp patterns unless unavoidable.
+\end{itemize}
+
+When tensors require non-trivial index reorderings, preprocessing overhead is
+quantified explicitly and accounted for in end-to-end performance claims.
+

@@ -1,2 +1,24 @@
 % chapters/05_sections/profiling_analysis.tex
 \section{Profiling Analysis}\label{sec:profiling}
+
+Nsight Compute data is used to explain \emph{why} performance changes after each
+optimisation, not only \emph{how much} it changes.
+
+\subsection{Primary Counter Groups}
+
+The analysis focuses on:
+
+\begin{itemize}
+  \item achieved occupancy and active warps,
+  \item SM and tensor-core utilisation,
+  \item global-memory throughput and L2 hit rate,
+  \item warp stall breakdown (memory, dependency, barrier, dispatch),
+  \item shared-memory bank-conflict indicators.
+\end{itemize}
+
+\subsection{Attribution Method}
+
+For each optimisation step, counters are compared before/after under identical
+workload settings. A claimed optimisation mechanism is accepted only if the
+relevant counter movement is consistent with the performance change.
+

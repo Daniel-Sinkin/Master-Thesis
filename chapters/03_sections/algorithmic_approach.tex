@@ -1,2 +1,309 @@
 % chapters/03_sections/algorithmics_approach
 \section{Algorithmic Approach}\label{sec:algorithmic-approach}
+
+The optimisation strategy follows a profile-driven iterative loop:
+
+\begin{enumerate}
+  \item establish a reproducible baseline with library implementations,
+  \item measure kernel-level behaviour with Nsight metrics,
+  \item construct a bottleneck hypothesis (launch-bound, bandwidth-bound, or
+    compute-bound),
+  \item implement one targeted optimisation,
+  \item re-profile and accept/reject the change based on quantitative criteria.
+\end{enumerate}
+
+This approach avoids premature low-level tuning and keeps each optimisation
+step attributable to a specific observed bottleneck.
+
+\subsection{Optimisation Axes}
+
+Four axes are prioritised throughout the implementation chapters:
+
+\begin{itemize}
+  \item \textbf{Launch amortisation:} reduce host-side orchestration overhead
+    through kernel fusion and device-side composition.
+  \item \textbf{Memory-efficiency optimisation:} maximise coalesced access and
+    data reuse via layout control, shared-memory tiling, and register blocking.
+  \item \textbf{Occupancy-resource balance:} tune block sizes and
+    launch-bounds against register and shared-memory budgets.
+  \item \textbf{Precision-performance trade-offs:} evaluate FP64, FP32, and
+    TF32 modes under fixed correctness checks.
+\end{itemize}
+
+\subsection{Acceptance Criteria}
+
+An optimisation is considered successful only if:
+
+\begin{itemize}
+  \item it improves runtime or throughput on the target workload set,
+  \item the profiling counters match the intended mechanism (not incidental
+    noise),
+  \item numerical deviation remains within predefined tolerance,
+  \item implementation complexity remains maintainable for further tuning.
+\end{itemize}
+
+\subsection{Analytical Performance Models}\label{sec:analytical-models}
+
+Before implementation-level tuning, this thesis uses two compact analytical
+models to classify bottlenecks and to set realistic speedup expectations:
+roofline analysis for single-kernel limits and Amdahl's law for global
+parallel-scaling limits.
+
+\subsubsection{Roofline Model}\label{sec:roofline-model}
+
+Let
+\[
+  I = \frac{\text{FLOPs}}{\text{bytes moved to/from main memory}}
+\]
+denote operational intensity (FLOP/byte). For a device with peak compute
+throughput $P_{\max}$ and peak memory bandwidth $B$, the roofline bound is
+\[
+  P(I) = \min\left(P_{\max},\; B \cdot I\right).
+\]
+This separates the two regimes:
+\begin{itemize}
+  \item \textbf{memory-bound:} $I < I^\star$ and $P(I) \approx B\cdot I$,
+  \item \textbf{compute-bound:} $I \ge I^\star$ and $P(I) \approx P_{\max}$,
+\end{itemize}
+where the crossover intensity is
+\[
+  I^\star = \frac{P_{\max}}{B}.
+\]
+
+Using the A100-SXM4-40GB values from \cref{tab:a100-specs,tab:a100-peak-performance},
+we take $B=\SI{1555}{\giga\byte\per\second}=\SI{1.555}{\tera\byte\per\second}$.
+This yields the following crossover points:
+\[
+  I^\star_{\mathrm{FP64}} \approx \frac{9.7}{1.555}=6.2,\quad
+  I^\star_{\mathrm{FP32}} \approx \frac{19.5}{1.555}=12.5,\quad
+  I^\star_{\mathrm{TF32}} \approx \frac{156}{1.555}=100.3.
+\]
+
+To quantify hardware sensitivity, two additional roofline references are used.
+For A100-SXM4-80GB, the compute ceilings stay unchanged while bandwidth rises to
+$B=\SI{2.039}{\tera\byte\per\second}$~\cite{nvidia2020a100}, which shifts the
+crossover points to
+\[
+  I^\star_{\mathrm{FP64}} \approx 4.8,\quad
+  I^\star_{\mathrm{FP32}} \approx 9.6,\quad
+  I^\star_{\mathrm{TF32}} \approx 76.5.
+\]
+For H100-SXM5-80GB, using representative peak values
+$B=\SI{3.35}{\tera\byte\per\second}$, $P_{\mathrm{FP64}}=\SI{33.5}{\tera\flops}$,
+$P_{\mathrm{FP32}}=\SI{67.0}{\tera\flops}$, and
+$P_{\mathrm{TF32}}=\SI{494.0}{\tera\flops}$~\cite{nvidia2022h100}, the
+crossover points become
+\[
+  I^\star_{\mathrm{FP64}} \approx 10.0,\quad
+  I^\star_{\mathrm{FP32}} \approx 20.0,\quad
+  I^\star_{\mathrm{TF32}} \approx 147.5.
+\]
+
+In practical terms, small and medium contractions with low reuse remain
+memory-bound unless layout/tiling raises intensity.
+
+\subsubsection{Arithmetic-Intensity Landscape for Rectangular Kernels}
+\label{sec:ai-landscape}
+
+To study shape effects before full kernel implementation, we model a GEMM-like
+kernel
+\[
+  C_{M\times N} \leftarrow A_{M\times K}B_{K\times N} + C_{M\times N}
+\]
+with element size $s$ bytes (FP32: $s=4$). Under an ideal one-pass traffic
+model (read $A$, read $B$, read+write $C$), the arithmetic intensity is
+\[
+  I_{\mathrm{ideal}}(M,N,K)=
+  \frac{2MNK}{s\,(MK+KN+2MN)}.
+\]
+
+If dimensions are padded to a tile size $t$ for tensor-core-friendly execution,
+define
+\[
+  \hat M = \left\lceil \frac{M}{t}\right\rceil t,\quad
+  \hat N = \left\lceil \frac{N}{t}\right\rceil t,\quad
+  \hat K = \left\lceil \frac{K}{t}\right\rceil t.
+\]
+Using useful FLOPs ($2MNK$) over padded traffic gives the effective intensity
+\[
+  I_{\mathrm{eff}}(M,N,K;t)=
+  \frac{2MNK}{s\,(\hat M\hat K+\hat K\hat N+2\hat M\hat N)}.
+\]
+
+For the target shape regime in this thesis, we use $K=64$ and $t=16$ as a
+representative setup. \Cref{fig:ai-heatmap-fp32,fig:ai-heatmap-fp64} map
+$I_{\mathrm{ideal}}$ and $I_{\mathrm{eff}}$ across $M,N\in[16,256]$. The trend
+is consistent with an area-to-perimeter argument: larger and more balanced
+rectangles increase intensity, while slender shapes and heavy padding reduce
+it. Under the same traffic model, moving from FP32 to FP64 doubles bytes per
+value and therefore halves arithmetic intensity at every point of the map.
+
+\begin{table}[H]
+\centering
+\caption{Representative arithmetic-intensity values for fixed $K=64$ in FP32 with
+$t=16$ padding.}
+\label{tab:ai-rectangular-examples}
+\begin{tabularx}{0.95\textwidth}{l r r r X}
+\toprule
+Shape $(M,N)$ & $I_{\mathrm{ideal}}$ & $I_{\mathrm{eff}}$ & Drop (\%) & Padded $(\hat M,\hat N,\hat K)$ \\
+\midrule
+$(47,84)$   & 7.76 & 6.85 & 11.7 & $(48,96,64)$ \\
+$(63,95)$   & 8.67 & 8.50 & 2.0  & $(64,96,64)$ \\
+$(65,130)$  & 9.20 & 7.23 & 21.4 & $(80,144,64)$ \\
+$(111,73)$  & 9.27 & 8.58 & 7.4  & $(112,80,64)$ \\
+$(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/arithmetic_intensity_heatmap.pdf}{
+    \includegraphics[width=0.98\textwidth]{arithmetic_intensity_heatmap}
+  }{
+    \fbox{
+      \parbox{0.92\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/generate_arithmetic_intensity_heatmap.py}.
+      }
+    }
+  }
+  \caption{Arithmetic-intensity landscape for rectangular GEMM-like kernels in
+  FP32 at fixed $K=64$. Left: ideal intensity without padding.
+  Right: effective intensity with $16$-element padding on $M,N,K$ (useful FLOPs
+  over padded traffic).}
+  \label{fig:ai-heatmap-fp32}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/arithmetic_intensity_heatmap_fp64.pdf}{
+    \includegraphics[width=0.98\textwidth]{arithmetic_intensity_heatmap_fp64}
+  }{
+    \fbox{
+      \parbox{0.92\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/generate_arithmetic_intensity_heatmap.py}.
+      }
+    }
+  }
+  \caption{Arithmetic-intensity landscape for rectangular GEMM-like kernels in
+  FP64 at fixed $K=64$. Shape trends match FP32, while absolute intensity is
+  uniformly lower due to the larger element size.}
+  \label{fig:ai-heatmap-fp64}
+\end{figure}
+
+\subsubsection{GEMM Storage Footprint vs A100 Capacity}
+\label{sec:gemm-storage-capacity}
+
+For square GEMM dimensions $(k,k,k)$, storing input and output matrices
+($A,B,C$) requires
+\[
+  M(k;s)=3k^2s
+\]
+bytes, where $s$ is bytes per element ($s=4$ for FP32, $s=8$ for FP64). This
+is a storage model only (no temporary workspace, no extra staging buffers).
+The capacity-limited crossover dimension for a memory budget $C$ is
+\[
+  k_{\max}(C;s)=\sqrt{\frac{C}{3s}}.
+\]
+
+\begin{table}[H]
+\centering
+\caption{Capacity-limited square dimensions for the GEMM storage model
+$M(k;s)=3k^2s$.}
+\label{tab:gemm-capacity-thresholds}
+\begin{tabularx}{0.9\textwidth}{X r r}
+\toprule
+Memory limit $C$ & $k_{\max}$ (FP32) & $k_{\max}$ (FP64) \\
+\midrule
+A100 HBM (\SI{40}{\giga\byte}) & \num{57735} & \num{40825} \\
+A100 shared memory per SM (164 KiB) & \num{118} & \num{84} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/gemm_memory_capacity_a100.pdf}{
+    \includegraphics[width=0.98\textwidth]{gemm_memory_capacity_a100}
+  }{
+    \fbox{
+      \parbox{0.92\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/generate_gemm_memory_capacity_plot.py}.
+      }
+    }
+  }
+  \caption{Storage model $M(k;s)=3k^2s$ for square GEMM in FP32 and FP64.
+  Left: intersection with A100 HBM capacity (\SI{40}{\giga\byte}).
+  Right: same model against per-SM shared-memory capacity (164 KiB).}
+  \label{fig:gemm-memory-capacity-a100}
+\end{figure}
+
+\subsubsection{Amdahl's Law}\label{sec:amdahl-model}
+
+Let $f$ be the parallelisable fraction of a workload and $p$ the number of
+parallel workers. Amdahl's law gives the idealised speedup bound
+\[
+  S(p)=\frac{1}{(1-f)+\frac{f}{p}}.
+\]
+The asymptotic limit as $p\to\infty$ is
+\[
+  S_{\infty}=\frac{1}{1-f}.
+\]
+This means that even very efficient kernels can be capped by serial orchestration,
+launch overhead, synchronisation, and data-movement steps outside the parallel
+kernel body.
+
+\begin{table}[H]
+\centering
+\caption{Amdahl speedup bounds for representative parallel fractions.}
+\label{tab:amdahl-examples}
+\begin{tabularx}{0.8\textwidth}{l r r}
+\toprule
+Parallel fraction $f$ & $S(4)$ & $S_{\infty}$ \\
+\midrule
+0.90 & 3.08 & 10.0 \\
+0.95 & 3.48 & 20.0 \\
+0.99 & 3.88 & 100.0 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+For this thesis, these bounds are used as planning constraints: kernel-local
+optimisation is necessary, but end-to-end scaling requires reducing serial
+fractions in launch and orchestration paths.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{roofline_a100_40gb}
+  \caption{Roofline envelopes for A100-SXM4-40GB. The extended intensity axis
+  makes the long TF32 compute-bound plateau explicit.}
+  \label{fig:roofline-a100-40gb}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{roofline_a100_80gb}
+  \caption{Roofline envelopes for A100-SXM4-80GB. Relative to A100-40GB, the
+  compute ceilings are unchanged while higher memory bandwidth shifts the knees
+  to lower operational intensity.}
+  \label{fig:roofline-a100-80gb}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{roofline_h100_80gb}
+  \caption{Roofline envelopes for H100-SXM5-80GB using representative peak
+  throughput and bandwidth values from NVIDIA's Hopper documentation.}
+  \label{fig:roofline-h100-80gb}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{amdahl_speedup}
+  \caption{Amdahl speedup bounds for representative parallel fractions
+  ($f\in\{0.90,0.95,0.99\}$).}
+  \label{fig:amdahl-speedup}
+\end{figure}

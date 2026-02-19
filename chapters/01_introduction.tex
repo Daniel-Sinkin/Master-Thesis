@@ -1,13 +1,72 @@
 % chapters/01_introduction.tex
 \section{Motivation}\label{sec:motivation}
 
+Tensor-network simulations increasingly rely on GPU-accelerated dense kernels,
+yet practical workloads often run in a regime where library defaults are not
+fully efficient: matrix blocks are small or irregular, kernel sequences are
+short, and memory-layout transforms are frequent. In this regime, launch
+overhead, data movement, and occupancy limits can dominate the total runtime.
+
+This thesis is conducted in collaboration with the J\"ulich Supercomputing
+Centre (JSC), where partner teams in computational physics require robust and
+portable performance improvements on production HPC systems. The immediate
+hardware target is Ampere-class GPUs, in particular A100 nodes, with a
+conservative baseline of one node (four A100-SXM4-40GB GPUs connected via
+NVLink).
+
+The core motivation is therefore practical: build a profiling-driven kernel
+optimisation workflow that produces measurable speedups for tensor-network
+contraction workloads on current JSC hardware and remains transferable to
+next-generation accelerators.
+
 \section{Problem Statement}\label{sec:problem-statement}
+
+The central problem is to identify and optimise the CUDA kernels and execution
+patterns that dominate runtime in tensor-network contraction workflows, while
+keeping the scope on HPC implementation aspects rather than physics modelling.
+
+This leads to the following technical questions:
+
+\begin{enumerate}
+  \item Which kernel motifs are the primary bottlenecks on A100 for the target
+    workload distribution (small/medium contractions, layout transforms, short
+    kernel sequences)?
+  \item How much performance can be recovered through launch reduction, kernel
+    fusion, data-layout control, and occupancy-aware tuning?
+  \item How closely do optimised kernels approach hardware limits predicted by
+    bandwidth and throughput models, and where do residual stalls remain?
+\end{enumerate}
+
+The thesis addresses these questions with a measurement-first methodology based
+on reproducible benchmarks and Nsight profiling, and compares custom kernels
+against established vendor baselines (cuBLAS/cuTENSOR).
 
 \section{Contributions}\label{sec:contributions}
 
+The contributions of this thesis are:
+
+\begin{enumerate}
+  \item A hardware-aware characterisation of tensor-network-relevant kernel
+    motifs on Ampere GPUs, with emphasis on launch-dominated and
+    bandwidth-limited regimes.
+  \item An implementation strategy for fused and layout-aware CUDA kernels,
+    including explicit occupancy and memory-hierarchy trade-off analysis.
+  \item A profiling workflow that links observed performance counters to
+    concrete optimisation decisions and documents where bottlenecks shift after
+    each optimisation step.
+  \item A benchmark and comparison framework against cuBLAS/cuTENSOR baselines
+    on a realistic single-node A100 environment.
+\end{enumerate}
+
 \section{Outline}\label{sec:outline}
-\Cref{ch:background} introduces \ldots
-\Cref{ch:design} presents \ldots
-\Cref{ch:implementation} details \ldots
-\Cref{ch:results} evaluates \ldots
-\Cref{ch:conclusion} summarises \ldots
+\Cref{ch:background} introduces the CUDA and hardware concepts required for the
+optimisation work, and frames tensor networks only as computational motivation.
+\Cref{ch:design} defines the target kernels, baseline choices, and data-layout
+strategy.
+\Cref{ch:implementation} details the kernel design and integration choices used
+to realise the optimisation approach.
+\Cref{ch:results} reports benchmark and profiling results, including launch
+overhead experiments and comparison against library baselines.
+\Cref{ch:conclusion} summarises findings, limitations, and next optimisation
+steps.
+

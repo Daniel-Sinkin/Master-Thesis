@@ -1,2 +1,31 @@
 % chapters/05_sections/scaling_behaviour.tex
 \section{Scaling Behaviour}\label{sec:scaling}
+
+This section analyses how performance evolves when moving from one GPU to
+multiple GPUs within a single NVLink-connected node.
+
+\subsection{Strong and Weak Scaling Views}
+
+\begin{itemize}
+  \item \textbf{Strong scaling:} fixed total problem size, increasing GPU
+    count.
+  \item \textbf{Weak scaling:} per-GPU problem size fixed, total size increases
+    with GPU count.
+\end{itemize}
+
+Both views are needed because kernel-level speedups may not translate linearly
+once communication and synchronisation costs are included.
+
+\subsection{Communication Effects}
+
+Scaling analysis explicitly separates:
+
+\begin{enumerate}
+  \item pure compute time on each GPU,
+  \item peer-to-peer transfer time over NVLink,
+  \item host-side orchestration and synchronisation overhead.
+\end{enumerate}
+
+This decomposition identifies when scaling is limited by communication topology
+rather than kernel efficiency.
+

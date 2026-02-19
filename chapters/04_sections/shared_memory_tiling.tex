@@ -1,2 +1,28 @@
 % chapters/04_sections/shared_memory_tiling.tex
 \section{Shared Memory Tiling}\label{sec:tiling}
+
+Shared-memory tiling is used to raise arithmetic intensity by reusing data that
+would otherwise be fetched repeatedly from global memory. The design objective
+is to maximise reuse while staying within per-block shared-memory limits and
+avoiding bank conflicts.
+
+\subsection{Tile Design Choices}
+
+Tile sizes are selected based on:
+
+\begin{itemize}
+  \item contraction dimensions and divisibility,
+  \item register pressure from accumulator blocking,
+  \item shared-memory footprint per block,
+  \item expected occupancy after resource allocation.
+\end{itemize}
+
+Padding is introduced where needed to avoid systematic bank conflicts in
+column-wise shared-memory accesses.
+
+\subsection{Boundary Handling}
+
+Real workloads frequently use dimensions that are not multiples of tile sizes.
+Boundary tiles are handled with predicated loads/stores to preserve correctness
+without launching separate cleanup kernels.
+

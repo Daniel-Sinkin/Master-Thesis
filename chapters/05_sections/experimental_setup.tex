@@ -1,2 +1,43 @@
 % chapters/05_sections/experimental_setup.tex
 \section{Experimental Setup}\label{sec:experimental-setup}
+
+All measurements are performed on the A100-based JSC environment documented in
+\cref{app:reproducibility}, with emphasis on reproducibility and fair
+comparison between custom kernels and vendor-library baselines.
+
+\subsection{Hardware/Software Baseline}
+
+Unless explicitly stated otherwise, experiments use a single node with
+$4\times$ A100-SXM4-40GB GPUs. Single-GPU measurements are pinned to one device;
+multi-GPU measurements use NVLink-connected devices within the same node.
+
+The software stack (CUDA toolkit, driver, compiler, profiling tools) is kept
+fixed across all experiments in a campaign.
+
+\subsection{Workload Definition}
+
+The workload suite includes:
+
+\begin{itemize}
+  \item small to medium GEMM-like contractions representative of target traces,
+  \item layout-transform kernels required by contraction pipelines,
+  \item fused-kernel variants for launch amortisation studies.
+\end{itemize}
+
+Dimensions are selected to cover both launch-dominated and compute-dominated
+regions. Problem sets include non-power-of-two sizes to reflect realistic
+tensor shapes.
+
+\subsection{Measurement Protocol}
+
+Each data point is measured with:
+
+\begin{enumerate}
+  \item warm-up iterations to remove first-launch effects,
+  \item repeated timed iterations (CUDA events) for stable statistics,
+  \item optional Nsight Compute passes for hardware-counter attribution.
+\end{enumerate}
+
+Reported values use median runtime by default; spread (e.g.\ min/max or
+percentiles) is included when variance is non-negligible.
+

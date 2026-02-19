@@ -1,6 +1,31 @@
 % chapters/06_conclusion.tex
 \section{Summary}\label{sec:summary}
 
+This thesis addresses tensor-network workloads from a strict HPC perspective:
+identify kernel bottlenecks on A100-class GPUs, apply profile-guided
+optimisations, and quantify performance relative to vendor-library baselines.
+The work emphasises launch overhead, memory hierarchy efficiency, and
+occupancy-resource trade-offs as the dominant practical levers.
+
 \section{Limitations}\label{sec:limitations}
 
+The current scope has three deliberate limitations:
+
+\begin{itemize}
+  \item physics-specific algorithm derivations and notation are out of scope,
+  \item optimisation focus is on Ampere-era kernels and one-node execution,
+  \item coverage of workload diversity is bounded by available benchmark traces.
+\end{itemize}
+
 \section{Future Work}\label{sec:future-work}
+
+Natural continuation points include:
+
+\begin{enumerate}
+  \item extending the same methodology to Hopper/H100-class hardware while
+    preserving comparability with A100 results,
+  \item deeper multi-GPU overlap strategies (communication/computation
+    pipelining),
+  \item automated kernel-configuration search constrained by profiler-derived
+    bottleneck models.
+\end{enumerate}

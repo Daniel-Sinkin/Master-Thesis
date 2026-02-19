@@ -1,8 +1,52 @@
 % chapters/02_sections/tensor_networks.tex
 \section{Tensor Networks}\label{sec:tensor-networks}
 
-\subsection{Tensor Notation and Diagrams}\label{sec:tensor-notation}
+\subsection{Computational Context}\label{sec:tensor-context}
 
-\subsection{Tensor Contraction}\label{sec:tensor-contraction}
+Tensor-network methods arise in quantum many-body simulation, where the full
+state space of the Schr\"odinger equation is reduced to a structured set of
+lower-rank objects. For this thesis, tensor networks are treated as an
+\emph{application source of computational patterns}, not as a physics topic.
+Detailed notation, model assumptions, and algorithmic physics choices are
+outside scope here and are introduced separately with domain experts.
 
-\subsection{Tensor Network Structures}\label{sec:tn-structures}
+From a high-performance computing perspective, the relevant point is that
+tensor-network codes repeatedly execute dense linear-algebra-like kernels on
+moderate to small tensor blocks. Those kernels are often embedded in long
+iterative workflows, so both per-kernel efficiency and orchestration overhead
+matter.
+
+\subsection{Kernel Motifs Relevant to This Thesis}\label{sec:tn-kernel-motifs}
+
+The optimisation work in this thesis is driven by three recurring motifs:
+
+\begin{enumerate}
+  \item \textbf{Small and medium dense contractions.} After index reshaping,
+    many contractions reduce to GEMM-like operations with dimensions that are
+    too small to saturate the GPU when launched individually.
+  \item \textbf{Layout transforms.} Permutations and reshapes are required to
+    match library expectations (e.g.\ column-major interfaces), and these
+    transforms can dominate runtime if memory access is not coalesced.
+  \item \textbf{Fine-grained kernel sequences.} Practical workflows execute
+    large numbers of short kernels; launch overhead and synchronisation
+    overhead become first-order effects in this regime (see
+    \cref{sec:kernel-launch-mechanics,sec:launch-overhead-benchmark}).
+\end{enumerate}
+
+This computational profile aligns directly with CUDA optimisation topics such as
+occupancy control, shared-memory tiling, register pressure, launch fusion, and
+host-device scheduling.
+
+\subsection{Scope Boundary}\label{sec:tn-scope-boundary}
+
+To keep the thesis focused and technically coherent, we explicitly exclude:
+
+\begin{itemize}
+  \item derivations of tensor-network physics models,
+  \item detailed notation systems used in specific communities,
+  \item algorithmic comparisons driven primarily by physics accuracy criteria.
+\end{itemize}
+
+Instead, we evaluate kernels by HPC criteria: runtime, achieved throughput,
+memory efficiency, and scaling behaviour on Ampere-class GPUs.
+

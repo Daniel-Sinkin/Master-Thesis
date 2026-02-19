@@ -1,2 +1,30 @@
 % chapters/04_sections/occupancy_and_launch_configuration.text
 \section{Occupancy and Launch Configuration}\label{sec:occupancy}
+
+Launch configuration is tuned as a constrained resource-allocation problem on
+each SM. The central trade-off is that aggressive register/shared-memory usage
+can increase per-thread efficiency while reducing occupancy, which may hurt
+latency hiding.
+
+\subsection{Tuning Procedure}
+
+The tuning sequence is:
+
+\begin{enumerate}
+  \item choose an initial block size (typically 128 or 256 threads),
+  \item inspect register use and shared-memory use per block,
+  \item estimate achievable occupancy,
+  \item benchmark and profile stall reasons,
+  \item retune block size and launch bounds based on measured bottlenecks.
+\end{enumerate}
+
+If memory stalls dominate, higher occupancy is often preferred. If execution is
+compute-bound with low dependency stalls, lower occupancy with higher
+per-thread work can be superior.
+
+\subsection{Launch Overhead Considerations}
+
+For small kernels, launch latency can dominate irrespective of occupancy.
+Therefore occupancy tuning is combined with launch reduction techniques (kernel
+fusion or persistent execution) rather than treated in isolation.
+

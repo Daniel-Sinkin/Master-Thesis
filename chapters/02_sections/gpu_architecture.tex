@@ -34,7 +34,7 @@ contains:
   \item \textbf{8 LD/ST units} for issuing memory load and store operations.
   \item \textbf{4 SFUs} (Special Function Units) for transcendental operations 
     such as \texttt{sin}, \texttt{exp}, and reciprocal square root.
-  \item \todo{This is wrong} One \textbf{texture unit} for read-only cached memory access.
+  \item A \textbf{read-only/texture path} for cached read-mostly memory access.
   \item An \textbf{L0 instruction cache} private to the processing block.
 \end{itemize}
 
@@ -60,7 +60,7 @@ where $s$ is a sign bit, $e$ is an unsigned integer stored in the exponent field
 \[
     2^{k - 1} - 1
 \]
-where k is the number of exponent bits. For example for 
+where $k$ is the number of exponent bits.
 
 \begin{figure}[H]
   \centering
@@ -126,7 +126,7 @@ holds. To express this as an FP16 number we write it in normalised form,
 and match it against \cref{eq:ieee754}: the sign is $s = 0$ (positive), the true exponent is $-3$, and the stored exponent is $e = -3 + 15 = 12 = 01100_2$. The fraction field stores the bits after the implicit leading~1, i.e.\ $01$ padded with zeros to 10~bits. The complete bit representation is therefore
 \[
   \underbrace{0}_{\text{sign}} \;|\; \underbrace{01100}_{\text{exp}} \;|\; \underbrace{0100000000}_{\text{mantissa}}.
-15\]
+\]
 
 \paragraph{Example: Absorption in FP16 addition.}
 Consider adding $1024.0$ and $0.5$ in half precision.
@@ -169,7 +169,7 @@ whereas exact FP32 arithmetic yields
 \]
 The relative error in each entry is on the order of $5 \times 10^{-4}$ to $10^{-3}$, consistent with TF32's machine epsilon of $\varepsilon \approx 9.8 \times 10^{-4}$.
 
-In practice, the entries of typical tensor contractions are not deliberately crafted to maximise the impact of truncation, and the FP32 accumulation across many products causes individual truncation errors to partially cancel. Empirical studies consistently report that TF32 is a drop-in replacement for FP32 in deep-learning training~\cite{nvidia2020a100}; whether the same holds for a given scientific workload must be verified on a case-by-case basis, as we do in \cref{sec:precision-experiments}.
+In practice, the entries of typical tensor contractions are not deliberately crafted to maximise the impact of truncation, and the FP32 accumulation across many products causes individual truncation errors to partially cancel. Empirical studies consistently report that TF32 is a drop-in replacement for FP32 in deep-learning training~\cite{nvidia2020a100}; whether the same holds for a given scientific workload must still be validated case by case in the benchmark chapter.
 
 \paragraph{Remark: Fused multiply-add and single rounding.}
 Modern GPU floating-point units implement the \emph{fused multiply-add} (FMA) operation
@@ -225,7 +225,7 @@ For tensor network algorithms, several factors favour FP32:
   \item \textbf{Bandwidth amplification.} Since tensor contractions are frequently memory-bandwidth-bound (\cref{sec:gpu-memory-hierarchy}), the $2\times$ reduction in data movement from FP32 translates almost directly into a $2\times$ speedup for bandwidth-limited kernels, before accounting for any compute throughput gains.
 \end{enumerate}
 
-The combination of these factors yields a practical speedup well in excess of the raw $2\times$ compute ratio, as demonstrated in the benchmarks in \cref{sec:results}. Where necessary, mixed-precision strategies---accumulating in FP32 while storing in FP16 or BF16---can push performance further (see~\cite{higham2022mixed} for a rigorous treatment), though this thesis focuses on FP32 as the primary working precision.
+The combination of these factors yields a practical speedup well in excess of the raw $2\times$ compute ratio, as demonstrated in the benchmarks in \cref{ch:results}. Where necessary, mixed-precision strategies---accumulating in FP32 while storing in FP16 or BF16---can push performance further (see~\cite{higham2022mixed} for a rigorous treatment), though this thesis focuses on FP32 as the primary working precision.
 
 \subsection{Memory Hierarchy}\label{sec:gpu-memory-hierarchy}
 \begin{figure}[H]
@@ -241,7 +241,7 @@ As shown in \cref{fig:cpu-cache-hierarchy}, modern CPUs rely on a deep cache hie
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.65\textwidth]{A100CacheHierarchy}
-  \caption{Memory hierarchy of a modern CPU, showing the register file and cache levels (L1, L2, L3) before main memory (DRAM).}
+  \caption{Memory hierarchy of an A100 GPU, showing registers, shared memory/L1, L2 cache, and HBM global memory.}
   \label{fig:a100-cache-hierarchy}
 \end{figure}
 
@@ -251,7 +251,7 @@ Where CPUs use deep cache hierarchies to hide latency, GPUs prioritise bandwidth
   \item \textbf{Registers} reside in the SM and offer single-cycle access. They are private to each thread and are the scarcest on-chip resource: the number of registers a kernel uses directly limits occupancy.
   \item \textbf{Shared memory} is also on-chip but visible to all threads in a block, making it the primary mechanism for explicit data reuse and inter-thread communication. Most high-performance kernels---tiled matrix multiplications, tensor contractions---stage data through shared memory to avoid repeated global loads.
   \item \textbf{L2 cache} is shared across all SMs and transparently caches global memory traffic. On the A100 it is \SI{40}{\mega\byte}, modest relative to the core count, which reflects the throughput-oriented design.
-  \item \textbf{HBM (global memory)} provides the bulk storage. The A100 uses HBM2e with \SI{80}{\giga\byte} capacity and a peak bandwidth of \SI{2039}{\giga\byte\per\second} (\cref{tab:a100-specs}), achieved through a wide interface with thousands of parallel data lines. Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
+  \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB used in this thesis provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
 \end{itemize}
 
 The practical consequence is that most scientific GPU kernels, including tensor contractions, are memory-bandwidth-bound rather than compute-bound. Performance therefore hinges on maximising reuse in registers and shared memory and accessing HBM in coalesced, bandwidth-efficient patterns.
@@ -261,7 +261,7 @@ The practical consequence is that most scientific GPU kernels, including tensor 
 
 \begin{table}[H]
 \centering
-\caption{Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}
+\caption{Key hardware specifications of the NVIDIA A100 (SXM4-40GB baseline).}
 \label{tab:a100-specs}
 \begin{tabularx}{\textwidth}{X r}
 \toprule
@@ -277,14 +277,14 @@ Maximum blocks per SM & \num{32} \\
 Register file size per SM (32-bit registers) & \num{65536} \\
 Shared memory per SM (KB) & \num{164} \\
 L2 cache size (MB) & \num{40} \\
-HBM memory capacity (GB) & \num{80} \\
-Peak memory bandwidth (GB/s) & \num{2039} \\
+HBM memory capacity (GB) & \num{40} \\
+Peak memory bandwidth (GB/s) & \num{1555} \\
 Base clock frequency (GHz) & \num{1.41} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The A100 employs HBM2e as its main device memory, providing the high memory bandwidth necessary to sustain its computational throughput.
+The A100 employs high-bandwidth memory as its main device memory, providing the throughput required to sustain dense linear algebra kernels.
 
 \subsubsection{Theoretical Peak Performance}
 
@@ -319,13 +319,13 @@ Metric & Value \\
 Peak FP32 performance per SM (TFLOPS) & \num{0.18} \\
 Peak FP64 performance per SM (TFLOPS) & \num{0.09} \\
 Tensor core FP16 performance per SM (TFLOPS) & \num{2.89} \\
-Memory bandwidth per SM (GB/s) & \num{18.88} \\
+Memory bandwidth per SM (GB/s) & \num{14.40} \\
 Total CUDA cores & \num{6912} \\
 Total FP64 cores & \num{3456} \\
 Maximum resident warps & \num{6912} \\
 Maximum resident threads & \num{221184} \\
-Arithmetic intensity threshold FP32 (FLOPs/byte) & \num{9.6} \\
-Arithmetic intensity threshold FP64 (FLOPs/byte) & \num{4.8} \\
+Arithmetic intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
+Arithmetic intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -355,7 +355,22 @@ The performance of GPU-accelerated applications depends not only on the GPU itse
 
 \subsubsection{CPU and NUMA Topology}
 
-Each compute node contains two AMD EPYC 7742 processors (Rome, Zen\,2 microarchitecture), each with 64 physical cores. The chips are built from a chiplet design: each socket consists of a central I/O die (cIOD) connected to eight Core Complex Dies (CCDs). Each CCD contains two Core Complexes (CCXes), and each CCX contains four cores sharing a \SI{16}{\mega\byte} L3 cache. The hierarchy is shown in \cref{fig:numa-cpu-node}.
+Each compute node contains two AMD EPYC 7742 processors (Rome, Zen\,2
+microarchitecture), each with 64 physical cores. The chips follow a chiplet
+design. Since the terms are easy to mix up, we fix the naming used in this
+thesis:
+
+\begin{itemize}
+  \item \textbf{CCD} (\emph{Core Complex Die}): a compute chiplet containing CPU cores.
+  \item \textbf{CCX} (\emph{Core Complex}): a core cluster inside a CCD. On
+    EPYC\,7742, each CCD has two CCXes.
+  \item \textbf{cIOD} (\emph{central I/O die}): the central die that provides
+    memory controllers, PCIe root complexes, and fabric routing.
+\end{itemize}
+
+On this Rome generation, each CCX contains four cores with a private
+\SI{16}{\mega\byte} L3 cache. The hierarchy is shown in
+\cref{fig:numa-cpu-node}.
 
 \begin{figure}[H]
   \centering
@@ -364,14 +379,35 @@ Each compute node contains two AMD EPYC 7742 processors (Rome, Zen\,2 microarchi
   \label{fig:numa-cpu-node}
 \end{figure}
 
-The BIOS is configured with NPS=4, which exposes four NUMA domains per socket (eight in total across the node). Each NUMA domain encompasses two CCDs (16 cores, 32 threads with SMT) and a quarter of the socket's memory controllers. This configuration allows the operating system and runtime to make NUMA-aware allocation decisions. The latency hierarchy within a socket, from fastest to slowest, is:
+The BIOS is configured with NPS=4, which exposes four NUMA domains per socket
+(eight in total across the node). Each NUMA domain encompasses two CCDs (16
+cores, 32 threads with SMT) and a quarter of the socket's memory controllers.
+This configuration allows the operating system and runtime to make NUMA-aware
+allocation decisions.
+
+\paragraph{Infinity Fabric and latency classes.}
+AMD's Infinity Fabric connects CCX/CCD resources to the cIOD and also connects
+the two sockets. The practical latency hierarchy for software placement
+decisions is:
 
 \begin{enumerate}
   \item \textbf{Intra-CCX:} cores sharing the same \SI{16}{\mega\byte} L3 cache communicate through it at low latency.
-  \item \textbf{Intra-CCD, cross-CCX:} cores in different CCXes of the same CCD must communicate through the I/O die, as each CCX has its own independent L3.
-  \item \textbf{Cross-CCD, same socket:} traffic between CCDs in different NUMA domains routes through the I/O die's internal Infinity Fabric switches.
-  \item \textbf{Cross-socket:} traffic between the two sockets traverses AMD's Infinity Fabric inter-socket links (xGMI), incurring the highest latency.
+  \item \textbf{Cross-CCX / cross-CCD, same socket:} communication no longer
+    benefits from a shared L3 and is routed via Infinity Fabric through cIOD
+    resources, with higher latency.
+  \item \textbf{Cross-socket:} traffic traverses inter-socket Infinity Fabric
+    links (xGMI), which is the highest-latency path.
 \end{enumerate}
+
+\paragraph{Why this matters for GPU work.}
+The GPU is not attached directly to a random core; it is attached to a PCIe
+root complex on the cIOD, and each GPU therefore has a \emph{local} NUMA region
+on the host side. A host-to-device transfer is fastest when both the launching
+thread and the source host memory are local to the GPU-affine NUMA domain.
+
+If either thread placement or host-memory placement is remote, the transfer must
+take additional Infinity Fabric hops before reaching PCIe, which increases
+latency and can reduce effective bandwidth.
 
 \subsubsection{GPU Interconnect Topology}
 
@@ -406,10 +442,49 @@ The full topology, including the three classes of CPU--GPU data paths, is illust
 
 The distinction between these paths matters for host--device data transfers. A \texttt{cudaMemcpy} initiated from a CPU thread pinned to a GPU's local NUMA domain takes the shortest PCIe path through the I/O die. If the source thread or memory allocation resides on the wrong NUMA domain---or worse, the wrong socket---the transfer must additionally traverse Infinity Fabric, increasing latency. For GPU-to-GPU communication, NVLink bypasses the CPU subsystem entirely, making the CPU topology irrelevant for peer-to-peer transfers.
 
+\paragraph{Fast-path policy used in this thesis.}
+For runs that include host-device staging, the following policy is applied:
+\begin{enumerate}
+  \item pin the orchestration thread to cores in the GPU-affine NUMA domain,
+  \item allocate pinned host buffers on the same NUMA domain,
+  \item execute \texttt{cudaMemcpyAsync} from that thread/context to preserve
+    the local PCIe path.
+\end{enumerate}
+
+This is a standard NUMA-locality rule for PCIe-attached accelerators and is
+independent of tensor-network physics details.
+More tightly integrated CPU--GPU systems (e.g.\ Grace-Hopper style designs) use
+different host-device topology assumptions and are therefore outside the scope
+of this node-level model.
+
+\paragraph{Host-device path cost model.}
+For a transfer of size $V$ bytes, a useful first-order model is
+\[
+  T_{\mathrm{H2D}}(\pi, V)
+  \approx
+  T_0(\pi) + \frac{V}{B_{\mathrm{eff}}(\pi)},
+\]
+where $\pi$ is the path class (local, same-socket remote, or cross-socket
+remote), $T_0$ is the fixed setup/latency term, and $B_{\mathrm{eff}}$ is the
+effective end-to-end bandwidth.
+
+To make the topology penalty explicit, we can write
+\[
+  T_0(\pi) = T_0^{\mathrm{local}} + n_{\mathrm{IF}}(\pi)\,\tau_{\mathrm{IF}},
+\]
+with $n_{\mathrm{IF}}$ the number of additional Infinity Fabric segments and
+$\tau_{\mathrm{IF}}$ an average per-segment latency penalty. In practice, this
+gives the expected ordering
+\[
+  T_{\mathrm{local}} < T_{\mathrm{same\ socket\ remote}} < T_{\mathrm{cross\ socket}}.
+\]
+This model is intentionally simple, but it is sufficient for placement policy
+decisions: thread pinning and host-buffer NUMA placement should minimise
+$n_{\mathrm{IF}}$ and maximise $B_{\mathrm{eff}}$.
+
 In practice, this topology has two implications for the work in this thesis:
 
 \begin{itemize}
   \item \textbf{Single-GPU kernels:} the CPU topology is largely invisible, since kernel launch overhead is small and tensor data resides in GPU memory throughout the computation.
   \item \textbf{Multi-GPU contractions:} data distribution and inter-GPU communication use NVLink exclusively. Host-side orchestration threads are pinned to the appropriate NUMA domain to minimise any residual host--device transfer overhead.
 \end{itemize}
-

@@ -1,2 +1,33 @@
 % chapters/05_sections/comparison_with_cublas_and_cutensor.tex
 \section{Comparison with cuBLAS and cuTENSOR}\label{sec:comparison}
+
+This section compares optimised kernels with vendor-library baselines under
+matched precision, layout assumptions, and workload definitions.
+
+\subsection{Comparison Protocol}
+
+For each workload class:
+
+\begin{enumerate}
+  \item run cuBLAS/cuTENSOR baseline,
+  \item run custom unfused variant,
+  \item run custom fused/layout-aware variant,
+  \item report speedups and counter-based explanation.
+\end{enumerate}
+
+The strongest baseline per workload is used as denominator for reported speedup
+to avoid optimistic bias.
+
+\subsection{Interpretation Strategy}
+
+Outperformance is interpreted by regime:
+
+\begin{itemize}
+  \item if custom kernels win in small sizes, launch reduction is the likely
+    mechanism,
+  \item if wins appear in medium sizes with high bandwidth utilisation, memory
+    access improvements are the likely mechanism,
+  \item if libraries remain dominant at larger sizes, this indicates the
+    practical boundary of workload-specific optimisation.
+\end{itemize}
+

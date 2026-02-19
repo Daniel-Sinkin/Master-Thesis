@@ -3,6 +3,199 @@
 
 \subsection{cuBLAS, cuBLASDx, and cuTENSOR}\label{sec:cublas-cublasdx-cutensor}
 
+NVIDIA's vendor libraries define the practical baseline for dense kernels on
+Ampere GPUs. cuBLAS provides highly optimised BLAS routines and remains the
+reference point for GEMM-like workloads~\cite{cublas}. cuTENSOR generalises
+this to tensor contractions and permutation-heavy primitives~\cite{cutensor}.
+
+For the small-kernel regime relevant to tensor-network workflows, cuBLASDx is
+especially important: it enables device-side GEMM composition and therefore
+supports launch-amortisation strategies that are difficult to implement with
+host-only library calls~\cite{cublasdx}. The launch-overhead benchmark in this
+thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
+
+In this thesis, custom kernels are evaluated against these libraries as
+performance baselines rather than replacements. The objective is to understand
+where workload-specific structure can outperform general-purpose interfaces.
+
 \subsection{ChASE Eigensolver}\label{sec:chase}
 
+The ChASE line of work provides relevant experience in GPU-oriented numerical
+software engineering, especially for hybrid CPU--GPU execution and scalable
+performance tuning~\cite{winkelmann2019chase,wu2022chase-gpu,wu2023chase-nccl}.
+Although ChASE targets eigenvalue problems rather than tensor networks, it
+shares core HPC concerns with this thesis:
+
+\begin{itemize}
+  \item balancing algorithmic structure with hardware-aware implementation,
+  \item minimising communication and orchestration overhead,
+  \item validating performance claims with rigorous benchmarking.
+\end{itemize}
+
+These principles influence the methodological choices in later chapters,
+particularly the emphasis on bottleneck-driven optimisation.
+
 \subsection{Existing GPU Tensor Network Implementations}\label{sec:existing-tn-gpu}
+
+Prior work on tensor contractions shows that performance is sensitive to index
+ordering, data layout, and mapping of contractions to BLAS kernels
+(\cite{springer2017tensor} provides an early and still useful reference point).
+Across implementations, two recurring observations are relevant here:
+
+\begin{enumerate}
+  \item \textbf{Kernel granularity matters.} Many contractions are too small to
+    fully utilise GPU throughput when issued individually.
+  \item \textbf{Data movement dominates.} Layout transforms and non-coalesced
+    accesses can erase gains from nominally fast compute kernels.
+\end{enumerate}
+
+This thesis builds on those observations with a stricter focus on Ampere-era
+execution details: launch overhead, occupancy limits, memory hierarchy effects,
+and profile-guided kernel fusion on realistic node topology.
+
+\subsection{Selected Work in Collaborating Research Directions}\label{sec:people-sota}
+
+This section highlights work that is directly relevant to the research
+environment of this thesis, with focus on Wu, Di~Napoli, Rizzi, Waintal,
+Legeza, and closely related collaborators.
+
+\subsubsection{Wu and Di Napoli: GPU-Distributed Dense Kernels and Communication}
+
+Wu et al.\ report a distributed hybrid CPU--GPU eigensolver where the dominant
+kernel is a distributed Hermitian matrix--matrix multiplication step
+(\texttt{HEMM}), and show that replacing vendor \texttt{PZGEMM} with a custom
+GPU-distributed implementation significantly improves strong scaling on
+JUWELS-Booster~\cite{wu2022chase-gpu}. The SC-W extension further improves
+distributed behaviour with NCCL-based communication
+optimisations~\cite{wu2023chase-nccl}.
+
+For this thesis, the transferable lesson is architectural: once local kernels
+are efficient, communication orchestration and overlap become first-order
+bottlenecks.
+
+\subsubsection{Legeza Group: Massively Parallel DMRG/MPS on CPU--GPU Systems}
+
+Menczer et al.\ present a sequence of works on massively parallel DMRG-style
+workloads that are highly relevant for kernel engineering: lock-free scheduling,
+task buffering, explicit overlap of communication and computation, and
+mixed-precision/tensor-core acceleration paths
+(\cite{menczer2023massive,menczer2023nonabelian,menczer2024efficient-dmrg-gpu}).
+
+The 2024 implementation study highlights practical optimisation points that map
+directly to CUDA kernel work: reducing launch overhead for many small tensor
+operations, grouping shape-compatible tasks, and careful stream-level
+scheduling~\cite{menczer2024efficient-dmrg-gpu}.
+
+\subsubsection{Rizzi and Waintal: Operator-Sum Formulations and Practical TN Performance}
+
+Krinitsin et al.\ compare tree tensor network and exact diagonalisation
+approaches and emphasise a key implementation detail for practical performance:
+using local operator sums instead of explicit MPO constructions can remove large
+intermediate overhead in contraction pipelines~\cite{krinitsin2025ttn-ed}.
+
+Waintal and collaborators provide broader algorithmic limits and scalable
+simulation perspectives for circuit-style tensor-network workloads
+(\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}).
+Even where papers are not CUDA-kernel papers, the computational motifs they
+identify (many medium/small contractions, truncation-heavy iterative sweeps)
+match the exact regime where launch overhead, layout efficiency, and batching
+matter most on A100-class hardware.
+
+\subsubsection{Recurring Implementation Patterns}
+
+Across the above works, four recurring implementation patterns emerge:
+
+\begin{enumerate}
+  \item \textbf{Task bucketing by contraction shape.} Grouping same-shape small
+    contractions enables batched GEMM and reduces launch count.
+  \item \textbf{Operator-sum execution paths.} Avoiding explicit large operator
+    objects can reduce memory traffic and intermediate-kernel overhead.
+  \item \textbf{Communication--computation overlap.} Multi-GPU execution
+    benefits from explicit stream partitioning and asynchronous collectives.
+  \item \textbf{Mixed-precision acceleration with guarded validation.} FP32/TF32
+    tensor-core execution is used for throughput, with strict numerical checks.
+\end{enumerate}
+
+\subsection{Representative CUDA Implementation Patterns}\label{sec:sota-cuda-patterns}
+
+The following snippets are representative implementation skeletons derived from
+the above literature patterns. They are intentionally simplified to expose the
+kernel-architecture idea.
+
+\subsubsection{Pattern A: Bucketed Small-GEMM Execution (DMRG/MPS Sweeps)}
+
+\begin{lstlisting}[language=CUDA, caption={Shape-bucketed small contractions using strided batched GEMM. Representative kernel-orchestration pattern inspired by massively parallel DMRG implementations.}, label={lst:sota-bucketed-small-gemm}]
+struct BatchBucket {
+    int m, n, k, count;
+    const float* A;   // strided batch base
+    const float* B;
+    float* C;
+    long long strideA, strideB, strideC;
+};
+
+void run_bucket(const BatchBucket& b, cublasHandle_t h, cudaStream_t s) {
+    cublasSetStream(h, s);
+    const float alpha = 1.0f, beta = 0.0f;
+    cublasGemmStridedBatchedEx(
+        h, CUBLAS_OP_N, CUBLAS_OP_N,
+        b.m, b.n, b.k,
+        &alpha,
+        b.A, CUDA_R_32F, b.m, b.strideA,
+        b.B, CUDA_R_32F, b.k, b.strideB,
+        &beta,
+        b.C, CUDA_R_32F, b.m, b.strideC,
+        b.count,
+        CUBLAS_COMPUTE_32F_FAST_TF32, CUBLAS_GEMM_DEFAULT_TENSOR_OP);
+}
+\end{lstlisting}
+
+\textbf{Why it matters.}
+Instead of launching one kernel per tiny contraction, this pattern executes
+many contractions per call and shifts the regime away from launch-dominated
+runtime.
+
+\subsubsection{Pattern B: Operator-Sum Path Without Explicit MPO Materialisation}
+
+\begin{lstlisting}[language=CUDA, caption={Operator-sum contraction sketch. The core idea is to accumulate local terms directly instead of materialising a large explicit operator tensor first.}, label={lst:sota-operator-sum}]
+// Pseudocode-level sketch: each term is mapped to a GEMM-like contraction.
+for (int t = 0; t < num_terms; ++t) {
+    // left[t], right[t], and local_op[t] encode one local contribution
+    contract_term_kernel<<<grid, block, shmem, stream>>>(
+        left[t], local_op[t], right[t], state_in, state_tmp);
+}
+
+// Optional: fuse accumulation to reduce global-memory traffic.
+accumulate_terms_kernel<<<grid2, block2, 0, stream>>>(state_tmp, state_out);
+\end{lstlisting}
+
+\textbf{Why it matters.}
+This reflects the local-operator-sum idea discussed in recent TTN benchmarking:
+it reduces intermediate tensor construction overhead and often improves cache
+and memory-traffic behaviour~\cite{krinitsin2025ttn-ed}.
+
+\subsubsection{Pattern C: Overlap of Local Compute and Multi-GPU Reduction}
+
+\begin{lstlisting}[language=CUDA, caption={Two-stream overlap pattern for distributed dense kernels. The communication stream runs asynchronous collectives while compute proceeds on the main stream.}, label={lst:sota-overlap}]
+cudaStream_t s_compute, s_comm;
+cudaStreamCreate(&s_compute);
+cudaStreamCreate(&s_comm);
+
+// 1) Local block update on each GPU
+local_update_kernel<<<grid, block, 0, s_compute>>>(local_A, local_B, local_C);
+
+// 2) Asynchronous inter-GPU reduction / exchange
+ncclAllReduce(local_C, global_C, count, ncclFloat, ncclSum, comm, s_comm);
+
+// 3) Synchronize only when data dependency requires it
+cudaEvent_t done_comm;
+cudaEventCreate(&done_comm);
+cudaEventRecord(done_comm, s_comm);
+cudaStreamWaitEvent(s_compute, done_comm, 0);
+postprocess_kernel<<<grid2, block2, 0, s_compute>>>(global_C);
+\end{lstlisting}
+
+\textbf{Why it matters.}
+This captures the communication/computation orchestration emphasis in
+Wu--Di~Napoli style distributed GPU kernels and in massively parallel DMRG
+implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2023massive}.
+

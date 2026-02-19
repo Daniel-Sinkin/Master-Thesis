@@ -1,2 +1,33 @@
 
 \section{Target Kernels}\label{sec:target-kernels}
+
+The target workload is defined by contraction patterns that can be reduced to
+dense linear algebra kernels after index permutation and reshaping. We focus on
+kernel classes that are both frequent in tensor-network workflows and sensitive
+to GPU execution overhead:
+
+\begin{enumerate}
+  \item \textbf{Small/medium GEMM-like contractions} (single and batched),
+    including cases where dimensions are not multiples of warp tile sizes.
+  \item \textbf{Layout-transformation kernels} (permute/pack/unpack) required
+    before and after contractions.
+  \item \textbf{Fused micro-pipelines} that execute several contractions (and
+    optional lightweight post-processing) inside one launch.
+\end{enumerate}
+
+The baseline precision target is FP32 for compute and storage, with optional
+TF32 tensor-core execution where numerical tolerance permits it. FP64 remains a
+reference configuration for accuracy and performance comparison.
+
+\subsection{Selection Criteria}
+
+A kernel is included in the optimisation set if it satisfies at least two of
+the following conditions:
+
+\begin{itemize}
+  \item high call frequency in representative traces,
+  \item measurable contribution to end-to-end runtime,
+  \item clear exposure to launch overhead or memory-traffic bottlenecks,
+  \item portability to both single-GPU and one-node multi-GPU execution.
+\end{itemize}
+

@@ -1,2 +1,30 @@
 % chapters/04_sections/kernel_design.tex
 \section{Kernel Design}\label{sec:kernel-design}
+
+Kernel design follows a bottom-up strategy: start from a minimal correct
+implementation, then introduce one optimisation mechanism at a time (tiling,
+fusion, vectorised loads, launch configuration tuning), validating each step by
+profiling.
+
+\subsection{Design Variants}
+
+For each target contraction motif, three variants are maintained:
+
+\begin{enumerate}
+  \item \textbf{Reference variant:} straightforward kernel for correctness and
+    baseline profiling.
+  \item \textbf{Memory-optimised variant:} improved access locality and reduced
+    redundant global loads.
+  \item \textbf{Launch-optimised variant:} fused execution that amortises
+    host-side launch overhead.
+\end{enumerate}
+
+Maintaining explicit variants makes performance deltas attributable and prevents
+``all-at-once'' changes that are hard to analyse.
+
+\subsection{Correctness and Numerical Checks}
+
+Each variant is checked against a trusted baseline (library result or high
+precision reference) with fixed tolerance settings per precision mode. Any
+performance result is accepted only after numerical agreement is verified.
+
