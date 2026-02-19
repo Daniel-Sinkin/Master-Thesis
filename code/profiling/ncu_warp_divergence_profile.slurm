@@ -38,38 +38,86 @@ cmake --build "${SCRIPT_DIR}/build" -j
 "${SCRIPT_DIR}/build/warp_divergence_good_uniform"
 "${SCRIPT_DIR}/build/warp_divergence_bad_divergent"
 
-KPI="smsp__sass_average_branch_targets_threads_uniform.pct"
 ALL_METRICS="$(ncu --query-metrics --query-metrics-mode all 2>/dev/null || true)"
 
-if ! grep -Fq "${KPI}" <<< "${ALL_METRICS}"; then
-  for cand in \
-    "smsp__thread_inst_executed_per_inst_executed.ratio" \
-    "smsp__thread_inst_executed_per_inst_executed.pct" \
-    "smsp__average_warp_latency_per_inst_executed.ratio"; do
+pick_metric() {
+  for cand in "$@"; do
     if grep -Fq "${cand}" <<< "${ALL_METRICS}"; then
-      KPI="${cand}"
-      break
+      echo "${cand}"
+      return 0
     fi
   done
-fi
+  return 1
+}
 
-if ! grep -Fq "${KPI}" <<< "${ALL_METRICS}"; then
-  echo "No expected divergence KPI found in this Nsight version."
-  echo "Candidates discovered on this system:"
-  echo "${ALL_METRICS}" | grep -Ei "branch|uniform|diverg|thread_inst_executed_per_inst_executed" || true
+SELECTED_METRICS=()
+MISSING_GROUPS=()
+
+add_metric_group() {
+  local label="$1"
+  shift
+  local picked
+  if picked="$(pick_metric "$@")"; then
+    SELECTED_METRICS+=("${picked}")
+  else
+    MISSING_GROUPS+=("${label}")
+  fi
+}
+
+add_metric_group "sm_throughput" \
+  "sm__throughput.avg.pct_of_peak_sustained_elapsed" \
+  "sm__throughput.avg.pct_of_peak_sustained_active"
+add_metric_group "dram_throughput" \
+  "dram__throughput.avg.pct_of_peak_sustained_elapsed" \
+  "dram__throughput.avg.pct_of_peak_sustained_active"
+add_metric_group "l2_throughput" \
+  "lts__t_sectors.avg.pct_of_peak_sustained_elapsed" \
+  "lts__throughput.avg.pct_of_peak_sustained_elapsed" \
+  "lts__throughput.avg.pct_of_peak_sustained_active"
+add_metric_group "l1_hit_rate" \
+  "l1tex__t_sector_hit_rate.pct"
+add_metric_group "fp32_fma_pipe_active" \
+  "smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active" \
+  "smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed"
+add_metric_group "warps_active" \
+  "sm__warps_active.avg.pct_of_peak_sustained_active" \
+  "sm__warps_active.avg.pct_of_peak_sustained_elapsed"
+add_metric_group "occ_limit_registers" \
+  "launch__occupancy_limit_registers"
+add_metric_group "warps_eligible_per_cycle" \
+  "smsp__warps_eligible.sum.per_cycle_active" \
+  "smsp__warps_eligible.avg.per_cycle_active"
+add_metric_group "issue_active" \
+  "smsp__issue_active.avg.pct_of_peak_sustained_active" \
+  "smsp__issue_active.avg.pct_of_peak_sustained_elapsed"
+add_metric_group "thread_inst_per_inst" \
+  "smsp__thread_inst_executed_per_inst_executed.pct" \
+  "smsp__thread_inst_executed_per_inst_executed.ratio"
+
+if [[ ${#SELECTED_METRICS[@]} -lt 6 ]]; then
+  echo "Too few KPI metrics available (${#SELECTED_METRICS[@]} found)."
+  echo "Discovered related metrics:"
+  echo "${ALL_METRICS}" | grep -Ei "sm__throughput|dram__throughput|lts__|l1tex__|pipe_fma|warps_active|launch__occupancy_limit_registers|warps_eligible|issue_active|thread_inst_executed_per_inst_executed|pct_of_peak|branch|uniform|diverg" || true
   exit 1
 fi
 
-echo "Using KPI: ${KPI}"
+METRICS_CSV="$(IFS=,; echo "${SELECTED_METRICS[*]}")"
 
-ncu --metrics "${KPI}" \
+echo "Using ${#SELECTED_METRICS[@]} KPIs:"
+printf '  - %s\n' "${SELECTED_METRICS[@]}"
+if [[ ${#MISSING_GROUPS[@]} -gt 0 ]]; then
+  echo "Missing KPI groups:"
+  printf '  - %s\n' "${MISSING_GROUPS[@]}"
+fi
+
+ncu --metrics "${METRICS_CSV}" \
   -k warp_uniform_branch \
   --launch-skip 20 --launch-count 1 \
-  --csv --log-file "${SCRIPT_DIR}/warp_uniform_kpi.${SLURM_JOB_ID}.csv" \
+  --csv --log-file "${SCRIPT_DIR}/warp_uniform_metrics.${SLURM_JOB_ID}.csv" \
   "${SCRIPT_DIR}/build/warp_divergence_good_uniform"
 
-ncu --metrics "${KPI}" \
+ncu --metrics "${METRICS_CSV}" \
   -k warp_divergent_branch \
   --launch-skip 20 --launch-count 1 \
-  --csv --log-file "${SCRIPT_DIR}/warp_divergent_kpi.${SLURM_JOB_ID}.csv" \
+  --csv --log-file "${SCRIPT_DIR}/warp_divergent_metrics.${SLURM_JOB_ID}.csv" \
   "${SCRIPT_DIR}/build/warp_divergence_bad_divergent"
