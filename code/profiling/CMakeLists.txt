@@ -43,6 +43,14 @@ add_executable(gemm_fp32_bad_naive gemm_fp32_bad_naive.cu)
 target_link_libraries(gemm_fp32_bad_naive PRIVATE CUDA::cudart)
 apply_common_cuda_flags(gemm_fp32_bad_naive)
 
+add_executable(tn_two_site_good_batched_gemm tn_two_site_good_batched_gemm.cu)
+target_link_libraries(tn_two_site_good_batched_gemm PRIVATE CUDA::cublas)
+apply_common_cuda_flags(tn_two_site_good_batched_gemm)
+
+add_executable(tn_two_site_bad_direct tn_two_site_bad_direct.cu)
+target_link_libraries(tn_two_site_bad_direct PRIVATE CUDA::cudart)
+apply_common_cuda_flags(tn_two_site_bad_direct)
+
 add_executable(warp_divergence_good_uniform warp_divergence_good_uniform.cu)
 target_link_libraries(warp_divergence_good_uniform PRIVATE CUDA::cudart)
 apply_common_cuda_flags(warp_divergence_good_uniform)

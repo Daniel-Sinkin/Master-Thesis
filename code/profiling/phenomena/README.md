@@ -61,3 +61,15 @@ Expected CSV files:
 - `05_ilp_dependency.<jobid>.csv`
 - `06_register_pressure.<jobid>.csv`
 - `07_arithmetic_intensity.<jobid>.csv`
+
+## Generate thesis figures
+
+From repository root:
+
+```bash
+python3 -m pip install matplotlib
+python3 scripts/generate_phenomena_plots.py
+```
+
+The script reads the newest matching CSV per benchmark from
+`code/profiling/phenomena/results/` and writes PDF plots to `images/`.

@@ -23,12 +23,18 @@ The scripts print the exact metric names they selected in the SLURM stdout log.
 - `gemm_fp32_bad_naive.cu`: naive FP32 GEMM kernel (intentionally inefficient)
 - `warp_divergence_good_uniform.cu`: warp-uniform branch behavior (good)
 - `warp_divergence_bad_divergent.cu`: forced intra-warp divergence (bad)
+- `tn_two_site_good_batched_gemm.cu`: ordered two-step TN-style contraction via
+  cuBLAS strided-batched GEMM
+- `tn_two_site_bad_direct.cu`: direct two-site contraction kernel with poor
+  contraction order and low reuse
 
 ## Folder layout
 
 - `code/profiling/CMakeLists.txt`: local build config for profiling binaries
 - `code/profiling/ncu_fp32_profile.slurm`: one-shot compile + FP32 GEMM profile
 - `code/profiling/ncu_warp_divergence_profile.slurm`: one-shot compile + divergence profile
+- `code/profiling/ncu_tn_contraction_profile.slurm`: one-shot compile + TN
+  contraction-order profile
 
 ## Build manually (from repository root)
 
@@ -82,6 +88,26 @@ Expected behavior:
 
 - `warp_divergence_good_uniform`: better thread participation and issue behavior.
 - `warp_divergence_bad_divergent`: lower thread participation and lower effective throughput.
+
+## TN two-site contraction pair via SLURM
+
+```bash
+sbatch code/profiling/ncu_tn_contraction_profile.slurm
+```
+
+Outputs:
+
+- `code/profiling/ncu-tn-out.<jobid>`
+- `code/profiling/ncu-tn-err.<jobid>`
+- `code/profiling/good_tn_two_site_metrics.<jobid>.csv`
+- `code/profiling/bad_tn_two_site_metrics.<jobid>.csv`
+
+Expected behavior:
+
+- `tn_two_site_good_batched_gemm`: high compute utilization from better
+  contraction order + batched GEMM mapping.
+- `tn_two_site_bad_direct`: lower throughput from direct $O(d^2\chi^2)$-style
+  contraction with weak data reuse.
 
 ## Thesis Phenomena Suite (7 benchmarks)
 
