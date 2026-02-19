@@ -16,37 +16,58 @@ Interpretation:
 - `gemm_fp32_good_cublas.cu`: cuBLAS FP32 GEMM with pedantic FP32 compute
 - `gemm_fp32_bad_naive.cu`: naive FP32 GEMM kernel (intentionally inefficient)
 
-## Build
+## Folder layout
+
+- `code/profiling/CMakeLists.txt`: local build config for profiling binaries
+- `code/profiling/ncu_fp32_profile.slurm`: one-shot compile + profile batch script
+
+## Build manually (from repository root)
 
 ```bash
-nvcc -O3 -arch=sm_80 /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_good_cublas.cu -lcublas -o /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_good_cublas
-nvcc -O3 -arch=sm_80 /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_bad_naive.cu -o /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_bad_naive
+module load Stages/2025 CUDA/12 GCC/13.3.0
+cmake -S code/profiling -B code/profiling/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=80 -DENABLE_CUDA_LINEINFO=ON -DFORCE_O3=ON
+cmake --build code/profiling/build -j
 ```
 
-## Quick run (throughput sanity)
+## Run manually (throughput sanity)
 
 ```bash
-/Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_good_cublas
-/Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_bad_naive
+./code/profiling/build/gemm_fp32_good_cublas
+./code/profiling/build/gemm_fp32_bad_naive
 ```
 
-Defaults:
+Default sizes:
 
 - good: `8192 x 8192 x 8192`, warmup 20, iters 100
 - bad: `4096 x 4096 x 4096`, warmup 5, iters 20
 
-## Nsight Compute
+## Profile manually (Nsight Compute)
 
 ```bash
-ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed -k regex:.*gemm.* --launch-skip 20 --launch-count 1 /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_good_cublas
-ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed -k naive_sgemm_fp32 --launch-skip 5 --launch-count 1 /Users/danielsinkin/GitHub_private/Master-Thesis/code/profiling/gemm_fp32_bad_naive
+ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed --launch-skip 20 --launch-count 1 ./code/profiling/build/gemm_fp32_good_cublas
+ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed -k naive_sgemm_fp32 --launch-skip 5 --launch-count 1 ./code/profiling/build/gemm_fp32_bad_naive
 ```
 
 If this metric name differs in your Nsight version:
 
 ```bash
-ncu --query-metrics | rg "sm__throughput.*pct_of_peak"
+ncu --query-metrics | grep -Ei "sm__throughput.*pct_of_peak"
 ```
+
+## One-command SLURM path
+
+Submit from repository root:
+
+```bash
+sbatch code/profiling/ncu_fp32_profile.slurm
+```
+
+Outputs:
+
+- `code/profiling/ncu-fp32-out.<jobid>`
+- `code/profiling/ncu-fp32-err.<jobid>`
+- `code/profiling/good_fp32_tpp.<jobid>.csv`
+- `code/profiling/bad_fp32_tpp.<jobid>.csv`
 
 ## Expected behavior
 
