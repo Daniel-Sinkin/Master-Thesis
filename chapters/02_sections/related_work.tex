@@ -80,17 +80,20 @@ task buffering, explicit overlap of communication and computation, and
 mixed-precision/tensor-core acceleration paths
 (\cite{menczer2023massive,menczer2023nonabelian,menczer2024efficient-dmrg-gpu}).
 
-The 2024 implementation study highlights practical optimisation points that map
-directly to CUDA kernel work: reducing launch overhead for many small tensor
-operations, grouping shape-compatible tasks, and careful stream-level
-scheduling~\cite{menczer2024efficient-dmrg-gpu}.
+The 2023 and 2024 studies also report good scaling across heterogeneous
+CPU--GPU systems and explicitly motivate mixed-precision/tensor-core execution
+for contraction-heavy workloads~\cite{menczer2023massive,menczer2024efficient-dmrg-gpu}.
+For this thesis, the concrete transfer is straightforward: reduce launch count
+for small contractions, bucket by shape, and tune stream-level scheduling.
 
 \subsubsection{Rizzi and Waintal: Operator-Sum Formulations and Practical TN Performance}
 
-Krinitsin et al.\ compare tree tensor network and exact diagonalisation
-approaches and emphasise a key implementation detail for practical performance:
-using local operator sums instead of explicit MPO constructions can remove large
-intermediate overhead in contraction pipelines~\cite{krinitsin2025ttn-ed}.
+Krinitsin, Rizzi, and Waintal present a TTN time-evolution implementation with
+two-level parallelisation (shared and distributed memory) and report order of
+magnitude speedups from GPU acceleration in the targeted workload
+regime~\cite{krinitsin2025ttn-ed}. A practical point for this thesis is their
+emphasis on local operator-sum formulations, which can avoid expensive explicit
+intermediate constructions in contraction pipelines.
 
 Waintal and collaborators provide broader algorithmic limits and scalable
 simulation perspectives for circuit-style tensor-network workloads
@@ -99,6 +102,40 @@ Even where papers are not CUDA-kernel papers, the computational motifs they
 identify (many medium/small contractions, truncation-heavy iterative sweeps)
 match the exact regime where launch overhead, layout efficiency, and batching
 matter most on A100-class hardware.
+
+\subsubsection{A100 CUDA Optimisation Practice (Documentation SOTA)}
+
+For low-level CUDA engineering on Ampere, the most actionable guidance comes
+from NVIDIA's architecture and profiling documentation rather than from
+application papers. The recurring recommendations are:
+\begin{enumerate}
+  \item treat memory traffic and reuse as first-order constraints
+    (coalescing, shared-memory tiling, and cache-aware layouts),
+  \item use occupancy as a constraint, not a sole objective; register and
+    shared-memory pressure must be balanced against instruction-level
+    efficiency,
+  \item reduce launch overhead for short kernels through batching, fusion, and
+    stream-graph style execution where appropriate,
+  \item validate each optimisation with metric-level profiling instead of
+    relying on throughput numbers alone.
+\end{enumerate}
+These points are consistent across the Ampere tuning guide, CUDA best-practice
+guide, and Nsight Compute profiling guide
+(\cite{nvidia-ampere-tuning-guide,nvidia-cuda-best-practices,nvidia-nsight-compute-profiling-guide}).
+
+\paragraph{Integration plan for this thesis (working notes).}
+Given the current project scope (single A100 node, contraction-heavy short
+kernel sequences), the most relevant near-term integration steps are:
+\begin{enumerate}
+  \item build a shape-bucketed benchmark suite for representative contraction
+    sizes,
+  \item maintain a per-kernel profiler checklist (occupancy, memory throughput,
+    stall breakdown, launch cost),
+  \item prioritise launch amortisation before aggressive micro-optimisation for
+    kernels that run in the sub-millisecond regime,
+  \item keep FP32 as baseline and treat TF32 as an opt-in acceleration path
+    with explicit numerical checks.
+\end{enumerate}
 
 \subsubsection{Recurring Implementation Patterns}
 

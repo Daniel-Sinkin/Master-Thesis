@@ -24,8 +24,13 @@ fi
 
 SCRIPT_DIR="${REPO_ROOT}/code/profiling"
 
-module load Stages/2025 CUDA/12 GCC/13.3.0
+module load Stages/2025 CMake/3.29.3 CUDA/12 GCC/13.3.0
 export CUDA_VISIBLE_DEVICES=0
+
+if ! command -v cmake >/dev/null 2>&1; then
+  echo "cmake not found after module load. Check CMake module availability."
+  exit 1
+fi
 
 cmake -S "${SCRIPT_DIR}" -B "${SCRIPT_DIR}/build" \
   -DCMAKE_BUILD_TYPE=Release \

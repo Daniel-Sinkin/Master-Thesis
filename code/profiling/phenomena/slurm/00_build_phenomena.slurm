@@ -27,6 +27,20 @@ mkdir -p "${RESULT_DIR}"
 
 module load Stages/2025 CUDA/12 GCC/13.3.0
 
+if ! command -v cmake >/dev/null 2>&1; then
+  if ! module load CMake >/dev/null 2>&1; then
+    CMAKE_CANDIDATE="$(module -t avail CMake 2>&1 | awk '/^CMake\\// {print $1}' | tail -n1)"
+    if [[ -n "${CMAKE_CANDIDATE}" ]]; then
+      module load "${CMAKE_CANDIDATE}" >/dev/null 2>&1 || true
+    fi
+  fi
+fi
+
+if ! command -v cmake >/dev/null 2>&1; then
+  echo "cmake not found after module load. Try: module spider CMake"
+  exit 1
+fi
+
 cmake -S "${SCRIPT_DIR}" -B "${SCRIPT_DIR}/build" \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CUDA_ARCHITECTURES=80 \

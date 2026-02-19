@@ -101,6 +101,38 @@ crossover points become
 Small and medium contractions with low reuse remain memory-bound unless
 layout/tiling increases operational intensity.
 
+\subsubsection{Roofline in Practice}\label{sec:roofline-in-practice}
+
+For this project, roofline is used as a measurement workflow, not just an
+analytical plot. The practical loop is:
+\begin{enumerate}
+  \item estimate FLOPs and bytes from kernel geometry (static model),
+  \item collect measured FLOPs, memory traffic, and runtime from Nsight
+    Compute~\cite{nvidia-nsight-compute-profiling-guide},
+  \item place each kernel on the roofline and compare against the bound,
+  \item choose the next optimisation based on the dominant gap.
+\end{enumerate}
+
+With measured FLOPs $F$, measured runtime $t$, and measured DRAM traffic
+$Q_{\mathrm{dram}}$, we use
+\[
+  I_{\mathrm{meas}}=\frac{F}{Q_{\mathrm{dram}}},\qquad
+  P_{\mathrm{meas}}=\frac{F}{t},\qquad
+  \eta=\frac{P_{\mathrm{meas}}}{\min(P_{\max},B\,I_{\mathrm{meas}})}.
+\]
+Here $\eta$ is a roofline efficiency ratio relative to the active bound.
+
+Interpretation for optimisation decisions:
+\begin{itemize}
+  \item if $I_{\mathrm{meas}}<I^\star$ and $\eta$ is low, prioritise memory
+    coalescing, reuse, and layout changes;
+  \item if $I_{\mathrm{meas}}\ge I^\star$ and $\eta$ is low, prioritise
+    instruction-level efficiency, occupancy/resource balance, and launch
+    overhead reduction;
+  \item if end-to-end speedup is still low while kernel $\eta$ improves,
+    serial orchestration is likely the limiting factor (Amdahl regime).
+\end{itemize}
+
 \subsubsection{Arithmetic-Intensity Landscape for Rectangular Kernels}
 \label{sec:ai-landscape}
 
