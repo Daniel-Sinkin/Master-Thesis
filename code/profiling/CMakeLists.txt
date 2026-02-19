@@ -42,3 +42,11 @@ apply_common_cuda_flags(gemm_fp32_good_cublas)
 add_executable(gemm_fp32_bad_naive gemm_fp32_bad_naive.cu)
 target_link_libraries(gemm_fp32_bad_naive PRIVATE CUDA::cudart)
 apply_common_cuda_flags(gemm_fp32_bad_naive)
+
+add_executable(warp_divergence_good_uniform warp_divergence_good_uniform.cu)
+target_link_libraries(warp_divergence_good_uniform PRIVATE CUDA::cudart)
+apply_common_cuda_flags(warp_divergence_good_uniform)
+
+add_executable(warp_divergence_bad_divergent warp_divergence_bad_divergent.cu)
+target_link_libraries(warp_divergence_bad_divergent PRIVATE CUDA::cudart)
+apply_common_cuda_flags(warp_divergence_bad_divergent)

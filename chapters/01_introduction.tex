@@ -14,10 +14,9 @@ hardware target is Ampere-class GPUs, in particular A100 nodes, with a
 conservative baseline of one node (four A100-SXM4-40GB GPUs connected via
 NVLink).
 
-The core motivation is therefore practical: build a profiling-driven kernel
-optimisation workflow that produces measurable speedups for tensor-network
-contraction workloads on current JSC hardware and remains transferable to
-next-generation accelerators.
+The goal is practical: build a profiling-driven kernel-optimisation workflow
+that produces measurable speedups for tensor-network contraction workloads on
+current JSC hardware and can be carried over to next-generation accelerators.
 
 \section{Problem Statement}\label{sec:problem-statement}
 
@@ -25,7 +24,7 @@ The central problem is to identify and optimise the CUDA kernels and execution
 patterns that dominate runtime in tensor-network contraction workflows, while
 keeping the scope on HPC implementation aspects rather than physics modelling.
 
-This leads to the following technical questions:
+The work is organised around the following technical questions:
 
 \begin{enumerate}
   \item Which kernel motifs are the primary bottlenecks on A100 for the target
@@ -69,4 +68,3 @@ to realise the optimisation approach.
 overhead experiments and comparison against library baselines.
 \Cref{ch:conclusion} summarises findings, limitations, and next optimisation
 steps.
-

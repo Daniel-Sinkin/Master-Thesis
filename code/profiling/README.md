@@ -1,4 +1,4 @@
-# A100 FP32 Profiling Warmup: One KPI, Two Cases
+# A100 CUDA Profiling Warmups: One KPI, Two Cases
 
 ## KPI to focus on
 
@@ -15,11 +15,14 @@ Interpretation:
 
 - `gemm_fp32_good_cublas.cu`: cuBLAS FP32 GEMM with pedantic FP32 compute
 - `gemm_fp32_bad_naive.cu`: naive FP32 GEMM kernel (intentionally inefficient)
+- `warp_divergence_good_uniform.cu`: warp-uniform branch behavior (good)
+- `warp_divergence_bad_divergent.cu`: forced intra-warp divergence (bad)
 
 ## Folder layout
 
 - `code/profiling/CMakeLists.txt`: local build config for profiling binaries
 - `code/profiling/ncu_fp32_profile.slurm`: one-shot compile + profile batch script
+- `code/profiling/ncu_warp_divergence_profile.slurm`: one-shot compile + divergence profile script
 
 ## Build manually (from repository root)
 
@@ -73,3 +76,41 @@ Outputs:
 
 - `gemm_fp32_good_cublas`: clearly higher `% of peak`, often around or above 50% on healthy A100 FP32 runs.
 - `gemm_fp32_bad_naive`: much lower `% of peak`.
+
+## Warp Divergence Pair
+
+Focus KPI:
+
+- `smsp__sass_average_branch_targets_threads_uniform.pct` (higher is better)
+
+Manual run:
+
+```bash
+./code/profiling/build/warp_divergence_good_uniform
+./code/profiling/build/warp_divergence_bad_divergent
+```
+
+Manual profile:
+
+```bash
+ncu --metrics smsp__sass_average_branch_targets_threads_uniform.pct -k warp_uniform_branch --launch-skip 20 --launch-count 1 ./code/profiling/build/warp_divergence_good_uniform
+ncu --metrics smsp__sass_average_branch_targets_threads_uniform.pct -k warp_divergent_branch --launch-skip 20 --launch-count 1 ./code/profiling/build/warp_divergence_bad_divergent
+```
+
+One-command SLURM:
+
+```bash
+sbatch code/profiling/ncu_warp_divergence_profile.slurm
+```
+
+Outputs:
+
+- `code/profiling/ncu-warpdiv-out.<jobid>`
+- `code/profiling/ncu-warpdiv-err.<jobid>`
+- `code/profiling/warp_uniform_kpi.<jobid>.csv`
+- `code/profiling/warp_divergent_kpi.<jobid>.csv`
+
+Expected behavior:
+
+- `warp_divergence_good_uniform`: branch-uniform KPI close to 100%.
+- `warp_divergence_bad_divergent`: noticeably lower branch-uniform KPI and lower effective throughput.
