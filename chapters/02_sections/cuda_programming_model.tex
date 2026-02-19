@@ -153,7 +153,7 @@ __global__ void matmul(const float *A, const float *B, float *C,
 }
 \end{lstlisting}
 
-The key points of this kernel are:
+The kernel structure has three important properties:
 
 \begin{enumerate}
   \item \textbf{Cooperative loading (lines 14--19).} Every thread in the block loads exactly one element of the $A$-tile and one element of the $B$-tile. The 256 threads in a $16 \times 16$ block therefore load the entire $16 \times 16$ tile cooperatively. Boundary conditions are handled by loading zero for out-of-range indices.

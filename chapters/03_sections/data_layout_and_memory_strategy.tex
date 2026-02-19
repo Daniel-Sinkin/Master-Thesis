@@ -3,7 +3,7 @@
 
 Data layout is treated as a first-class optimisation variable rather than a
 post-processing detail. For contraction-heavy workloads, memory access patterns
-often dominate arithmetic cost; therefore layout decisions are made jointly with
+often dominate arithmetic cost, so layout decisions are made jointly with
 kernel design.
 
 \subsection{Layout Principles}
@@ -35,4 +35,3 @@ The memory strategy mirrors the A100 hierarchy:
 
 When tensors require non-trivial index reorderings, preprocessing overhead is
 quantified explicitly and accounted for in end-to-end performance claims.
-

@@ -9,9 +9,9 @@ reference point for GEMM-like workloads~\cite{cublas}. cuTENSOR generalises
 this to tensor contractions and permutation-heavy primitives~\cite{cutensor}.
 
 For the small-kernel regime relevant to tensor-network workflows, cuBLASDx is
-especially important: it enables device-side GEMM composition and therefore
-supports launch-amortisation strategies that are difficult to implement with
-host-only library calls~\cite{cublasdx}. The launch-overhead benchmark in this
+especially important: it enables device-side GEMM composition and supports
+launch-amortisation strategies that are difficult to implement with host-only
+library calls~\cite{cublasdx}. The launch-overhead benchmark in this
 thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
 
 In this thesis, custom kernels are evaluated against these libraries as
@@ -69,9 +69,8 @@ JUWELS-Booster~\cite{wu2022chase-gpu}. The SC-W extension further improves
 distributed behaviour with NCCL-based communication
 optimisations~\cite{wu2023chase-nccl}.
 
-For this thesis, the transferable lesson is architectural: once local kernels
-are efficient, communication orchestration and overlap become first-order
-bottlenecks.
+The transferable architectural lesson is that once local kernels are efficient,
+communication orchestration and overlap become first-order bottlenecks.
 
 \subsubsection{Legeza Group: Massively Parallel DMRG/MPS on CPU--GPU Systems}
 
@@ -198,4 +197,3 @@ postprocess_kernel<<<grid2, block2, 0, s_compute>>>(global_C);
 This captures the communication/computation orchestration emphasis in
 Wu--Di~Napoli style distributed GPU kernels and in massively parallel DMRG
 implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2023massive}.
-

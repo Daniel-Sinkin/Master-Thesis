@@ -12,8 +12,7 @@ The optimisation strategy follows a profile-driven iterative loop:
   \item re-profile and accept/reject the change based on quantitative criteria.
 \end{enumerate}
 
-This approach avoids premature low-level tuning and keeps each optimisation
-step attributable to a specific observed bottleneck.
+This keeps low-level tuning tied to measured bottlenecks instead of guesswork.
 
 \subsection{Optimisation Axes}
 
@@ -72,7 +71,7 @@ where the crossover intensity is
 
 Using the A100-SXM4-40GB values from \cref{tab:a100-specs,tab:a100-peak-performance},
 we take $B=\SI{1555}{\giga\byte\per\second}=\SI{1.555}{\tera\byte\per\second}$.
-This yields the following crossover points:
+The resulting crossover points are:
 \[
   I^\star_{\mathrm{FP64}} \approx \frac{9.7}{1.555}=6.2,\quad
   I^\star_{\mathrm{FP32}} \approx \frac{19.5}{1.555}=12.5,\quad
@@ -99,13 +98,13 @@ crossover points become
   I^\star_{\mathrm{TF32}} \approx 147.5.
 \]
 
-In practical terms, small and medium contractions with low reuse remain
-memory-bound unless layout/tiling raises intensity.
+Small and medium contractions with low reuse remain memory-bound unless
+layout/tiling increases operational intensity.
 
 \subsubsection{Arithmetic-Intensity Landscape for Rectangular Kernels}
 \label{sec:ai-landscape}
 
-To study shape effects before full kernel implementation, we model a GEMM-like
+To isolate shape effects before full kernel implementation, we model a GEMM-like
 kernel
 \[
   C_{M\times N} \leftarrow A_{M\times K}B_{K\times N} + C_{M\times N}
@@ -130,8 +129,8 @@ Using useful FLOPs ($2MNK$) over padded traffic gives the effective intensity
   \frac{2MNK}{s\,(\hat M\hat K+\hat K\hat N+2\hat M\hat N)}.
 \]
 
-For the target shape regime in this thesis, we use $K=64$ and $t=16$ as a
-representative setup. \Cref{fig:ai-heatmap-fp32,fig:ai-heatmap-fp64} map
+For the target shape regime, we use $K=64$ and $t=16$.
+\Cref{fig:ai-heatmap-fp32,fig:ai-heatmap-fp64} map
 $I_{\mathrm{ideal}}$ and $I_{\mathrm{eff}}$ across $M,N\in[16,256]$. The trend
 is consistent with an area-to-perimeter argument: larger and more balanced
 rectangles increase intensity, while slender shapes and heavy padding reduce
@@ -252,9 +251,8 @@ The asymptotic limit as $p\to\infty$ is
 \[
   S_{\infty}=\frac{1}{1-f}.
 \]
-This means that even very efficient kernels can be capped by serial orchestration,
-launch overhead, synchronisation, and data-movement steps outside the parallel
-kernel body.
+Even efficient kernels are capped by serial orchestration, launch overhead,
+synchronisation, and data movement outside the parallel kernel body.
 
 \begin{table}[H]
 \centering
@@ -271,9 +269,9 @@ Parallel fraction $f$ & $S(4)$ & $S_{\infty}$ \\
 \end{tabularx}
 \end{table}
 
-For this thesis, these bounds are used as planning constraints: kernel-local
-optimisation is necessary, but end-to-end scaling requires reducing serial
-fractions in launch and orchestration paths.
+These bounds are used as planning constraints: kernel-local optimisation is
+necessary, but end-to-end scaling also requires reducing serial fractions in
+launch and orchestration paths.
 
 \begin{figure}[H]
   \centering

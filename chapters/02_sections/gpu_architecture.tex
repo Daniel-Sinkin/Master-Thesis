@@ -109,7 +109,7 @@ FP16  & $65504$                         & $\approx 6.1 \times 10^{-5}$   & $\app
 \end{tabularx}
 \end{table}
 
-Two aspects of this table merit attention. First, TF32 and BF16 share the same 8-bit exponent as FP32, so they retain the full FP32 dynamic range despite having far fewer significand bits. TF32 was introduced specifically for the Ampere tensor cores: inputs are stored as ordinary FP32 values, but the tensor core hardware internally truncates to 10 significand bits before performing the multiply-accumulate, with the accumulation itself carried out in full FP32~\cite{nvidia2020a100}. The programmer does not need to convert data explicitly; the truncation is transparent.
+Two observations are relevant here. First, TF32 and BF16 share the same 8-bit exponent as FP32, so they retain the FP32 dynamic range despite having fewer significand bits. TF32 was introduced for Ampere tensor cores: inputs are stored as FP32 values, while the tensor core internally truncates to 10 significand bits before multiply-accumulate, with accumulation in FP32~\cite{nvidia2020a100}. No explicit data conversion is required in user code.
 
 Second, FP16 has a severely limited dynamic range (maximum value $65504$), which makes it unsuitable for many scientific workloads without careful scaling. BF16 (``brain floating point''), originally developed for deep learning training on Google's TPUs~\cite{kalamkar2019bfloat16}, avoids this limitation by retaining the FP32 exponent range at the cost of reduced precision (7 fraction bits versus 10 for FP16).
 
@@ -210,7 +210,13 @@ BF16   & \num{19.5} & \num{39}   & \num{312} (\num{624}) \\
 \end{tabularx}
 \end{table}
 
-The ratios are stark. Moving from FP64 CUDA core arithmetic (\SI{9.7}{\tera\flops}) to FP32 (\SI{19.5}{\tera\flops}) doubles throughput at no algorithmic cost. Engaging the tensor cores in TF32 mode yields a further $8\times$ increase to \SI{156}{\tera\flops}, and FP16/BF16 tensor core throughput reaches \SI{312}{\tera\flops}---a $32\times$ factor over FP64. Even accounting for the fact that many kernels are memory-bandwidth-bound rather than compute-bound, the reduced data movement from using 32-bit instead of 64-bit values halves the memory traffic, which directly benefits bandwidth-limited operations.
+The throughput differences are large. Moving from FP64 CUDA core arithmetic
+(\SI{9.7}{\tera\flops}) to FP32 (\SI{19.5}{\tera\flops}) doubles throughput at
+no algorithmic cost. Using tensor cores in TF32 mode raises peak throughput to
+\SI{156}{\tera\flops}, and FP16/BF16 tensor-core throughput reaches
+\SI{312}{\tera\flops} (a $32\times$ factor over FP64). Many kernels remain
+memory-bandwidth-bound, but switching from 64-bit to 32-bit values still halves
+memory traffic and directly benefits bandwidth-limited sections.
 
 \subsubsection{The Case for Single Precision in Tensor Network Computations}\label{sec:fp32-argument}
 
@@ -254,7 +260,10 @@ Where CPUs use deep cache hierarchies to hide latency, GPUs prioritise bandwidth
   \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB used in this thesis provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
 \end{itemize}
 
-The practical consequence is that most scientific GPU kernels, including tensor contractions, are memory-bandwidth-bound rather than compute-bound. Performance therefore hinges on maximising reuse in registers and shared memory and accessing HBM in coalesced, bandwidth-efficient patterns.
+Most scientific GPU kernels, including tensor contractions, are
+memory-bandwidth-bound rather than compute-bound. Performance depends on reuse
+in registers and shared memory, plus coalesced, bandwidth-efficient HBM access
+patterns.
 
 \subsection{NVIDIA A100 Ampere Architecture}\label{sec:a100}
 \subsubsection{Hardware Overview}
