@@ -13,7 +13,16 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -n "${SLURM_SUBMIT_DIR:-}" && -d "${SLURM_SUBMIT_DIR}/code/profiling" ]]; then
+  REPO_ROOT="${SLURM_SUBMIT_DIR}"
+elif [[ -d "/p/home/jusers/sinkin1/jureca/Master-Thesis/code/profiling" ]]; then
+  REPO_ROOT="/p/home/jusers/sinkin1/jureca/Master-Thesis"
+else
+  echo "Could not locate repository root with code/profiling."
+  exit 1
+fi
+
+SCRIPT_DIR="${REPO_ROOT}/code/profiling"
 
 module load Stages/2025 CUDA/12 GCC/13.3.0
 export CUDA_VISIBLE_DEVICES=0
@@ -31,12 +40,28 @@ cmake --build "${SCRIPT_DIR}/build" -j
 
 KPI="sm__throughput.avg.pct_of_peak_sustained_elapsed"
 
-if ! ncu --query-metrics | grep -Fq "${KPI}"; then
-  echo "Metric not found: ${KPI}"
-  echo "Candidate throughput metrics:"
-  ncu --query-metrics | grep -Ei "sm__throughput.*pct_of_peak"
+ALL_METRICS="$(ncu --query-metrics --query-metrics-mode all 2>/dev/null || true)"
+
+if ! grep -Fq "${KPI}" <<< "${ALL_METRICS}"; then
+  for cand in \
+    "sm__throughput.avg.pct_of_peak_sustained_active" \
+    "smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active" \
+    "smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed"; do
+    if grep -Fq "${cand}" <<< "${ALL_METRICS}"; then
+      KPI="${cand}"
+      break
+    fi
+  done
+fi
+
+if ! grep -Fq "${KPI}" <<< "${ALL_METRICS}"; then
+  echo "No expected FP32 throughput KPI found in this Nsight version."
+  echo "Candidates discovered on this system:"
+  echo "${ALL_METRICS}" | grep -Ei "sm__throughput|pipe_fma|flop_count_sp|pct_of_peak" || true
   exit 1
 fi
+
+echo "Using KPI: ${KPI}"
 
 ncu --metrics "${KPI}" \
   --launch-skip 20 --launch-count 1 \
