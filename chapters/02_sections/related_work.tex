@@ -16,7 +16,7 @@ thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
 
 In this thesis, custom kernels are evaluated against these libraries as
 performance baselines rather than replacements. The objective is to understand
-where workload-specific structure can outperform general-purpose interfaces.
+where workload-specific structure can beat general-purpose interfaces.
 
 \subsection{ChASE Eigensolver}\label{sec:chase}
 
@@ -98,14 +98,14 @@ intermediate constructions in contraction pipelines.
 Waintal and collaborators provide broader algorithmic limits and scalable
 simulation perspectives for circuit-style tensor-network workloads
 (\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}).
-Even where papers are not CUDA-kernel papers, the computational motifs they
+Even where papers are not CUDA-kernel papers, the computational patterns they
 identify (many medium/small contractions, truncation-heavy iterative sweeps)
 match the exact regime where launch overhead, layout efficiency, and batching
 matter most on A100-class hardware.
 
 \subsubsection{A100 CUDA Optimisation Practice (Documentation SOTA)}
 
-For low-level CUDA engineering on Ampere, the most actionable guidance comes
+For low-level CUDA engineering on Ampere, the most useful guidance comes
 from NVIDIA's architecture and profiling documentation rather than from
 application papers. The recurring recommendations are:
 \begin{enumerate}
@@ -123,7 +123,7 @@ These points are consistent across the Ampere tuning guide, CUDA best-practice
 guide, and Nsight Compute profiling guide
 (\cite{nvidia-ampere-tuning-guide,nvidia-cuda-best-practices,nvidia-nsight-compute-profiling-guide}).
 
-\paragraph{Integration plan for this thesis (working notes).}
+\paragraph{Integration plan used in this thesis.}
 Given the current project scope (single A100 node, contraction-heavy short
 kernel sequences), the most relevant near-term integration steps are:
 \begin{enumerate}

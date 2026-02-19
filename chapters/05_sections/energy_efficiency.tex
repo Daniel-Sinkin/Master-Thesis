@@ -1,0 +1,83 @@
+% chapters/05_sections/energy_efficiency.tex
+\section{Energy Efficiency Considerations}\label{sec:energy-efficiency}
+
+Performance is the primary optimisation target in this thesis, but energy
+efficiency is closely coupled to it for GPU tensor contractions. In practical
+HPC operation, node power is capped and energy-to-solution affects both cost and
+cluster throughput.
+
+\subsection{Metrics}
+
+For one benchmark run of duration $T$, instantaneous board power $P(t)$, and
+total floating-point work $F$, the core quantities are
+\[
+  E = \int_0^T P(t)\,\mathrm{d}t \approx \bar P\,T,
+  \qquad
+  \eta_{\mathrm{F}} = \frac{F}{E},
+  \qquad
+  \eta_{\mathrm{T}} = \frac{\text{time-to-solution}^{-1}}{\bar P},
+\]
+where $E$ is energy-to-solution (J), $\eta_{\mathrm{F}}$ is computational
+energy efficiency (FLOP/J), and $\eta_{\mathrm{T}}$ is throughput per watt for a
+fixed workload.
+
+For memory-intensive kernels with transferred bytes $Q$, a useful auxiliary
+metric is
+\[
+  \eta_{\mathrm{B}} = \frac{Q}{E}
+  \quad [\text{bytes/J}],
+\]
+which helps identify memory-system inefficiency.
+
+\subsection{First-Order Model for Contraction Kernels}
+
+A simple decomposition that is sufficient for design decisions is
+\[
+  E \approx P_{\mathrm{base}}\,T + e_{\mathrm{F}}\,F + e_{\mathrm{B}}\,Q,
+\]
+with:
+\begin{itemize}
+  \item $P_{\mathrm{base}}$: baseline board power while the GPU is active,
+  \item $e_{\mathrm{F}}$: effective energy per floating-point operation,
+  \item $e_{\mathrm{B}}$: effective energy per byte moved through memory.
+\end{itemize}
+
+This model captures the main trade-off in this thesis: optimisations that
+reduce runtime $T$, redundant work $F$, or memory traffic $Q$ usually improve
+energy efficiency simultaneously.
+
+\subsection{Implications for This Thesis}
+
+The profiling results already support concrete energy-efficiency expectations:
+\begin{enumerate}
+  \item \textbf{Contraction-order improvement} (TN case study) reduces
+  arithmetic work from $\BigO(Bd_p^2\chi^2)$ to
+  $\BigO(B(d_p^2\chi+d_p\chi^2))$, so both time-to-solution and expected
+  energy-to-solution decrease.
+  \item \textbf{Coalescing improvements} reduce excess memory transactions,
+  improving both runtime and bytes/J in memory-sensitive regimes.
+  \item \textbf{Launch overhead reduction} is energy-relevant: many tiny
+  launches spend time at non-trivial board power without proportional progress.
+  \item \textbf{Register-pressure control} avoids occupancy collapse that
+  prolongs runtime and therefore increases $P_{\mathrm{base}}\,T$.
+\end{enumerate}
+
+In short, the same mechanisms that improve throughput in
+\cref{sec:profiling,tab:coalescing-sweep,tab:register-pressure} are also the
+dominant mechanisms for reducing energy-to-solution.
+
+\subsection{Measurement Protocol on A100 Nodes}
+
+On the JSC platform used here, practical energy measurement can be added with
+minimal workflow change:
+\begin{enumerate}
+  \item sample board power during each run via \texttt{nvidia-smi} telemetry,
+  \item integrate sampled power over wall-clock time to estimate $E$,
+  \item report FLOP/J together with runtime and Nsight KPIs.
+\end{enumerate}
+
+Representative telemetry fields and command syntax are documented in the
+\texttt{nvidia-smi} manual~\cite{nvidia-smi-doc}. This approach is robust enough
+for relative comparisons between algorithmic variants, even when absolute power
+calibration is not available.
+

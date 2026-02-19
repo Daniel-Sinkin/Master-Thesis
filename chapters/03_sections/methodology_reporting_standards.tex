@@ -1,0 +1,102 @@
+% chapters/03_sections/methodology_reporting_standards.tex
+\section{Methodology and Reporting Standards}
+\label{sec:methodology-reporting}
+
+This section defines mandatory rules for experiment design, profiling, and
+result reporting. The goal is to keep optimisation claims causal, reproducible,
+and comparable across kernels and optimisation stages.
+
+\subsection{Profiling Workflow Standard}
+
+Profiling is executed in two stages:
+\begin{enumerate}
+  \item \textbf{System-level trace first (Nsight Systems).} Identify launch
+  gaps, synchronisation bottlenecks, and overlap failures before collecting
+  kernel microarchitecture counters. Traces are restricted to explicit regions
+  of interest and short wall-clock windows to limit profiling perturbation
+  and trace bloat~\cite{nvidia-nsight-systems-user-guide,nvidia-nsight-latency}.
+  \item \textbf{Kernel-level trace second (Nsight Compute).} After the timeline
+  bottleneck is localised, collect a fixed KPI pack for attribution. For routine
+  iteration, use a minimal metric set and kernel filters; broad metric sweeps
+  are reserved for focused deep dives because replay passes increase overhead
+  and can bias short kernels~\cite{nvidia-nsight-compute-profiling-guide}.
+\end{enumerate}
+
+This workflow enforces a strict order: first find \emph{where} time is spent,
+then explain \emph{why} with counters.
+
+\subsection{Benchmark Design Standard}
+
+Each benchmark campaign follows these rules:
+\begin{enumerate}
+  \item \textbf{Fixed conditions of observation:} hardware partition, software
+  stack, compile flags, precision mode, and CPU/GPU affinity remain constant.
+  \item \textbf{Warm-up and steady-state timing:} warm-up iterations remove
+  first-launch effects; measured iterations are reported separately.
+  \item \textbf{Replicated measurements:} repeated runs are required, with
+  robust summary statistics (median and dispersion).
+  \item \textbf{Bias control:} run-order effects and hidden configuration
+  dependencies are treated as validity risks and explicitly checked.
+  \item \textbf{Cross-workload aggregation:} when normalised speedups are
+  aggregated across workloads, geometric means are used.
+\end{enumerate}
+
+These choices follow established benchmarking guidance from systems
+literature~\cite{kalibera2013rigorous,mytkowicz2009wrongdata,fleming1986geomean}
+and reporting standards in benchmark suites~\cite{spec-cpu2017-runrules}.
+
+\subsection{Mandatory Reporting Items}
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{l X}
+    \toprule
+    Item & Minimum required disclosure \\
+    \midrule
+    Platform & GPU model, interconnect/topology, CPU model, memory capacity. \\
+    Software stack & Driver, CUDA toolkit, compiler, library versions, profiler version. \\
+    Build configuration & Optimisation flags, debug/lineinfo flags, math mode (FP32/TF32/BF16/FP64). \\
+    Workloads & Exact tensor dimensions, batch sizes, data types, and input-generation policy. \\
+    Timing protocol & Warm-up count, measured iterations, repetitions, synchronisation boundaries. \\
+    Profiling protocol & Tool commands, kernel filters, metric set, launch-skip/count, replay-relevant options. \\
+    Statistics & Point estimate definition (e.g.\ median) and spread/uncertainty summary. \\
+    Correctness criteria & Numerical tolerance, reference implementation, validation frequency. \\
+    Artifacts & Script paths for run submission, CSV extraction, and figure generation. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Mandatory disclosure checklist for this thesis.}
+  \label{tab:methodology-reporting-checklist}
+\end{table}
+
+\subsection{Claim-to-Evidence Rules}
+
+To avoid over-claiming, each optimisation claim must satisfy:
+\begin{enumerate}
+  \item \textbf{Effect:} measurable runtime/throughput change on the target
+  workload distribution.
+  \item \textbf{Mechanism match:} KPI movement is consistent with the proposed
+  mechanism (e.g.\ memory, scheduler, occupancy, divergence).
+  \item \textbf{Numerical validity:} output deviation remains within tolerance.
+  \item \textbf{Reproducibility:} the result can be regenerated from documented
+  scripts and environment settings.
+\end{enumerate}
+
+If an effect is observed but mechanism counters do not match, the result is
+reported as empirical but non-attributed; no causal interpretation is claimed.
+
+\subsection{Threats-to-Validity Template}
+
+Each results subsection reports the following validity classes:
+\begin{itemize}
+  \item \textbf{Internal validity:} profiler perturbation, run-to-run noise,
+  and hidden synchronisation.
+  \item \textbf{Construct validity:} mismatch between chosen KPIs and the
+  intended bottleneck interpretation.
+  \item \textbf{External validity:} portability limits across architectures,
+  software versions, and tensor-shape distributions.
+\end{itemize}
+
+Mitigations are stated per experiment, using the mandatory reporting items in
+\cref{tab:methodology-reporting-checklist}.
+

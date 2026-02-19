@@ -36,23 +36,55 @@ fall back to equivalent names for the installed Nsight Compute version.
 
 \paragraph{Interpretation by KPI.}
 \begin{description}
-  \item[K1 (SM throughput).] Top-level SM progress indicator for overall
-  utilisation trends.
-  \item[K2 (DRAM throughput).] HBM pressure and memory-system saturation level.
-  \item[K3 (L2 throughput).] L2 traffic pressure; useful to separate L2-limited
-  from SM-limited phases.
-  \item[K4 (L1 hit rate).] L1/texture locality quality for kernels that route
-  through this cache path.
-  \item[K5 (FP32 FMA pipe active).] Fraction of peak FP32 arithmetic-pipe
-  activity, used as primary compute-efficiency signal.
-  \item[K6 (warps active).] Runtime active-warp level (occupancy in execution).
-  \item[K7 (register occupancy limit).] Indicates register-file constraints on
-  theoretical occupancy.
-  \item[K8 (warps eligible per cycle).] Scheduler readiness, i.e.\ how many
-  warps are ready to issue each cycle.
-  \item[K9 (issue active).] Front-end issue-slot utilisation.
-  \item[K10 (thread-inst per inst).] Divergence-sensitive thread participation
-  per instruction; a direct SIMT-efficiency signal.
+  \item[K1 (SM throughput).] This counter reports how much total SM work was
+  completed relative to the sustained peak for the device. It is a top-level
+  progress indicator across execution pipelines, so high values mean the SMs
+  are busy doing useful work. Low K1 indicates unused compute capacity, but it
+  does not by itself say whether the cause is memory stalls, low occupancy, or
+  poor issue efficiency.
+  \item[K2 (DRAM throughput).] This measures bandwidth at the HBM interface as
+  a percentage of sustained peak. High K2 means the kernel is pushing the DRAM
+  subsystem hard, often indicating a bandwidth-sensitive region. If K2 is high
+  while compute-side counters stay modest, the kernel is usually memory-bound.
+  \item[K3 (L2 throughput).] This measures traffic pressure through the L2
+  cache fabric relative to peak. It helps distinguish kernels limited by
+  on-chip cache traffic from kernels limited in the core pipelines. High K3
+  with weak compute counters often means data movement inside the memory
+  hierarchy dominates.
+  \item[K4 (L1 hit rate).] This is the fraction of L1/texture requests served
+  by L1 instead of missing to lower levels. Higher values usually mean better
+  locality and lower latency per memory access. Low K4 is not automatically bad
+  for streaming kernels with little temporal reuse, so it must be read together
+  with K2/K3 and runtime.
+  \item[K5 (FP32 FMA pipe active).] This reports how active the FP32 FMA
+  pipelines are relative to their sustained peak activity. It is the most
+  direct signal for whether FP32 arithmetic hardware is actually being used.
+  High K1 but low K5 usually means time is spent in non-FMA instructions or
+  waiting, not in dense FP32 math.
+  \item[K6 (warps active).] This is runtime occupancy: active warps as a
+  percentage of the architectural peak during kernel execution. High K6 means
+  many warps are resident and participating, which improves latency hiding
+  potential. However, high K6 alone does not guarantee speed if those warps are
+  mostly stalled.
+  \item[K7 (register occupancy limit).] This launch statistic captures how
+  strongly register allocation constrains theoretical occupancy. A stronger
+  register limit means fewer blocks/warps can reside on an SM at once, reducing
+  latency-hiding headroom. It should be interpreted with K6 and K8 to separate
+  static resource limits from dynamic scheduler starvation.
+  \item[K8 (warps eligible per cycle).] This counter measures how many warps
+  are ready to issue in each active cycle of an SM sub-partition. High K8 means
+  the scheduler has choices and can keep issue slots fed. Low K8 is a direct
+  starvation signal, typically from dependencies or long-latency memory waits.
+  \item[K9 (issue active).] This reports how often issue slots actually
+  dispatch instructions relative to peak sustained activity. High K9 means the
+  front end is productive and instruction delivery is healthy. Low K9 together
+  with low K8 indicates not enough ready warps, while low K9 with high K8 can
+  indicate other front-end bottlenecks.
+  \item[K10 (thread-inst per inst).] This approximates average participating
+  threads per issued instruction as a percentage of full-warp execution. Values
+  near 100\% indicate mostly uniform control flow, while values around 50\%
+  indicate substantial lane under-utilisation from divergence or predication.
+  It is therefore the primary SIMT efficiency counter for branch-heavy kernels.
 \end{description}
 
 \subsection{Interpretation Rules}
@@ -73,9 +105,9 @@ configurations:
   time increases under otherwise similar arithmetic work.
 \end{enumerate}
 
-\subsection{Application to Diagnostic Pairs}
+\subsection{Application to Benchmark Pairs}
 
-The same KPI pack is applied to both diagnostic pairs used in this chapter:
+The same KPI pack is applied to both benchmark pairs used in this chapter:
 
 \begin{itemize}
   \item \textbf{FP32 GEMM pair (cuBLAS vs naive):} expected separation is high
@@ -84,10 +116,14 @@ The same KPI pack is applied to both diagnostic pairs used in this chapter:
   \item \textbf{Warp-divergence pair (uniform vs divergent):} expected
   separation is primarily in K10, with secondary reductions in K8/K9 and
   effective throughput for the divergent variant.
+  \item \textbf{TN two-site contraction pair (ordered vs direct):} expected
+  separation is higher K1/K5/K9 for the ordered strided-batched GEMM mapping
+  and lower scheduler efficiency plus heavier memory pressure for the direct
+  contraction-order baseline.
 \end{itemize}
 
-\paragraph{Representative measured signatures.}
-For the FP32 GEMM diagnostic pair, the measured counters show:
+\paragraph{Measured example values.}
+For the FP32 GEMM benchmark pair, the measured counters show:
 K1 $98.45\%$ (cuBLAS) vs $54.32\%$ (naive),
 K5 $98.67\%$ vs $28.05\%$,
 K9 $56.15\%$ vs $31.50\%$,
@@ -100,5 +136,87 @@ For the warp-divergence pair, the key discriminator is K10:
 $100\%$ (warp-uniform) vs $50.35\%$ (forced divergent split), matching the
 expected half-warp execution efficiency for a lane-based $16/16$ branch split.
 
-This fixed KPI pack reduces ad-hoc profiler exploration and makes profile
-evidence directly comparable across optimisation steps.
+This fixed KPI pack reduces trial-and-error profiler exploration and keeps
+profile evidence comparable across optimisation steps.
+
+\subsection{Global-Memory Coalescing Sweep}
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{r r r r}
+    \toprule
+    Stride & Avg.\ kernel time (ms) & Effective BW (GB/s) & BW/BW$_{s=1}$ \\
+    \midrule
+    1   & 0.107776 & 1245.34 & 1.000 \\
+    2   & 0.152576 & 879.68  & 0.706 \\
+    4   & 0.242893 & 552.58  & 0.444 \\
+    8   & 0.432947 & 310.01  & 0.249 \\
+    16  & 0.822886 & 163.11  & 0.131 \\
+    32  & 0.841216 & 159.55  & 0.128 \\
+    64  & 0.600320 & 223.58  & 0.180 \\
+    128 & 0.237824 & 564.36  & 0.453 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Coalescing sweep results from the synthetic stride microbenchmark on
+    A100 (FP32 loads/stores).}
+  \label{tab:coalescing-sweep}
+\end{table}
+
+\IfFileExists{images/phenomena_coalescing_sweep.pdf}{
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{phenomena_coalescing_sweep}
+  \caption{Global-memory coalescing sweep over stride.}
+  \label{fig:phenomena-coalescing}
+\end{figure}
+}{}
+
+From stride 1 to stride 32, average kernel time increases from
+$0.108\;\text{ms}$ to $0.841\;\text{ms}$ ($7.8\times$), while the effective
+bandwidth proxy drops from $1245$ to $160\;\text{GB/s}$ ($0.13\times$). This
+is the expected signature of reduced coalescing: lanes in a warp map to more
+memory sectors, increasing memory transactions per useful word. For tensor
+network kernels this result shows that operand layouts in critical kernels should
+preserve unit-stride accesses for warp-contiguous dimensions whenever possible.
+
+The partial recovery at stride 64 and 128 is treated as a benchmark artifact
+from the masked synthetic index mapping
+(\texttt{idx = (tid * stride) \& (N-1)}), which introduces aliasing/reuse at
+large power-of-two strides. Therefore, interpretation is based primarily on the
+monotonic degradation regime up to stride 32.
+
+\subsection{Register Pressure and Occupancy}
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{l r r r}
+    \toprule
+    Variant & Avg.\ kernel time (ms) & Core effective TFLOP/s & Theoretical occupancy (\%) \\
+    \midrule
+    Low register pressure  & 0.594150 & 14.46 & 100.0 \\
+    High register pressure & 0.671002 & 12.80 & 62.5 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Register-pressure microbenchmark results on A100 (FP32 arithmetic
+    core work).}
+  \label{tab:register-pressure}
+\end{table}
+
+\IfFileExists{images/phenomena_register_pressure.pdf}{
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{phenomena_register_pressure}
+  \caption{Register pressure versus throughput and occupancy.}
+  \label{fig:phenomena-register-pressure}
+\end{figure}
+}{}
+
+Increasing live register state reduces theoretical occupancy from
+$100.0\%$ to $62.5\%$, increases runtime by about $12.9\%$, and reduces core
+effective throughput from $14.46$ to $12.80\;\text{TFLOP/s}$ (about $11.5\%$).
+This indicates that the high-register variant exposes less latency hiding due
+to fewer concurrently resident warps per SM. For contraction kernels, this
+supports limiting accumulator blocking and aggressive unrolling when they push
+register usage past the occupancy-efficient range.

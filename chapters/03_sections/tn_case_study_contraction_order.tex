@@ -1,0 +1,143 @@
+\section{Case Study: Contraction Order in a Two-Site TN Update}
+\label{sec:tn-contraction-order-case}
+
+This section introduces a concrete tensor-network-style problem where a
+reasonable first implementation can be much slower than a mathematically
+equivalent alternative.
+
+\subsection{Problem Definition}
+
+Consider a batched two-site update with fused physical dimension $d_p=d^2$:
+\[
+  Y_{b,p,r}
+  =
+  \sum_{q=0}^{d_p-1}\sum_{c=0}^{\chi-1}
+  G_{p,q}\,X_{b,q,c}\,M_{c,r},
+\]
+where:
+\begin{itemize}
+  \item $b\in[0,B)$ is a batch index,
+  \item $p,q\in[0,d_p)$ are fused physical indices,
+  \item $c,r\in[0,\chi)$ are bond-space indices.
+\end{itemize}
+
+The tensor structure is representative of two-site gate application and local
+environment projection steps in MPS-style workflows.
+
+\subsection{Plausible Baseline (Bad)}
+
+A straightforward GPU implementation computes one output element
+$Y_{b,p,r}$ per thread and evaluates both sums directly. This gives a direct
+cost
+\[
+  \BigO\!\left(B\,d_p^2\,\chi^2\right),
+\]
+with weak reuse of $X$ and $M$ across threads and heavy global-memory traffic.
+This baseline is implemented in
+\path{code/profiling/tn_two_site_bad_direct.cu}.
+
+\subsection{Improved Algorithm (Better)}
+
+The key change is contraction order:
+\[
+  T_{b,p,c} = \sum_{q=0}^{d_p-1} G_{p,q}X_{b,q,c},
+  \qquad
+  Y_{b,p,r} = \sum_{c=0}^{\chi-1} T_{b,p,c}M_{c,r}.
+\]
+This reduces asymptotic work to
+\[
+  \BigO\!\left(B\,(d_p^2\chi + d_p\chi^2)\right),
+\]
+and maps directly to two strided-batched GEMMs. The implementation is
+\path{code/profiling/tn_two_site_good_batched_gemm.cu}.
+
+Theoretical operation-ratio improvement (direct vs ordered) is
+\[
+  R
+  =
+  \frac{d_p^2\chi^2}{d_p^2\chi + d_p\chi^2}
+  =
+  \frac{d_p\chi}{d_p+\chi}.
+\]
+For the benchmarked shape $d_p=16$, $\chi=256$, this gives
+$R\approx 15.1$, before any hardware-level optimisations.
+
+\subsection{Design Decisions Behind the Better Variant}
+
+The implementation sequence follows the staged optimisation style from
+Simon B\"ohm's SGEMM worklog~\cite{boehm2022cuda-mmm}:
+start with algorithmic structure, then improve memory behavior, then improve
+execution mapping.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{l X}
+    \toprule
+    Design decision & Why it helps \\
+    \midrule
+    Change contraction order first & Removes redundant work
+    ($\BigO(Bd_p^2\chi^2)\rightarrow\BigO(B(d_p^2\chi+d_p\chi^2))$). \\
+    Map to strided-batched GEMM & Uses highly tuned kernels instead of manual
+    scalar loops. \\
+    Reuse shared operands with zero stride & $G$ and $M$ are reused across the
+    whole batch without host-side relaunch loops. \\
+    Keep FP32 pedantic math mode & Preserves strict FP32 behavior while
+    comparing algorithmic variants. \\
+    Profile with fixed KPI pack & Separates true algorithm gains from incidental
+    launch/measurement noise. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Main design decisions for the two-site contraction case study.}
+  \label{tab:tn-case-design-decisions}
+\end{table}
+
+\subsection{Optimisation Ladder (Structured After SGEMM Worklogs)}
+
+Beyond the single ``bad vs good'' comparison, this case follows a staged
+optimisation structure similar to the SGEMM worklog style in
+\cite{boehm2022cuda-mmm}: fix algorithmic work first, then remove memory
+pathologies, then improve scheduling and occupancy, and finally tune.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{l l X}
+    \toprule
+    Stage & Typical problem & Why it matters for TN contractions \\
+    \midrule
+    0: Correct baseline & Slow but simple direct contraction &
+    Ensures correctness and provides a reproducible lower-performance
+    reference point. \\
+    1: Contraction order & Redundant arithmetic in naive loop nests &
+    Reduces asymptotic work before low-level tuning, often the largest
+    single gain for TN updates. \\
+    2: Global-memory access & Non-coalesced or strided operand traversal &
+    Determines whether memory traffic scales with useful work or with
+    transaction overhead. \\
+    3: On-chip reuse & Re-reading hot operands from HBM instead of cache/SMEM &
+    Increases arithmetic intensity and reduces long-latency loads. \\
+    4: Scheduler feed (ILP) & Too few independent instructions per warp &
+    Improves eligible-warps and issue efficiency in instruction-dense
+    contraction kernels. \\
+    5: Resource balance & Excess registers reduce occupancy &
+    Preserves latency-hiding capacity and avoids occupancy collapse from
+    over-aggressive unrolling/blocking. \\
+    6: Launch cost & Many tiny kernels around contraction steps &
+    Fusing pre/post transforms amortises host launch overhead for
+    small and medium tensor shapes. \\
+    7: Parameter search & One fixed tile/shape choice for all workloads &
+    Auto-tuning per shape regime is required because optimal mappings are
+    hardware- and size-dependent. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Stage-wise optimisation path used for the TN contraction case.}
+  \label{tab:tn-optimisation-ladder}
+\end{table}
+
+\subsection{Profiling Reproducibility}
+
+The complete compile-and-profile job is provided as
+\path{code/profiling/ncu_tn_contraction_profile.slurm}.
+It collects the same KPI pack used in the rest of this thesis and writes
+separate CSV files for both variants.

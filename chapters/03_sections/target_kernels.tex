@@ -11,7 +11,7 @@ to GPU execution overhead:
     including cases where dimensions are not multiples of warp tile sizes.
   \item \textbf{Layout-transformation kernels} (permute/pack/unpack) required
     before and after contractions.
-  \item \textbf{Fused micro-pipelines} that execute several contractions (and
+  \item \textbf{Fused kernel sequences} that execute several contractions (and
     optional lightweight post-processing) inside one launch.
 \end{enumerate}
 
@@ -30,4 +30,3 @@ the following conditions:
   \item clear exposure to launch overhead or memory-traffic bottlenecks,
   \item portability to both single-GPU and one-node multi-GPU execution.
 \end{itemize}
-

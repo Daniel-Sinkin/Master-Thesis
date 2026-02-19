@@ -1,0 +1,93 @@
+\section{Mathematical Foundations for Performance Evaluation}
+\label{sec:math-foundations}
+
+This section summarizes core mathematical tools used throughout the thesis for
+performance interpretation and numerical reliability. The goal is not a full
+theory treatment, but a compact framework that links measurements to
+well-defined models.
+
+\subsection{Work, Data Movement, and Runtime Bounds}
+
+For a kernel with floating-point work $F$ (FLOPs) and main-memory traffic
+$Q$ (bytes), a first-order runtime model is
+\[
+  T \approx \max\!\left(\frac{F}{P_{\mathrm{eff}}},\,\frac{Q}{B_{\mathrm{eff}}}\right) + T_{\mathrm{launch}},
+\]
+where $P_{\mathrm{eff}}$ and $B_{\mathrm{eff}}$ are achieved compute and
+bandwidth rates, and $T_{\mathrm{launch}}$ is host/device dispatch overhead.
+
+The corresponding arithmetic intensity
+\[
+  I=\frac{F}{Q}
+\]
+links compute and memory limits. Under ideal sustained ceilings
+$(P_{\max},B_{\max})$, throughput is bounded by
+\[
+  P \le \min\!\left(P_{\max},\,B_{\max}I\right).
+\]
+This gives the standard ridge point
+\[
+  I^\star=\frac{P_{\max}}{B_{\max}},
+\]
+which separates memory-bound and compute-bound regimes.
+
+\subsection{Parallel Scaling Metrics}
+
+Given runtime $T_p$ on $p$ processing units, speedup and parallel efficiency are
+\[
+  S_p=\frac{T_1}{T_p},
+  \qquad
+  E_p=\frac{S_p}{p}.
+\]
+For strong scaling with serial fraction $f_s$, Amdahl's bound is
+\[
+  S_p \le \frac{1}{f_s + \frac{1-f_s}{p}}.
+\]
+For weak scaling with scaled problem size, Gustafson's relation is
+\[
+  S_p \approx p - f_s(p-1).
+\]
+These bounds are used to interpret node-level scaling results in
+\cref{sec:scaling}.
+
+\subsection{Floating-Point Error Model}
+
+For one floating-point operation, we use the standard model
+\[
+  \mathrm{fl}(a \circ b) = (a \circ b)(1+\delta),
+  \qquad
+  |\delta| \le u,
+\]
+with unit roundoff $u$ and $\circ\in\{+,-,\times,/\}$.
+
+For a length-$k$ dot product, a common bound is
+\[
+  \left|\mathrm{fl}(x^\top y)-x^\top y\right|
+  \le
+  \gamma_k\,|x|^\top|y|,
+  \qquad
+  \gamma_k = \frac{k u}{1-k u},
+\]
+which makes explicit why long reduction chains are sensitive to precision
+choice. This is one reason why FP32 accuracy checks are kept in the workflow
+even when throughput is the primary objective~\cite{higham2022mixed}.
+
+\subsection{Timing Statistics}
+
+For repeated runtime samples $\{t_i\}_{i=1}^n$, this thesis reports the sample
+median
+\[
+  \tilde t = \operatorname{median}(t_i)
+\]
+as the primary point estimate, because it is robust to occasional outliers from
+scheduler and system noise.
+
+Dispersion is tracked with the median absolute deviation (MAD):
+\[
+  \operatorname{MAD} = \operatorname{median}\!\left(|t_i-\tilde t|\right),
+\]
+and a robust spread estimate
+\[
+  \hat\sigma_{\mathrm{rob}} \approx 1.4826 \cdot \operatorname{MAD}.
+\]
+This keeps uncertainty reporting stable for short benchmark campaigns.

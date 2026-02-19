@@ -47,6 +47,39 @@ independently, an SM can have four instructions from four different warps in fli
 simultaneously, which is the primary mechanism for hiding memory and instruction 
 latency.
 
+\subsection{What Is New in A100 for This Thesis}\label{sec:a100-whats-new}
+
+Relative to the previous Volta generation, the A100 changes several hardware
+limits that matter directly for tensor-network kernels~\cite{nvidia2020a100,nvidia-ampere-tuning-guide}:
+\begin{itemize}
+  \item \textbf{Third-generation tensor cores and TF32 mode.} FP32 inputs can be
+    accelerated on tensor cores through TF32 execution without changing storage
+    format, which improves throughput for GEMM-like contractions.
+  \item \textbf{Larger on-chip memory budget.} The A100 provides up to
+    \SI{164}{\kilo\byte} shared memory per SM and a \SI{40}{\mega\byte} L2
+    cache, increasing tile reuse opportunities and reducing pressure on HBM.
+  \item \textbf{Asynchronous global-to-shared copy.} Ampere introduces hardware
+    support for overlap-friendly copy pipelines (\texttt{cp.async}), which is
+    important for latency hiding in custom kernels.
+  \item \textbf{Stronger inter-GPU fabric.} NVLink 3.0 bandwidth makes
+    multi-GPU contraction decomposition practical with lower communication
+    penalty.
+\end{itemize}
+
+For performance modeling, these changes can be summarized with a roofline bound
+\[
+  P \le \min\!\bigl(P_{\max},\, B_{\max}\,I\bigr),
+\]
+where $I$ is arithmetic intensity (FLOPs/byte). The ridge point
+\[
+  I^\star = \frac{P_{\max}}{B_{\max}}
+\]
+is the minimum intensity needed for compute-bound execution. Using A100 FP32
+peaks ($P_{\max}\approx\SI{19.5}{\tera\flops}$,
+$B_{\max}\approx\SI{1555}{\giga\byte\per\second}$), we get
+$I^\star\approx 12.5$ FLOPs/byte, which is the practical threshold used
+throughout this thesis.
+
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
 Scientific computing on GPUs has historically defaulted to 64-bit double precision (FP64), matching the convention established by decades of CPU-based numerical software. However, the A100 architecture supports a range of floating-point formats with dramatically different throughput characteristics, and for many workloads---including tensor contractions---FP32 or even reduced-precision formats offer sufficient accuracy at a fraction of the cost. This section reviews the relevant formats and motivates the precision choices made in this thesis.
@@ -467,7 +500,8 @@ different host-device topology assumptions and are therefore outside the scope
 of this node-level model.
 
 \paragraph{Host-device path cost model.}
-For a transfer of size $V$ bytes, a useful first-order model is
+For a transfer of size $V$ bytes, we use a first-order latency+bandwidth model
+in the standard Hockney form~\cite{hockney1988parallel}:
 \[
   T_{\mathrm{H2D}}(\pi, V)
   \approx
@@ -489,7 +523,35 @@ gives the expected ordering
 \]
 This model is intentionally simple, but it is sufficient for placement policy
 decisions: thread pinning and host-buffer NUMA placement should minimise
-$n_{\mathrm{IF}}$ and maximise $B_{\mathrm{eff}}$.
+$n_{\mathrm{IF}}$ and maximise $B_{\mathrm{eff}}$. This is consistent with CUDA
+placement recommendations for multi-socket hosts~\cite{nvidia-cuda-guide,nvidia-cuda-best-practices}.
+
+\paragraph{Concrete mapping for this node.}
+Using the measured affinity in \cref{tab:gpu-numa-affinity}, the path classes
+can be made explicit. For example, for GPU\,1 (local NUMA\,1):
+\begin{itemize}
+  \item \textbf{Local path} ($\pi=\pi_{\mathrm{local}}$):
+    thread and pinned host buffer on NUMA\,1 (cores 16--31),
+    modeled with $n_{\mathrm{IF}}=0$.
+  \item \textbf{Same-socket remote path} ($\pi=\pi_{\mathrm{ss}}$):
+    thread/buffer on NUMA\,3 (same socket, cores 48--63),
+    modeled with one additional fabric segment ($n_{\mathrm{IF}}\approx 1$).
+  \item \textbf{Cross-socket path} ($\pi=\pi_{\mathrm{xs}}$):
+    thread/buffer on NUMA\,5 or NUMA\,7 (other socket),
+    modeled with inter-socket traversal plus local fabric
+    ($n_{\mathrm{IF}}\approx 2$ in this simplified model).
+\end{itemize}
+The same local/same-socket/cross-socket classification applies to GPU\,0, GPU\,2,
+and GPU\,3 by replacing NUMA IDs with their entries from
+\cref{tab:gpu-numa-affinity}. The practical expectation is
+\[
+  B_{\mathrm{eff}}(\pi_{\mathrm{local}})
+  >
+  B_{\mathrm{eff}}(\pi_{\mathrm{ss}})
+  >
+  B_{\mathrm{eff}}(\pi_{\mathrm{xs}}),
+\]
+and correspondingly higher transfer time for the same $V$.
 
 In practice, this topology has two implications for the work in this thesis:
 

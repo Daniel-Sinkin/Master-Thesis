@@ -8,8 +8,8 @@ short, and memory-layout transforms are frequent. In this regime, launch
 overhead, data movement, and occupancy limits can dominate the total runtime.
 
 This thesis is conducted in collaboration with the J\"ulich Supercomputing
-Centre (JSC), where partner teams in computational physics require robust and
-portable performance improvements on production HPC systems. The immediate
+Centre (JSC), where partner teams in computational physics require reliable
+performance gains on production HPC systems. The immediate
 hardware target is Ampere-class GPUs, in particular A100 nodes, with a
 conservative baseline of one node (four A100-SXM4-40GB GPUs connected via
 NVLink).
@@ -27,7 +27,7 @@ keeping the scope on HPC implementation aspects rather than physics modelling.
 The work is organised around the following technical questions:
 
 \begin{enumerate}
-  \item Which kernel motifs are the primary bottlenecks on A100 for the target
+  \item Which kernel patterns are the primary bottlenecks on A100 for the target
     workload distribution (small/medium contractions, layout transforms, short
     kernel sequences)?
   \item How much performance can be recovered through launch reduction, kernel
@@ -46,7 +46,7 @@ The contributions of this thesis are:
 
 \begin{enumerate}
   \item A hardware-aware characterisation of tensor-network-relevant kernel
-    motifs on Ampere GPUs, with emphasis on launch-dominated and
+    patterns on Ampere GPUs, with emphasis on launch-dominated and
     bandwidth-limited regimes.
   \item An implementation strategy for fused and layout-aware CUDA kernels,
     including explicit occupancy and memory-hierarchy trade-off analysis.

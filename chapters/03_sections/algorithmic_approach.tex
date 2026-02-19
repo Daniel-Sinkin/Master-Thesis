@@ -133,7 +133,7 @@ Interpretation for optimisation decisions:
     serial orchestration is likely the limiting factor (Amdahl regime).
 \end{itemize}
 
-\subsubsection{Arithmetic-Intensity Landscape for Rectangular Kernels}
+\subsubsection{Arithmetic-Intensity Map for Rectangular Kernels}
 \label{sec:ai-landscape}
 
 To isolate shape effects before full kernel implementation, we model a GEMM-like
@@ -199,7 +199,7 @@ $(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
       }
     }
   }
-  \caption{Arithmetic-intensity landscape for rectangular GEMM-like kernels in
+  \caption{Arithmetic-intensity map for rectangular GEMM-like kernels in
   FP32 at fixed $K=64$. Left: ideal intensity without padding.
   Right: effective intensity with $16$-element padding on $M,N,K$ (useful FLOPs
   over padded traffic).}
@@ -218,7 +218,7 @@ $(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
       }
     }
   }
-  \caption{Arithmetic-intensity landscape for rectangular GEMM-like kernels in
+  \caption{Arithmetic-intensity map for rectangular GEMM-like kernels in
   FP64 at fixed $K=64$. Shape trends match FP32, while absolute intensity is
   uniformly lower due to the larger element size.}
   \label{fig:ai-heatmap-fp64}

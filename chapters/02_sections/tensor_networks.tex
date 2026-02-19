@@ -1,6 +1,56 @@
 % chapters/02_sections/tensor_networks.tex
 \section{Tensor Networks}\label{sec:tensor-networks}
 
+\subsection{Historical Background}\label{sec:tn-history}
+
+Tensor networks entered computational physics through the density-matrix
+renormalization group (DMRG) in the early 1990s, where the key practical idea
+was to keep only the most relevant subspace during iterative updates
+~\cite{white1992dmrg,white1993dmrg}. During the 2000s, this was reformulated in
+explicit tensor-network language, especially as matrix product states (MPS),
+which clarified the relation between approximation quality and bond dimension
+~\cite{schollwock2011dmrg,orus2014practical-intro-tn}.
+
+For high-performance computing, the first generation of tensor-network codes
+was CPU-focused and built around BLAS/LAPACK kernels plus MPI-based
+distribution. Over time, the contraction-heavy parts moved to GPUs, where
+cuBLAS/cuTENSOR-style kernels and communication-aware scheduling became central
+for strong scaling across devices~\cite{springer2017tensor,menczer2023massive,menczer2024efficient-dmrg-gpu}.
+In short: the algorithmic core stayed similar, but the performance bottlenecks
+shifted toward memory movement, launch overhead, and multi-GPU orchestration.
+
+\subsection{Why Tensor Networks Are of Interest}\label{sec:tn-interest}
+
+Tensor networks are useful because they replace exponential state
+representations with structured low-rank factorizations when entanglement is
+limited. For a chain of $L$ sites with local dimension $d$, the full state
+vector requires
+\[
+  N_{\text{state}} = d^L
+\]
+complex amplitudes. In contrast, a uniform-bond MPS uses
+\[
+  N_{\text{MPS}} \sim L\,d\,\chi^2,
+\]
+which is polynomial in system size for fixed bond dimension $\chi$.
+
+This reduction is directly tied to entanglement structure. Across one bipartite
+cut, an MPS corresponds to a truncated Schmidt decomposition
+\[
+  \left|\Psi\right\rangle = \sum_{a=1}^{\chi} s_a \left|a_L\right\rangle\left|a_R\right\rangle,
+\]
+and the von Neumann entropy
+\[
+  S = -\sum_a s_a^2 \log s_a^2
+\]
+is effectively controlled by the retained rank $\chi$.
+
+From an HPC perspective, tensor networks are also interesting because they are a
+stress test for modern GPUs: many dense contractions, repeated reshapes, and
+long iterative workflows with short kernels. This combination makes them a good
+case for studying both kernel-level efficiency and system-level orchestration
+costs~\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}.
+
 \subsection{Computational Context}\label{sec:tensor-context}
 
 Tensor-network methods arise in quantum many-body simulation, where the full
@@ -52,6 +102,16 @@ From an HPC perspective, two scaling facts are useful planning rules:
     shifts pressure to memory traffic and tensor-factorisation kernels.
 \end{enumerate}
 
+A typical two-site update can be sketched with a simple cost model:
+\[
+  \text{FLOPs}_{\text{update}}
+  \approx c_1\,d\,\chi^3 + c_2\,d^2\,\chi^2,
+\]
+where the first term represents contraction work and the second represents
+truncation/factorization work. Constants $c_1,c_2$ depend on layout and update
+scheme, but the scaling makes clear why $\chi$ is the dominant performance
+driver.
+
 In practical implementations, local updates are often executed as:
 \begin{enumerate}
   \item fuse neighboring local tensors into an effective two-site tensor,
@@ -64,9 +124,9 @@ This pattern maps directly to the optimisation targets in later chapters:
 GEMM-like contractions, layout transforms, launch overhead control, and
 profiling-guided tuning of memory/occupancy trade-offs.
 
-\subsection{Kernel Motifs Relevant to This Thesis}\label{sec:tn-kernel-motifs}
+\subsection{Kernel Patterns Relevant to This Thesis}\label{sec:tn-kernel-motifs}
 
-The optimisation work in this thesis is driven by three recurring motifs:
+The optimisation work in this thesis is driven by three recurring patterns:
 
 \begin{enumerate}
   \item \textbf{Small and medium dense contractions.} After index reshaping,

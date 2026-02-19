@@ -1,8 +1,8 @@
 % chapters/05_sections/discussion.tex
 \section{Discussion}\label{sec:discussion}
 
-The discussion synthesises kernel-level and system-level findings into
-actionable guidance for future optimisation cycles.
+This section combines kernel-level and system-level findings into practical
+guidance for future optimisation cycles.
 
 \subsection{What Improved and Why}
 
@@ -12,13 +12,30 @@ precision mode selection). Profiling evidence is used to support each claim,
 using the fixed KPI pack defined in \cref{tab:kpi-pack} so that attributions
 remain comparable across kernels and optimisation stages.
 
-\subsection{Transferability}
+\subsection{How Well Results Transfer}
 
 Improvements are classified as:
 
 \begin{itemize}
-  \item \textbf{portable} (likely to transfer across Ampere-like systems),
-  \item \textbf{topology-sensitive} (dependent on node NUMA/NVLink structure),
-  \item \textbf{workload-specific} (effective only for the studied contraction
+  \item \textbf{likely to carry over} (expected to transfer across Ampere-like systems),
+  \item \textbf{topology dependent} (depends on node NUMA/NVLink structure),
+  \item \textbf{workload dependent} (effective only for the studied contraction
     distribution).
 \end{itemize}
+
+\subsection{Microbenchmark Implications for Tensor Networks}
+
+The two most useful profiling microbenchmarks are the coalescing sweep
+(\cref{tab:coalescing-sweep,fig:phenomena-coalescing}) and the register
+pressure study (\cref{tab:register-pressure,fig:phenomena-register-pressure}).
+
+For coalescing, the stride-1 to stride-32 degradation quantifies how quickly
+memory efficiency collapses when warp lanes lose contiguous access patterns.
+This supports prioritising layout transforms and contraction ordering that keep
+the hottest contracted index unit-stride in memory.
+
+For register pressure, the occupancy drop from $100\%$ to $62.5\%$ with an
+accompanying throughput loss shows that ``more in-register work'' is not
+monotonically beneficial. In practice, this motivates tuning unroll depth and
+accumulator count jointly with occupancy targets rather than maximising
+instruction-level reuse in isolation.

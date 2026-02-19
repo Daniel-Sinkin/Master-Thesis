@@ -8,7 +8,7 @@ profiling.
 
 \subsection{Design Variants}
 
-For each target contraction motif, three variants are maintained:
+For each target contraction pattern, three variants are maintained:
 
 \begin{enumerate}
   \item \textbf{Reference variant:} straightforward kernel for correctness and
@@ -19,7 +19,7 @@ For each target contraction motif, three variants are maintained:
     host-side launch overhead.
 \end{enumerate}
 
-Maintaining explicit variants makes performance deltas attributable and prevents
+Maintaining explicit variants makes it easier to attribute performance deltas and prevents
 ``all-at-once'' changes that are hard to analyse.
 
 \subsection{Correctness and Numerical Checks}
@@ -27,4 +27,3 @@ Maintaining explicit variants makes performance deltas attributable and prevents
 Each variant is checked against a trusted baseline (library result or high
 precision reference) with fixed tolerance settings per precision mode. Any
 performance result is accepted only after numerical agreement is verified.
-
