@@ -35,9 +35,9 @@ Each data point is measured with:
 \begin{enumerate}
   \item warm-up iterations to remove first-launch effects,
   \item repeated timed iterations (CUDA events) for stable statistics,
-  \item optional Nsight Compute passes for hardware-counter attribution.
+  \item Nsight Compute passes with a fixed ten-counter KPI pack for
+  hardware-counter attribution (\cref{tab:kpi-pack}).
 \end{enumerate}
 
 Reported values use median runtime by default; spread (e.g.\ min/max or
 percentiles) is included when variance is non-negligible.
-

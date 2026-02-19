@@ -8,7 +8,9 @@ actionable guidance for future optimisation cycles.
 
 The main question is not only whether performance improved, but which mechanism
 was responsible (launch reduction, memory locality, occupancy tuning, or
-precision mode selection). Profiling evidence is used to support each claim.
+precision mode selection). Profiling evidence is used to support each claim,
+using the fixed KPI pack defined in \cref{tab:kpi-pack} so that attributions
+remain comparable across kernels and optimisation stages.
 
 \subsection{Transferability}
 
@@ -20,4 +22,3 @@ Improvements are classified as:
   \item \textbf{workload-specific} (effective only for the studied contraction
     distribution).
 \end{itemize}
-

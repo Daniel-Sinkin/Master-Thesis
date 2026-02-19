@@ -4,21 +4,76 @@
 Nsight Compute data is used to explain \emph{why} performance changes after each
 optimisation, not only \emph{how much} it changes.
 
-\subsection{Primary Counter Groups}
+\subsection{KPI Pack Used for Attribution}
 
-The analysis focuses on:
+To keep profiling interpretable and comparable, all Nsight Compute runs in this
+thesis use a fixed ten-counter KPI pack. The profiling scripts in
+\texttt{code/profiling/} use exact metric names when available and otherwise
+fall back to equivalent names for the installed Nsight Compute version.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{l X X}
+    \toprule
+    ID & Counter family (Nsight Compute) & Why it is included \\
+    \midrule
+    K1 & \texttt{sm\_\_throughput.*pct\_of\_peak} &
+    Top-level SM progress indicator (overall utilisation trend). \\
+    K2 & \texttt{dram\_\_throughput.*pct\_of\_peak} &
+    HBM pressure and memory-system saturation. \\
+    K3 & \texttt{lts\_\_...throughput.*pct\_of\_peak} &
+    L2 traffic pressure; helps separate L2-limited vs SM-limited phases. \\
+    K4 & \texttt{l1tex\_\_t\_sector\_hit\_rate.pct} &
+    L1/texture cache locality quality. \\
+    K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.*pct\_of\_peak} &
+    FP32 arithmetic-pipe activity (compute work actually issued). \\
+    K6 & \texttt{sm\_\_warps\_active.*pct\_of\_peak} &
+    Runtime occupancy/active warp level during execution. \\
+    K7 & \texttt{launch\_\_occupancy\_limit\_registers} &
+    Detects register-file constraints on theoretical occupancy. \\
+    K8 & \texttt{smsp\_\_warps\_eligible.*per\_cycle\_active} &
+    Scheduler readiness (how many warps are ready to issue). \\
+    K9 & \texttt{smsp\_\_issue\_active.*pct\_of\_peak} &
+    Issue-slot utilisation (front-end efficiency). \\
+    K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.*} &
+    Divergence-sensitive thread participation per instruction. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Ten-counter KPI pack used throughout profiling-based attribution.}
+  \label{tab:kpi-pack}
+\end{table}
+
+\subsection{Interpretation Rules}
+
+Attribution follows these rules under identical problem sizes and launch
+configurations:
+
+\begin{enumerate}
+  \item \textbf{Compute-limited pattern:} K1 and K5 are high, while K2/K3 are
+  not dominant.
+  \item \textbf{Memory-limited pattern:} K2 and/or K3 are high, K8/K9 are
+  reduced due to memory waiting, and throughput scales weakly with more FMAs.
+  \item \textbf{Occupancy/resource-limited pattern:} K7 indicates a register
+  limit and K6 remains below expected active-warp levels.
+  \item \textbf{Scheduler starvation pattern:} K8 and K9 drop together,
+  indicating insufficient eligible warps or long-latency dependencies.
+  \item \textbf{Divergence/predication loss pattern:} K10 decreases while kernel
+  time increases under otherwise similar arithmetic work.
+\end{enumerate}
+
+\subsection{Application to Diagnostic Pairs}
+
+The same KPI pack is applied to both diagnostic pairs used in this chapter:
 
 \begin{itemize}
-  \item achieved occupancy and active warps,
-  \item SM and tensor-core utilisation,
-  \item global-memory throughput and L2 hit rate,
-  \item warp stall breakdown (memory, dependency, barrier, dispatch),
-  \item shared-memory bank-conflict indicators.
+  \item \textbf{FP32 GEMM pair (cuBLAS vs naive):} expected separation is high
+  K1/K5/K9 for cuBLAS and lower compute-issue efficiency for the naive kernel,
+  with different memory-pressure signatures in K2--K4.
+  \item \textbf{Warp-divergence pair (uniform vs divergent):} expected
+  separation is primarily in K10, with secondary reductions in K8/K9 and
+  effective throughput for the divergent variant.
 \end{itemize}
 
-\subsection{Attribution Method}
-
-For each optimisation step, counters are compared before/after under identical
-workload settings. A claimed optimisation mechanism is accepted only if the
-relevant counter movement is consistent with the performance change.
-
+This fixed KPI pack reduces ad-hoc profiler exploration and makes profile
+evidence directly comparable across optimisation steps.
