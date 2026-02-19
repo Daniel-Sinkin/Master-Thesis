@@ -14,35 +14,46 @@ fall back to equivalent names for the installed Nsight Compute version.
 \begin{table}[t]
   \centering
   \small
-  \begin{tabularx}{\textwidth}{l X X}
+  \begin{tabularx}{\textwidth}{l X}
     \toprule
-    ID & Counter family (Nsight Compute) & Why it is included \\
+    ID & Counter selector family (Nsight Compute) \\
     \midrule
-    K1 & \texttt{sm\_\_throughput.*pct\_of\_peak} &
-    Top-level SM progress indicator (overall utilisation trend). \\
-    K2 & \texttt{dram\_\_throughput.*pct\_of\_peak} &
-    HBM pressure and memory-system saturation. \\
-    K3 & \texttt{lts\_\_...throughput.*pct\_of\_peak} &
-    L2 traffic pressure; helps separate L2-limited vs SM-limited phases. \\
-    K4 & \texttt{l1tex\_\_t\_sector\_hit\_rate.pct} &
-    L1/texture cache locality quality. \\
-    K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.*pct\_of\_peak} &
-    FP32 arithmetic-pipe activity (compute work actually issued). \\
-    K6 & \texttt{sm\_\_warps\_active.*pct\_of\_peak} &
-    Runtime occupancy/active warp level during execution. \\
-    K7 & \texttt{launch\_\_occupancy\_limit\_registers} &
-    Detects register-file constraints on theoretical occupancy. \\
-    K8 & \texttt{smsp\_\_warps\_eligible.*per\_cycle\_active} &
-    Scheduler readiness (how many warps are ready to issue). \\
-    K9 & \texttt{smsp\_\_issue\_active.*pct\_of\_peak} &
-    Issue-slot utilisation (front-end efficiency). \\
-    K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.*} &
-    Divergence-sensitive thread participation per instruction. \\
+    K1 & \texttt{sm\_\_throughput.*pct\_of\_peak} \\
+    K2 & \texttt{dram\_\_throughput.*pct\_of\_peak} \\
+    K3 & \texttt{lts\_\_...throughput.*pct\_of\_peak} \\
+    K4 & \texttt{l1tex\_\_t\_sector\_hit\_rate.pct} \\
+    K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.*pct\_of\_peak} \\
+    K6 & \texttt{sm\_\_warps\_active.*pct\_of\_peak} \\
+    K7 & \texttt{launch\_\_occupancy\_limit\_registers} \\
+    K8 & \texttt{smsp\_\_warps\_eligible.*per\_cycle\_active} \\
+    K9 & \texttt{smsp\_\_issue\_active.*pct\_of\_peak} \\
+    K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.*} \\
     \bottomrule
   \end{tabularx}
-  \caption{Ten-counter KPI pack used throughout profiling-based attribution.}
+  \caption{KPI identifier to metric-selector mapping used in profiling scripts.}
   \label{tab:kpi-pack}
 \end{table}
+
+\paragraph{Interpretation by KPI.}
+\begin{description}
+  \item[K1 (SM throughput).] Top-level SM progress indicator for overall
+  utilisation trends.
+  \item[K2 (DRAM throughput).] HBM pressure and memory-system saturation level.
+  \item[K3 (L2 throughput).] L2 traffic pressure; useful to separate L2-limited
+  from SM-limited phases.
+  \item[K4 (L1 hit rate).] L1/texture locality quality for kernels that route
+  through this cache path.
+  \item[K5 (FP32 FMA pipe active).] Fraction of peak FP32 arithmetic-pipe
+  activity, used as primary compute-efficiency signal.
+  \item[K6 (warps active).] Runtime active-warp level (occupancy in execution).
+  \item[K7 (register occupancy limit).] Indicates register-file constraints on
+  theoretical occupancy.
+  \item[K8 (warps eligible per cycle).] Scheduler readiness, i.e.\ how many
+  warps are ready to issue each cycle.
+  \item[K9 (issue active).] Front-end issue-slot utilisation.
+  \item[K10 (thread-inst per inst).] Divergence-sensitive thread participation
+  per instruction; a direct SIMT-efficiency signal.
+\end{description}
 
 \subsection{Interpretation Rules}
 
@@ -74,6 +85,20 @@ The same KPI pack is applied to both diagnostic pairs used in this chapter:
   separation is primarily in K10, with secondary reductions in K8/K9 and
   effective throughput for the divergent variant.
 \end{itemize}
+
+\paragraph{Representative measured signatures.}
+For the FP32 GEMM diagnostic pair, the measured counters show:
+K1 $98.45\%$ (cuBLAS) vs $54.32\%$ (naive),
+K5 $98.67\%$ vs $28.05\%$,
+K9 $56.15\%$ vs $31.50\%$,
+with higher memory pressure in the naive kernel
+(K2 $16.54\%$ vs $3.62\%$).
+This confirms that the naive kernel is not occupancy-limited (K6 is high) but
+issue/compute-efficiency-limited.
+
+For the warp-divergence pair, the key discriminator is K10:
+$100\%$ (warp-uniform) vs $50.35\%$ (forced divergent split), matching the
+expected half-warp execution efficiency for a lane-based $16/16$ branch split.
 
 This fixed KPI pack reduces ad-hoc profiler exploration and makes profile
 evidence directly comparable across optimisation steps.
