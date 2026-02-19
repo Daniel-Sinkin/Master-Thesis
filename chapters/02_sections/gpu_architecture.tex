@@ -69,7 +69,7 @@ where k is the number of exponent bits. For example for
   \label{fig:fp-bit-patterns}
 \end{figure}
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Bit layout of floating-point formats relevant to GPU computing. FP64, FP32, and FP16 are defined by IEEE 754~\cite{ieee754-2019}; BF16 and TF32 are industry-defined formats (see text). The mantissa column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}
 \label{tab:fp-bit-layout}
@@ -92,7 +92,7 @@ FP8 (E4M3)\footnotemark[2] & 8 & 1 & 4 & 7  & 3 \\
 
 The number of exponent bits determines the \emph{dynamic range} (the ratio of the largest to smallest representable magnitudes), while the number of significand bits determines the \emph{precision} (the spacing between adjacent representable values). These properties are summarised in \cref{tab:fp-properties}.
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon$) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}
 \label{tab:fp-properties}
@@ -194,7 +194,7 @@ This property is directly relevant to tensor core computation: the multiply-accu
 
 The performance gap between precisions is substantial. \Cref{tab:a100-throughput-by-format} reproduces the A100 throughput figures from NVIDIA's Ampere optimisation guide~\cite{nvidia2020gtc-ampere}, broken down by execution unit.
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Peak floating-point throughput (TFLOPS) of the A100 by format and execution unit. Tensor core figures in parentheses include sparsity acceleration (2:4 structured sparsity). Data from~\cite{nvidia2020gtc-ampere}.}
 \label{tab:a100-throughput-by-format}
@@ -259,7 +259,7 @@ The practical consequence is that most scientific GPU kernels, including tensor 
 \subsection{NVIDIA A100 Ampere Architecture}\label{sec:a100}
 \subsubsection{Hardware Overview}
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Key hardware specifications of the NVIDIA A100 (SXM4-80GB).}
 \label{tab:a100-specs}
@@ -288,7 +288,7 @@ The A100 employs HBM2e as its main device memory, providing the high memory band
 
 \subsubsection{Theoretical Peak Performance}
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Theoretical peak floating-point throughput of the A100 GPU.}
 \label{tab:a100-peak-performance}
@@ -308,7 +308,7 @@ FP16 (Tensor cores) & \num{312.0} & 32.2$\times$ \\
 
 \subsubsection{Derived Performance Limits}
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Derived theoretical limits of the A100 architecture.}
 \label{tab:a100-derived}
@@ -333,7 +333,7 @@ Arithmetic intensity threshold FP64 (FLOPs/byte) & \num{4.8} \\
 
 \subsubsection{Memory Latency}
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Approximate memory access latency at different hierarchy levels.}
 \label{tab:a100-memory-latency}

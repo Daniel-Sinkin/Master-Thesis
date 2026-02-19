@@ -33,7 +33,7 @@ strategies, along with the derived speedup factor and the fraction of the
 separate-launch time attributable to overhead.
 \Cref{fig:kernel-fusion-benchmark} visualises the same data.
 
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Total execution time for 1000 GEMM operations ($n \times n$, FP64) on
   an A100 GPU. \emph{Separate} denotes 1000 individual kernel launches;
@@ -57,7 +57,7 @@ $n$ & Separate ($\mu$s) & Fused ($\mu$s) & Speedup & Overhead (\%) \\
 \end{tabularx}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{kernel_fusion_benchmark}
   \caption{Total time for 1000 GEMM operations as a function of matrix size,
