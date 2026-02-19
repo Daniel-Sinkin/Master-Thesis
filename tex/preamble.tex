@@ -35,6 +35,8 @@
 \usepackage{subcaption}
 \usepackage{booktabs} 
 \usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
 
 \usepackage{xcolor}
 \usepackage{listings}
@@ -46,6 +48,12 @@
 \definecolor{lststring}{RGB}{163,21,21}
 \definecolor{lstnumber}{RGB}{150,150,150}
 \definecolor{lstcuda}{RGB}{170,55,0}
+% Diagram palette aligned with existing thesis figures.
+\definecolor{diagBlue}{HTML}{A5D8FF}
+\definecolor{diagGreen}{HTML}{B2F2BB}
+\definecolor{diagRed}{HTML}{FFC9C9}
+\definecolor{diagYellow}{HTML}{FFE599}
+\definecolor{diagGray}{HTML}{F2F2F2}
 
 \lstdefinelanguage{CUDA}[]{C++}{
   morekeywords=[1]{

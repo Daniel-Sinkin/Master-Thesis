@@ -1,10 +1,28 @@
 % chapters/05_sections/energy_efficiency.tex
 \section{Energy Efficiency Considerations}\label{sec:energy-efficiency}
 
-Performance is the primary optimisation target in this thesis, but energy
-efficiency is closely coupled to it for GPU tensor contractions. In practical
-HPC operation, node power is capped and energy-to-solution affects both cost and
-cluster throughput.
+Performance is the primary optimisation target in this thesis, but
+energy-to-solution is a co-equal operational objective in HPC: cluster power
+budgets are finite, and lower joules per job improve both operating cost and
+system throughput under queue load~\cite{kocot2023energy-aware,green500-top500}.
+For this reason, the same optimisation decisions used for speed (contraction
+order, coalescing, launch reduction, occupancy control) are evaluated here from
+an energy perspective as well.
+
+\subsection{Why Energy is in Scope for This Thesis}
+
+The target workload class (tensor-network-style contractions) executes many
+short and medium kernels in iterative loops. In this regime, wasted launches,
+redundant arithmetic, and avoidable memory traffic increase not only runtime but
+also board energy. On A100-class GPUs, where arithmetic throughput is high and
+kernel orchestration is often the bottleneck for moderate sizes, runtime
+improvements frequently translate directly into energy improvements at fixed
+clock/power settings~\cite{nvidia2020a100,nvidia-cuda-best-practices}.
+
+Scope note: the measurements and models in this section focus on GPU board
+energy for relative comparison between algorithmic variants on the same node.
+Whole-facility effects (cooling plant, PUE, rack-level sharing) are out of
+scope.
 
 \subsection{Metrics}
 
@@ -21,6 +39,17 @@ where $E$ is energy-to-solution (J), $\eta_{\mathrm{F}}$ is computational
 energy efficiency (FLOP/J), and $\eta_{\mathrm{T}}$ is throughput per watt for a
 fixed workload.
 
+In addition, a standard trade-off metric is energy-delay product (EDP):
+\[
+  \mathrm{EDP}=E\cdot T,
+\]
+and, when latency is weighted more strongly, energy-delay-squared product:
+\[
+  \mathrm{ED^2P}=E\cdot T^2.
+\]
+These metrics are useful when comparing alternatives that exchange small runtime
+gains for larger power increases (or vice versa)~\cite{hager2016power-model}.
+
 For memory-intensive kernels with transferred bytes $Q$, a useful auxiliary
 metric is
 \[
@@ -31,7 +60,12 @@ which helps identify memory-system inefficiency.
 
 \subsection{First-Order Model for Contraction Kernels}
 
-A simple decomposition that is sufficient for design decisions is
+A practical starting point is
+\[
+  E=\int_0^T P(t)\,\mathrm{d}t
+   =P_{\mathrm{base}}\,T + \int_0^T P_{\mathrm{dyn}}(t)\,\mathrm{d}t.
+\]
+Approximating the dynamic term by compute- and data-movement work yields
 \[
   E \approx P_{\mathrm{base}}\,T + e_{\mathrm{F}}\,F + e_{\mathrm{B}}\,Q,
 \]
@@ -42,7 +76,10 @@ with:
   \item $e_{\mathrm{B}}$: effective energy per byte moved through memory.
 \end{itemize}
 
-This model captures the main trade-off in this thesis: optimisations that
+This model is intentionally coarse, but it is sufficient for optimisation
+decisions and consistent with the runtime decomposition used in
+\cref{sec:math-foundations}~\cite{williams2009roofline,hockney1988parallel}.
+It captures the central trade-off in this thesis: optimisations that
 reduce runtime $T$, redundant work $F$, or memory traffic $Q$ usually improve
 energy efficiency simultaneously.
 
@@ -71,13 +108,24 @@ dominant mechanisms for reducing energy-to-solution.
 On the JSC platform used here, practical energy measurement can be added with
 minimal workflow change:
 \begin{enumerate}
-  \item sample board power during each run via \texttt{nvidia-smi} telemetry,
-  \item integrate sampled power over wall-clock time to estimate $E$,
-  \item report FLOP/J together with runtime and Nsight KPIs.
+  \item sample board power during each run via \texttt{nvidia-smi}
+  (\texttt{power.draw}) telemetry,
+  \item align measurement start/stop with explicit CUDA synchronisation points
+  so the integration window matches kernel execution,
+  \item integrate sampled power over wall-clock time (trapezoidal rule) to
+  estimate $E$,
+  \item repeat runs and report robust summaries (median and spread) together
+  with runtime and Nsight KPIs.
 \end{enumerate}
 
-Representative telemetry fields and command syntax are documented in the
-\texttt{nvidia-smi} manual~\cite{nvidia-smi-doc}. This approach is robust enough
-for relative comparisons between algorithmic variants, even when absolute power
-calibration is not available.
+With samples $(t_i,P_i)_{i=1}^m$, the numerical estimate is
+\[
+  E \approx \sum_{i=1}^{m-1}\frac{P_i+P_{i+1}}{2}\,(t_{i+1}-t_i).
+\]
 
+Representative telemetry fields and command syntax are documented in the
+\texttt{nvidia-smi} documentation~\cite{nvidia-smi-doc}. This workflow is
+appropriate for relative algorithmic comparisons, but absolute values should be
+interpreted with care because board-level telemetry has finite sampling
+granularity and excludes non-GPU node power. Repeated measurements and fixed
+protocols mitigate this risk~\cite{kalibera2013rigorous}.

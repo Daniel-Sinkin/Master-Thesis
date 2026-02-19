@@ -10,6 +10,38 @@
   doi       = {10.1145/3624062.3624249},
 }
 
+@inproceedings{amdahl1967validity,
+  author    = {Amdahl, Gene M.},
+  title     = {Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities},
+  booktitle = {Proceedings of the April 18--20, 1967, Spring Joint Computer Conference},
+  year      = {1967},
+  pages     = {483--485},
+  publisher = {ACM},
+  doi       = {10.1145/1465482.1465560},
+}
+
+@article{gustafson1988reevaluating,
+  author  = {Gustafson, John L.},
+  title   = {Reevaluating {Amdahl}'s Law},
+  journal = {Communications of the ACM},
+  volume  = {31},
+  number  = {5},
+  pages   = {532--533},
+  year    = {1988},
+  doi     = {10.1145/42411.42415},
+}
+
+@article{williams2009roofline,
+  author    = {Williams, Samuel and Waterman, Andrew and Patterson, David},
+  title     = {Roofline: An Insightful Visual Performance Model for Multicore Architectures},
+  journal   = {Communications of the ACM},
+  volume    = {52},
+  number    = {4},
+  pages     = {65--76},
+  year      = {2009},
+  doi       = {10.1145/1498765.1498785},
+}
+
 @inproceedings{wu2022chase-gpu,
   author    = {Wu, Xinzhe and Davidovi\'{c}, Davor and Achilles, Sebastian
                and Di~Napoli, Edoardo},
@@ -58,6 +90,13 @@
   note   = {Whitepaper},
 }
 
+@misc{nvidia-a100-product-specs,
+  author = {{NVIDIA Corporation}},
+  title  = {{NVIDIA} A100 Tensor Core {GPU}: Product Specifications},
+  year   = {2025},
+  note   = {\url{https://www.nvidia.com/en-us/data-center/a100/}},
+}
+
 @manual{nvidia-cuda-guide,
   author = {{NVIDIA Corporation}},
   title  = {{CUDA} {C}++ Programming Guide},
@@ -100,6 +139,13 @@
   title  = {How to Optimize a CUDA Matmul Kernel for cuBLAS-like Performance: a Worklog},
   year   = {2022},
   note   = {\url{https://siboehm.com/articles/22/CUDA-MMM}},
+}
+
+@misc{nvidia-ampere-in-depth,
+  author = {{NVIDIA Developer Blog}},
+  title  = {{NVIDIA} Ampere Architecture In-Depth},
+  year   = {2020},
+  note   = {\url{https://developer.nvidia.com/blog/nvidia-ampere-architecture-in-depth/}},
 }
 
 @article{white1992dmrg,
@@ -188,6 +234,13 @@ note         = {\url{https://developer.download.nvidia.com/video/gputechconf/gtc
   note   = {\url{https://docs.nvidia.com/deploy/nvidia-smi/index.html}},
 }
 
+@misc{green500-top500,
+  author = {{TOP500 Project}},
+  title  = {{The Green500 List}},
+  year   = {2025},
+  note   = {\url{https://www.top500.org/lists/green500/}},
+}
+
 @manual{spec-cpu2017-runrules,
   author = {{SPEC Open Systems Group}},
   title  = {{SPEC} {CPU}2017 Run and Reporting Rules},
@@ -258,11 +311,74 @@ note         = {\url{https://developer.download.nvidia.com/video/gputechconf/gtc
   doi     = {10.1017/S0962492922000022},
 }
 
+@book{higham2002accuracy,
+  author    = {Higham, Nicholas J.},
+  title     = {Accuracy and Stability of Numerical Algorithms},
+  edition   = {2},
+  publisher = {Society for Industrial and Applied Mathematics},
+  year      = {2002},
+  doi       = {10.1137/1.9780898718027},
+}
+
+@book{dahmen2022numerik,
+  author    = {Dahmen, Wolfgang and Reusken, Arnold},
+  title     = {Numerik f{\"u}r Ingenieure und Naturwissenschaftler},
+  edition   = {3},
+  publisher = {Springer Spektrum},
+  year      = {2022},
+  doi       = {10.1007/978-3-662-66368-6},
+}
+
 @book{hockney1988parallel,
   author    = {Hockney, R. W. and Jesshope, C. R.},
   title     = {Parallel Computers 2: Architecture, Programming and Algorithms},
   publisher = {Adam Hilger},
   year      = {1988},
+}
+
+@book{jain1991art,
+  author    = {Jain, Raj},
+  title     = {The Art of Computer Systems Performance Analysis},
+  publisher = {Wiley},
+  year      = {1991},
+}
+
+@book{huber2009robust,
+  author    = {Huber, Peter J. and Ronchetti, Elvezio M.},
+  title     = {Robust Statistics},
+  edition   = {2},
+  publisher = {Wiley},
+  year      = {2009},
+  doi       = {10.1002/9780470434697},
+}
+
+@book{efron1994bootstrap,
+  author    = {Efron, Bradley and Tibshirani, Robert J.},
+  title     = {An Introduction to the Bootstrap},
+  publisher = {Chapman and Hall/CRC},
+  year      = {1994},
+}
+
+@article{hager2016power-model,
+  author  = {Hager, Georg and Treibig, Jan and Habich, Johannes and Wellein, Gerhard},
+  title   = {Exploring Performance and Power Properties of Modern Multicore Chips via Simple Machine Models},
+  journal = {Concurrency and Computation: Practice and Experience},
+  volume  = {28},
+  number  = {2},
+  pages   = {189--210},
+  year    = {2016},
+  doi     = {10.1002/cpe.3180},
+}
+
+@article{kocot2023energy-aware,
+  author  = {Ko{\'c}ot, Jan and Pogodaev, Dmitrii and Bajer, Damian and Lisowski, Miroslaw and Gorgon, Marek and Leszczynski, Jacek},
+  title   = {Energy-Aware Computing and Practical Measures for Energy Efficiency: A Comprehensive Survey},
+  journal = {Energies},
+  volume  = {16},
+  number  = {2},
+  pages   = {890},
+  year    = {2023},
+  doi     = {10.3390/en16020890},
 }
 
 @misc{nvidia-nsight-latency,

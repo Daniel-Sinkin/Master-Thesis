@@ -10,6 +10,13 @@ occupancy, register pressure, and warp scheduling.
 
 \begin{figure}[H]
   \centering
+  \includegraphics[width=0.95\textwidth]{GA100Full}
+  \caption{Full GA100 floorplan schematic with graphics processing clusters (GPCs), L2 cache fabric, memory controllers, and NVLink/PCIe interfaces. This chip-level view provides the context for the SM-level detail in \cref{fig:sm-breakdown}.}
+  \label{fig:ga100-full}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
   \includegraphics[width=0.95\textwidth]{SMBreakdown}
   \caption{Internal structure of an A100 Streaming Multiprocessor at three levels 
   of detail. \textbf{Left:} the SM contains four processing blocks sharing an L1 
@@ -21,7 +28,9 @@ occupancy, register pressure, and warp scheduling.
 \end{figure}
 
 Each SM is partitioned into four \emph{processing blocks} (also called 
-sub-partitions). As shown in \cref{fig:sm-breakdown}, each processing block 
+sub-partitions). As shown in \cref{fig:ga100-full,fig:sm-breakdown}, GA100 is
+organized hierarchically from chip-level GPC groupings down to the internals of
+each SM. At the SM level, each processing block
 contains:
 
 \begin{itemize}
@@ -328,6 +337,86 @@ Base clock frequency (GHz) & \num{1.41} \\
 
 The A100 employs high-bandwidth memory as its main device memory, providing the throughput required to sustain dense linear algebra kernels.
 
+\subsubsection{GA100 Die vs A100 Module: What Is Around the Chip}
+\label{sec:ga100-vs-a100-module}
+
+It is useful to distinguish the \emph{GA100} silicon die from the complete
+\emph{A100 accelerator module}. GA100 is the GPU chip itself (compute cores,
+caches, memory controllers, and I/O logic). The A100 is the packaged and
+integrated product used in systems (SXM4 or PCIe form factor), which adds
+memory stacks, package/interposer, power delivery, and board/module interfaces.
+
+For architectural reasoning in this thesis, the main package-level components
+around GA100 are:
+\begin{itemize}
+  \item \textbf{HBM stacks on the same package:} A100 places high-bandwidth
+  memory adjacent to the GPU die in-package, enabling a very wide memory
+  interface with short electrical paths.
+  \item \textbf{Memory controllers and links:} the A100 implementation exposes
+  five active HBM stacks and ten 512-bit memory controllers (effective
+  5120-bit memory interface)~\cite{nvidia-ampere-in-depth,nvidia2020a100}.
+  \item \textbf{Interposer/package fabric:} GPU die and HBM stacks are
+  integrated in one package so bandwidth is far higher than off-package GDDR
+  designs at comparable power.
+  \item \textbf{Module-level interfaces:} outside the package, the accelerator
+  provides PCIe host connectivity and NVLink links for GPU-GPU communication,
+  depending on form factor and server integration~\cite{nvidia-a100-product-specs}.
+\end{itemize}
+
+This distinction matters methodologically: when a kernel is memory-bound, the
+limiting path is often the GA100$\leftrightarrow$HBM package subsystem; when
+multi-GPU scaling is analyzed, the dominant path may shift to NVLink; and when
+host staging dominates, PCIe plus CPU-NUMA placement becomes critical.
+
+\subsubsection{A100 40GB vs 80GB: HBM2 vs HBM2e}
+\label{sec:a100-40-80}
+
+For this thesis, the key architectural difference between A100-SXM4-40GB and
+A100-SXM4-80GB is the memory subsystem, not the SM compute front end. The
+40GB card uses HBM2, while the 80GB card uses HBM2e with higher aggregate
+bandwidth and doubled capacity. A concise comparison is given in
+\cref{tab:a100-40gb-vs-80gb}.
+
+\begin{table}[H]
+\centering
+\caption{A100 SXM4 variant comparison relevant to performance modeling. Data compiled from NVIDIA's A100 architecture whitepaper and product specifications~\cite{nvidia2020a100,nvidia-a100-product-specs}.}
+\label{tab:a100-40gb-vs-80gb}
+\begin{tabularx}{\textwidth}{X r r}
+\toprule
+Property & A100-SXM4-40GB & A100-SXM4-80GB \\
+\midrule
+Memory technology & HBM2 & HBM2e \\
+HBM capacity & \SI{40}{\giga\byte} & \SI{80}{\giga\byte} \\
+Peak HBM bandwidth & \SI{1555}{\giga\byte\per\second} & \SI{2039}{\giga\byte\per\second} \\
+FP32 peak throughput & \SI{19.5}{\tera\flops} & \SI{19.5}{\tera\flops} \\
+L2 cache size & \SI{40}{\mega\byte} & \SI{40}{\mega\byte} \\
+NVLink aggregate bandwidth per GPU (bidirectional) & \SI{600}{\giga\byte\per\second} & \SI{600}{\giga\byte\per\second} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two immediate modeling consequences follow:
+\begin{enumerate}
+  \item \textbf{Higher memory roofline.} For memory-bound kernels, the best-case
+  throughput scaling from 40GB to 80GB is approximately the bandwidth ratio
+  $2039/1555 \approx 1.31$ (about $31\%$).
+  \item \textbf{Lower ridge intensity.} With unchanged FP32 peak but higher
+  bandwidth, the FP32 roofline ridge point shifts from
+  \[
+    I^\star_{40}=\frac{19.5}{1555}\approx 12.5\ \text{FLOPs/byte}
+  \]
+  to
+  \[
+    I^\star_{80}=\frac{19.5}{2039}\approx 9.6\ \text{FLOPs/byte}.
+  \]
+  This means more kernels fall into the compute-bound region on A100-80GB
+  compared with A100-40GB at the same arithmetic intensity.
+\end{enumerate}
+
+In short, A100-80GB primarily increases performance headroom for memory-bound
+and capacity-limited workloads. Compute-pipeline ceilings remain essentially the
+same, so compute-bound kernels do not get a comparable speedup.
+
 \subsubsection{Theoretical Peak Performance}
 
 \begin{table}[H]
@@ -455,6 +544,21 @@ latency and can reduce effective bandwidth.
 
 Each node has four NVIDIA A100-SXM4-40GB GPUs arranged in a fully connected mesh via NVLink\,3.0. Every GPU pair is connected by four NVLink bridges (denoted NV4 in NVIDIA's topology notation), providing \SI{100}{\giga\byte\per\second} of uni-directional bandwidth between any two devices. This symmetric, all-to-all connectivity means that multi-GPU tensor contractions do not suffer from topology-dependent bandwidth asymmetries.
 
+\paragraph{PCIe and NVLink in this thesis.}
+Although both are high-speed interconnects, they serve different roles:
+\begin{itemize}
+  \item \textbf{PCIe Gen4 $\times$16} is the primary host-device path. On A100
+  nodes, it carries control traffic and host staging transfers, with a nominal
+  bidirectional bandwidth of about \SI{64}{\giga\byte\per\second}.
+  \item \textbf{NVLink 3.0} is the primary GPU-GPU path. It is used for
+  peer-to-peer exchange and collective communication, with up to
+  \SI{600}{\giga\byte\per\second} bidirectional bandwidth per A100 SXM4 GPU.
+\end{itemize}
+
+Practical rule: use PCIe-local NUMA placement to minimise host-device staging
+costs, and rely on NVLink for inter-GPU tensor redistribution whenever possible
+~\cite{nvidia-a100-product-specs,nvidia-cuda-guide}.
+
 Each GPU is physically attached via PCIe Gen\,4 $\times$16 to a specific NUMA domain on one of the two CPU sockets:
 
 \begin{table}[H]
@@ -552,6 +656,99 @@ and GPU\,3 by replacing NUMA IDs with their entries from
   B_{\mathrm{eff}}(\pi_{\mathrm{xs}}),
 \]
 and correspondingly higher transfer time for the same $V$.
+
+\paragraph{Cost instantiation for this architecture.}
+For topology-aware staging costs, we model a sequence of $N$ host-device
+transfers with total volume $V_{\mathrm{tot}}=\sum_{i=1}^{N}V_i$ as
+\[
+  T_{\mathrm{stage}}(\pi)
+  =
+  \sum_{i=1}^{N} T_{\mathrm{H2D}}(\pi,V_i)
+  \approx
+  N\,T_0(\pi)+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi)}.
+\]
+With the path classes used in this node model
+($n_{\mathrm{IF}}(\pi_{\mathrm{local}})=0$,
+ $n_{\mathrm{IF}}(\pi_{\mathrm{ss}})=1$,
+ $n_{\mathrm{IF}}(\pi_{\mathrm{xs}})=2$), this becomes
+\begin{align*}
+  T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  &\approx
+  N\,T_0^{\mathrm{local}}+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})},\\
+  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
+  &\approx
+  N\!\left(T_0^{\mathrm{local}}+\tau_{\mathrm{IF}}\right)
+  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})},\\
+  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
+  &\approx
+  N\!\left(T_0^{\mathrm{local}}+2\tau_{\mathrm{IF}}\right)
+  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}.
+\end{align*}
+
+Relative to local placement, the predicted penalties are therefore
+\begin{align*}
+  \Delta T_{\mathrm{ss}}
+  &=
+  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
+  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  \approx
+  N\,\tau_{\mathrm{IF}}
+  +V_{\mathrm{tot}}
+   \!\left(
+     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})}
+     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
+   \right),\\
+  \Delta T_{\mathrm{xs}}
+  &=
+  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
+  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  \approx
+  2N\,\tau_{\mathrm{IF}}
+  +V_{\mathrm{tot}}
+   \!\left(
+     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}
+     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
+   \right).
+\end{align*}
+This turns placement into a computable policy decision: for each staging phase,
+evaluate $\Delta T_{\mathrm{ss}}$ and $\Delta T_{\mathrm{xs}}$ from measured
+$T_0$/$B_{\mathrm{eff}}$ and choose local NUMA placement whenever possible.
+
+\paragraph{How parameters are obtained in practice.}
+For each path class $\pi$, measure transfer times for multiple sizes
+$V\in[V_{\min},V_{\max}]$ and fit
+\[
+  T(V)=a_\pi + b_\pi V,
+  \qquad
+  T_0(\pi)=a_\pi,\quad B_{\mathrm{eff}}(\pi)=\frac{1}{b_\pi}.
+\]
+This linear fit is the standard way to instantiate latency+bandwidth models in
+system-performance analysis~\cite{hockney1988parallel,jain1991art}.
+Once fitted, the above expressions directly provide predicted staging overhead
+for any $(N,V_{\mathrm{tot}})$ in the workload.
+
+\paragraph{Per-GPU path classes used in this thesis.}
+The local and same-socket ``remote'' NUMA domains used for orchestration are:
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{l l l l}
+    \toprule
+    GPU & $\pi_{\mathrm{local}}$ & $\pi_{\mathrm{ss}}$ (used) & $\pi_{\mathrm{xs}}$ (used) \\
+    \midrule
+    GPU\,0 & NUMA\,3 & NUMA\,1 & NUMA\,5 or NUMA\,7 \\
+    GPU\,1 & NUMA\,1 & NUMA\,3 & NUMA\,5 or NUMA\,7 \\
+    GPU\,2 & NUMA\,7 & NUMA\,5 & NUMA\,1 or NUMA\,3 \\
+    GPU\,3 & NUMA\,5 & NUMA\,7 & NUMA\,1 or NUMA\,3 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Path-class mapping used for topology-aware cost evaluation.}
+  \label{tab:gpu-path-class-mapping}
+\end{table}
+
+For each row in \cref{tab:gpu-path-class-mapping}, the same
+$n_{\mathrm{IF}}=\{0,1,2\}$ model applies, so the transfer-cost expressions
+above are directly reusable across all four GPUs.
 
 In practice, this topology has two implications for the work in this thesis:
 

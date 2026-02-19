@@ -20,6 +20,41 @@ The implementation follows four layout rules:
     efficiency and vectorised loads.
 \end{enumerate}
 
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+    >=Latex,
+    every node/.style={font=\small, align=center},
+    warp/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=4.0cm, minimum height=1.0cm},
+    map/.style={draw, rounded corners=2pt, fill=diagGray, minimum width=4.6cm, minimum height=1.0cm},
+    memgood/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=4.6cm, minimum height=1.0cm},
+    membad/.style={draw, rounded corners=2pt, fill=diagRed, minimum width=4.6cm, minimum height=1.0cm},
+    arrow/.style={->, very thick}
+  ]
+    \node[anchor=west, font=\bfseries] at (-0.1,1.7) {Coalesced (preferred)};
+    \node[warp] (w1) at (1.9,1.0) {Warp lanes\\$i=0,\dots,31$};
+    \node[map] (a1) at (7.2,1.0) {$\mathrm{addr}(i)=\mathrm{base}+4i$};
+    \node[memgood] (m1) at (12.5,1.0) {Few aligned\\memory transactions};
+    \draw[arrow] (w1) -- (a1);
+    \draw[arrow] (a1) -- (m1);
+
+    \node[anchor=west, font=\bfseries] at (-0.1,-0.1) {Strided (costly)};
+    \node[warp] (w2) at (1.9,-0.8) {Warp lanes\\$i=0,\dots,31$};
+    \node[map] (a2) at (7.2,-0.8) {$\mathrm{addr}(i)=\mathrm{base}+4si,\ s\gg1$};
+    \node[membad] (m2) at (12.5,-0.8) {Many split\\memory transactions};
+    \draw[arrow] (w2) -- (a2);
+    \draw[arrow] (a2) -- (m2);
+
+    \node[draw, rounded corners=2pt, fill=diagYellow, inner sep=4pt, align=center]
+      at (7.2,-2.1) {Layout goal for this thesis: keep the thread-mapped inner
+      dimension contiguous\\so that each warp issues mostly coalesced accesses.};
+  \end{tikzpicture}
+  \caption{Warp-level address mapping as a layout design rule: contiguous
+  thread-to-address mapping improves global-memory transaction efficiency, while
+  large strides fragment traffic.}
+  \label{fig:coalesced-vs-strided-layout}
+\end{figure}
+
 \subsection{Memory-Level Strategy}
 
 The memory strategy mirrors the A100 hierarchy:

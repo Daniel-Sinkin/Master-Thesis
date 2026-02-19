@@ -120,6 +120,47 @@ In practical implementations, local updates are often executed as:
   \item redistribute factors back into MPS form.
 \end{enumerate}
 
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+    >=Latex,
+    every node/.style={font=\small},
+    phase/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=3.2cm, minimum height=0.95cm, align=center},
+    kernel/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=3.2cm, minimum height=0.95cm, align=center},
+    edge/.style={->, very thick},
+    map/.style={->, thick, gray!70}
+  ]
+    \node[phase] (p1) at (0, 1.2) {Fuse two-site\\tensor};
+    \node[phase] (p2) at (3.8, 1.2) {Contract with\\environment};
+    \node[phase] (p3) at (7.6, 1.2) {Reshape and\\truncate};
+    \node[phase] (p4) at (11.4, 1.2) {Redistribute\\factors};
+
+    \node[kernel] (k1) at (0, 0) {Permutation /\\pack kernel};
+    \node[kernel] (k2) at (3.8, 0) {GEMM-like\\contraction};
+    \node[kernel] (k3) at (7.6, 0) {SVD / QR /\\orthogonalisation};
+    \node[kernel] (k4) at (11.4, 0) {Writeback /\\layout restore};
+
+    \draw[edge] (p1) -- (p2);
+    \draw[edge] (p2) -- (p3);
+    \draw[edge] (p3) -- (p4);
+
+    \draw[edge] (k1) -- (k2);
+    \draw[edge] (k2) -- (k3);
+    \draw[edge] (k3) -- (k4);
+
+    \draw[map] (p1) -- (k1);
+    \draw[map] (p2) -- (k2);
+    \draw[map] (p3) -- (k3);
+    \draw[map] (p4) -- (k4);
+  \end{tikzpicture}%
+  }
+  \caption{Two-site MPS update pipeline and its kernel-level mapping. This is
+  a direct bridge between tensor-network algorithm steps (top) and GPU
+  optimisation targets (bottom).}
+  \label{fig:mps-two-site-kernel-mapping}
+\end{figure}
+
 This pattern maps directly to the optimisation targets in later chapters:
 GEMM-like contractions, layout transforms, launch overhead control, and
 profiling-guided tuning of memory/occupancy trade-offs.

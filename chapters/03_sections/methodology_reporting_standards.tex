@@ -25,6 +25,41 @@ Profiling is executed in two stages:
 This workflow enforces a strict order: first find \emph{where} time is spent,
 then explain \emph{why} with counters.
 
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+    >=Latex,
+    every node/.style={font=\small, align=center},
+    stage/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=3.2cm, minimum height=1.0cm},
+    check/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=3.2cm, minimum height=1.0cm},
+    risk/.style={draw, rounded corners=2pt, fill=diagRed, minimum width=3.2cm, minimum height=1.0cm},
+    arrow/.style={->, very thick}
+  ]
+    \node[stage] (s1) at (0,0) {Define workload\\and ROI};
+    \node[stage] (s2) at (3.8,0) {Nsight Systems\\timeline pass};
+    \node[stage] (s3) at (7.6,0) {Localise bottleneck\\class};
+    \node[stage] (s4) at (11.4,0) {Nsight Compute\\fixed KPI pack};
+    \node[check] (s5) at (15.2,0) {Statistical summary\\(median, spread, CI)};
+    \node[check] (s6) at (19.0,0) {Claim-to-evidence\\validation};
+
+    \draw[arrow] (s1) -- (s2);
+    \draw[arrow] (s2) -- (s3);
+    \draw[arrow] (s3) -- (s4);
+    \draw[arrow] (s4) -- (s5);
+    \draw[arrow] (s5) -- (s6);
+
+    \node[risk] (r1) at (11.4,-1.8) {Mismatch between KPI\\movement and claim};
+    \draw[->, thick, dashed] (s6) -- (r1);
+    \draw[->, thick, dashed] (r1.west) to[out=180,in=-45] (s3.south);
+  \end{tikzpicture}%
+  }
+  \caption{Standard profiling-and-reporting pipeline used in this thesis.
+  Timeline localisation precedes counter collection, and claim validation
+  loops back when mechanism evidence is inconsistent.}
+  \label{fig:methodology-workflow-pipeline}
+\end{figure}
+
 \subsection{Benchmark Design Standard}
 
 Each benchmark campaign follows these rules:
@@ -99,4 +134,3 @@ Each results subsection reports the following validity classes:
 
 Mitigations are stated per experiment, using the mandatory reporting items in
 \cref{tab:methodology-reporting-checklist}.
-

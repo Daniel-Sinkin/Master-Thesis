@@ -4,16 +4,16 @@
 
 Both SLURM scripts now profile a 10-KPI set (with per-metric fallbacks for Nsight version differences):
 
-- `sm__throughput` `% of peak`
-- `dram__throughput` `% of peak`
-- `lts__...throughput` `% of peak` (L2 pressure proxy)
+- `sm__throughput.avg.pct_of_peak_sustained_elapsed`
+- `dram__throughput.avg.pct_of_peak_sustained_elapsed`
+- `lts__throughput.avg.pct_of_peak_sustained_elapsed` (L2 pressure proxy)
 - `l1tex__t_sector_hit_rate.pct`
-- `smsp__pipe_fma_cycles_active` `% of peak`
-- `sm__warps_active` `% of peak`
+- `smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active`
+- `sm__warps_active.avg.pct_of_peak_sustained_active`
 - `launch__occupancy_limit_registers`
-- `smsp__warps_eligible.*.per_cycle_active`
-- `smsp__issue_active` `% of peak`
-- `smsp__thread_inst_executed_per_inst_executed` (divergence-sensitive)
+- `smsp__warps_eligible.sum.per_cycle_active`
+- `smsp__issue_active.avg.pct_of_peak_sustained_active`
+- `smsp__thread_inst_executed_per_inst_executed.pct` (divergence-sensitive)
 
 The scripts print the exact metric names they selected in the SLURM stdout log.
 

@@ -80,10 +80,28 @@ GPU memory is addressed linearly, so multidimensional arrays must be mapped to o
 \begin{equation}\label{eq:row-major}
   \text{offset} = i \cdot N + j,
 \end{equation}
-which generalises to higher-order tensors by successive multiplication with trailing dimensions. In column-major (Fortran) order, the convention used by cuBLAS and most BLAS libraries, the index is instead
+which generalises to higher-order tensors by successive multiplication with trailing dimensions. For a 3D tensor with logical indices $(x,y,z)$ and extents $(s_x,s_y,s_z)$, a common row-major linearisation is
+\begin{equation}\label{eq:row-major-3d}
+  \text{offset}(x,y,z)=x+s_x\,y+s_x s_y\,z.
+\end{equation}
+Equivalently, using row-major index names $(i,j,k)$ for a shape $(D_0,D_1,D_2)$:
+\[
+  \text{offset}(i,j,k)=((iD_1)+j)D_2+k.
+\]
+In compact form for rank-$d$ tensors with extents $(D_0,\dots,D_{d-1})$,
+\[
+  \text{offset}(i_0,\dots,i_{d-1})=
+  \sum_{m=0}^{d-1}
+  i_m \prod_{n=m+1}^{d-1} D_n.
+\]
+In column-major (Fortran) order, the convention used by cuBLAS and most BLAS libraries, the 2D index is instead
 \begin{equation}\label{eq:col-major}
   \text{offset} = j \cdot M + i.
 \end{equation}
+For the same 3D extents $(s_x,s_y,s_z)$ and indices $(x,y,z)$, the column-major form is
+\[
+  \text{offset}(x,y,z)=z+s_z\,y+s_z s_y\,x.
+\]
 \Cref{lst:transpose-2d} uses row-major layout for the input (\texttt{in[row * N + col]}) and column-major layout for the output (\texttt{out[col * M + row]}), which is precisely the transpose operation.
 
 A concrete example: for a $4 \times 3$ matrix stored in row-major order, the element at row~2, column~1 maps to linear offset $2 \cdot 3 + 1 = 7$. Understanding this mapping is essential for implementing coalesced memory access patterns, discussed in \cref{sec:coalescing}.
@@ -269,6 +287,65 @@ such as batches of low-dimensional GEMM calls arising from tensor
 contractions: launching each operation as a separate kernel wastes the
 majority of the wall-clock time on launch overhead rather than useful
 computation.
+
+\subsubsection{MemcpyAsync vs Memcpy in Host--Device Timelines}
+\label{sec:memcpy-async-vs-sync}
+
+\Cref{fig:memcpy-async-timeline,fig:memcpy-sync-timeline} illustrate two common
+execution patterns. The asynchronous version enqueues transfers and kernels and
+lets the host continue with CPU work until an explicit synchronisation point.
+The synchronous version uses blocking \texttt{cudaMemcpy}, which stalls the host
+thread during each transfer.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\textwidth]{MemcpyAsync}
+  \caption{Asynchronous host--device timeline using \texttt{cudaMemcpyAsync},
+  streams, and event-based ordering. Host work overlaps queued device work
+  until explicit synchronisation.}
+  \label{fig:memcpy-async-timeline}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\textwidth]{MemcpySync}
+  \caption{Synchronous host--device timeline using blocking
+  \texttt{cudaMemcpy}. The host is stalled during H2D and D2H transfers.}
+  \label{fig:memcpy-sync-timeline}
+\end{figure}
+
+The corresponding asynchronous CUDA pattern is shown below. For true asynchronous
+host-device copies, host buffers should be page-locked (pinned), e.g.\ via
+\texttt{cudaMallocHost}~\cite{nvidia-cuda-guide,nvidia-cuda-best-practices}.
+
+\begin{lstlisting}[language=CUDA, caption={Asynchronous pattern with \texttt{cudaMemcpyAsync}, stream ordering, and explicit final synchronisation.}, label={lst:memcpy-async-pattern}]
+cudaStream_t s1, s2;
+cudaEvent_t done1;
+cudaStreamCreate(&s1);
+cudaStreamCreate(&s2);
+cudaEventCreate(&done1);
+
+// h_in / h_out should be pinned for true async copies.
+cudaMemcpyAsync(d_in, h_in, bytes, cudaMemcpyHostToDevice, s1);
+kernel1<<<grid1, block1, 0, s1>>>(d_in, d_tmp);
+cudaEventRecord(done1, s1);
+
+foo();  // host CPU work overlaps queued device work
+
+cudaStreamWaitEvent(s2, done1, 0);
+kernel2<<<grid2, block2, 0, s2>>>(d_tmp, d_out);
+
+bar();  // more host CPU work
+
+cudaMemcpyAsync(h_out, d_out, bytes, cudaMemcpyDeviceToHost, s2);
+cudaStreamSynchronize(s2);  // explicit synchronization point
+\end{lstlisting}
+
+\paragraph{Practical interpretation.}
+The asynchronous pattern is usually preferred when host-side orchestration can
+be overlapped with device execution. The synchronous pattern is simpler and
+often acceptable for single-shot transfers, but it introduces avoidable host
+idle time in pipelines with many transfer/compute stages.
 
 \subsubsection{Kernel Fusion}\label{sec:kernel-fusion}
 

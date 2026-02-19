@@ -15,12 +15,17 @@ $Q$ (bytes), a first-order runtime model is
 \]
 where $P_{\mathrm{eff}}$ and $B_{\mathrm{eff}}$ are achieved compute and
 bandwidth rates, and $T_{\mathrm{launch}}$ is host/device dispatch overhead.
+The first term is a roofline-style throughput bound, while the additive launch
+term follows the latency-plus-throughput structure used in communication models
+such as Hockney's~\cite{williams2009roofline,hockney1988parallel}.
 
 The corresponding arithmetic intensity
 \[
   I=\frac{F}{Q}
 \]
-links compute and memory limits. Under ideal sustained ceilings
+is a primary explanatory variable because it determines whether a kernel is
+expected to be memory-bound or compute-bound~\cite{williams2009roofline}. Under
+ideal sustained ceilings
 $(P_{\max},B_{\max})$, throughput is bounded by
 \[
   P \le \min\!\left(P_{\max},\,B_{\max}I\right).
@@ -48,7 +53,7 @@ For weak scaling with scaled problem size, Gustafson's relation is
   S_p \approx p - f_s(p-1).
 \]
 These bounds are used to interpret node-level scaling results in
-\cref{sec:scaling}.
+\cref{sec:scaling}~\cite{amdahl1967validity,gustafson1988reevaluating}.
 
 \subsection{Floating-Point Error Model}
 
@@ -59,6 +64,41 @@ For one floating-point operation, we use the standard model
   |\delta| \le u,
 \]
 with unit roundoff $u$ and $\circ\in\{+,-,\times,/\}$.
+
+Conditioning explains why addition/subtraction can be much more sensitive than
+multiplication. A local relative condition number for addition is
+\[
+  \kappa_{\mathrm{add}}(x,y)=\frac{|x|+|y|}{|x+y|},
+\]
+which becomes large under cancellation ($x \approx -y$). By contrast,
+multiplication has $\kappa_{\mathrm{mul}}(x,y)=1$ under standard relative
+perturbation analysis~\cite{higham2002accuracy}. A concise engineering-focused
+discussion of conditioning and cancellation is also given
+in~\cite{dahmen2022numerik}. For dot products, a useful
+problem-condition measure is
+\[
+  \kappa_{\mathrm{dot}}(x,y)=\frac{|x|^\top|y|}{|x^\top y|},
+\]
+which again grows when positive and negative contributions cancel.
+
+Two concrete values make the conditioning effect explicit:
+\[
+  \kappa_{\mathrm{add}}(1,0.8)
+  =\frac{|1|+|0.8|}{|1+0.8|}
+  =\frac{1.8}{1.8}
+  =1,
+\]
+while under near-cancellation
+\[
+  \kappa_{\mathrm{add}}(1,-0.999999)
+  =\frac{|1|+|{-0.999999}|}{|1-0.999999|}
+  =\frac{1.999999}{10^{-6}}
+  \approx 2\times 10^{6}.
+\]
+The corresponding multiplication stays locally well-conditioned:
+\[
+  \kappa_{\mathrm{mul}}(1,-0.999999)=1.
+\]
 
 For a length-$k$ dot product, a common bound is
 \[
@@ -72,6 +112,12 @@ which makes explicit why long reduction chains are sensitive to precision
 choice. This is one reason why FP32 accuracy checks are kept in the workflow
 even when throughput is the primary objective~\cite{higham2022mixed}.
 
+This also motivates fused multiply-add and FP32 accumulation in tensor-core
+paths: IEEE-754 FMA semantics avoid intermediate rounding between multiply and
+add~\cite{ieee754-2019}, and Ampere TF32 tensor-core execution keeps
+accumulation in FP32~\cite{nvidia2020a100}, reducing the impact of repeated
+low-precision reduction steps.
+
 \subsection{Timing Statistics}
 
 For repeated runtime samples $\{t_i\}_{i=1}^n$, this thesis reports the sample
@@ -80,7 +126,9 @@ median
   \tilde t = \operatorname{median}(t_i)
 \]
 as the primary point estimate, because it is robust to occasional outliers from
-scheduler and system noise.
+scheduler and system noise. This is preferable to the arithmetic mean when
+runtime distributions are skewed or contain sporadic long-tail events from OS,
+driver, or queue interference~\cite{jain1991art,kalibera2013rigorous}.
 
 Dispersion is tracked with the median absolute deviation (MAD):
 \[
@@ -90,4 +138,24 @@ and a robust spread estimate
 \[
   \hat\sigma_{\mathrm{rob}} \approx 1.4826 \cdot \operatorname{MAD}.
 \]
-This keeps uncertainty reporting stable for short benchmark campaigns.
+The scaling factor makes $\hat\sigma_{\mathrm{rob}}$ comparable to a standard
+deviation under a normal reference model, while retaining robustness under
+heavy-tailed noise~\cite{huber2009robust}.
+
+Uncertainty of the median is reported with a nonparametric bootstrap confidence
+interval. With $B$ resamples (typically $B=1000$), let
+$\tilde t^{(b)}$ be the median of bootstrap replicate $b$. The percentile
+interval is
+\[
+  \mathrm{CI}_{95\%} =
+  \Bigl[q_{0.025}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right),
+        q_{0.975}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right)\Bigr],
+\]
+which avoids normality assumptions on runtime samples~\cite{efron1994bootstrap}.
+
+For reporting stability, this thesis also tracks the robust relative spread
+\[
+  \mathrm{RRS} = \frac{\hat\sigma_{\mathrm{rob}}}{\tilde t},
+\]
+and increases repetition count when RRS is high. This keeps timing conclusions
+stable in short benchmark campaigns.

@@ -16,21 +16,22 @@ fall back to equivalent names for the installed Nsight Compute version.
   \small
   \begin{tabularx}{\textwidth}{l X}
     \toprule
-    ID & Counter selector family (Nsight Compute) \\
+    ID & Primary counter name (Nsight Compute) \\
     \midrule
-    K1 & \texttt{sm\_\_throughput.*pct\_of\_peak} \\
-    K2 & \texttt{dram\_\_throughput.*pct\_of\_peak} \\
-    K3 & \texttt{lts\_\_...throughput.*pct\_of\_peak} \\
+    K1 & \texttt{sm\_\_throughput.avg.pct\_of\_peak\_sustained\_elapsed} \\
+    K2 & \texttt{dram\_\_throughput.avg.pct\_of\_peak\_sustained\_elapsed} \\
+    K3 & \texttt{lts\_\_throughput.avg.pct\_of\_peak\_sustained\_elapsed} \\
     K4 & \texttt{l1tex\_\_t\_sector\_hit\_rate.pct} \\
-    K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.*pct\_of\_peak} \\
-    K6 & \texttt{sm\_\_warps\_active.*pct\_of\_peak} \\
+    K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.avg.pct\_of\_peak\_sustained\_active} \\
+    K6 & \texttt{sm\_\_warps\_active.avg.pct\_of\_peak\_sustained\_active} \\
     K7 & \texttt{launch\_\_occupancy\_limit\_registers} \\
-    K8 & \texttt{smsp\_\_warps\_eligible.*per\_cycle\_active} \\
-    K9 & \texttt{smsp\_\_issue\_active.*pct\_of\_peak} \\
-    K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.*} \\
+    K8 & \texttt{smsp\_\_warps\_eligible.sum.per\_cycle\_active} \\
+    K9 & \texttt{smsp\_\_issue\_active.avg.pct\_of\_peak\_sustained\_active} \\
+    K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.pct} \\
     \bottomrule
   \end{tabularx}
-  \caption{KPI identifier to metric-selector mapping used in profiling scripts.}
+  \caption{KPI identifier to primary metric mapping used for reporting. Scripts
+  keep compatibility fallbacks for Nsight Compute version differences.}
   \label{tab:kpi-pack}
 \end{table}
 

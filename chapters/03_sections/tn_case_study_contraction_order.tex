@@ -51,6 +51,53 @@ This reduces asymptotic work to
 and maps directly to two strided-batched GEMMs. The implementation is
 \path{code/profiling/tn_two_site_good_batched_gemm.cu}.
 
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+    >=Latex,
+    every node/.style={font=\small, align=center},
+    tensor/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=1.8cm, minimum height=0.9cm},
+    opbad/.style={draw, rounded corners=2pt, fill=diagRed, minimum width=2.5cm, minimum height=1.0cm},
+    opgood/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=2.5cm, minimum height=1.0cm},
+    cost/.style={draw, rounded corners=2pt, fill=diagYellow, inner sep=3pt},
+    arrow/.style={->, very thick}
+  ]
+    \node[font=\bfseries] at (3.2,2.1) {Direct baseline (single fused loop nest)};
+    \node[tensor] (xb) at (0.8,1.2) {$X$};
+    \node[tensor] (gb) at (2.4,1.2) {$G$};
+    \node[tensor] (mb) at (4.0,1.2) {$M$};
+    \node[opbad] (db) at (2.4,0.0) {Direct\\contraction};
+    \node[tensor] (yb) at (2.4,-1.2) {$Y$};
+    \draw[arrow] (xb) -- (db);
+    \draw[arrow] (gb) -- (db);
+    \draw[arrow] (mb) -- (db);
+    \draw[arrow] (db) -- (yb);
+    \node[cost] at (2.4,-2.05) {$\BigO(B\,d_p^2\chi^2)$};
+
+    \node[font=\bfseries] at (11.2,2.1) {Ordered contraction (two GEMM stages)};
+    \node[tensor] (xg) at (8.8,1.2) {$X$};
+    \node[tensor] (gg) at (10.4,1.2) {$G$};
+    \node[opgood] (g1) at (9.6,0.0) {Stage 1\\$T=G\cdot X$};
+    \node[tensor] (tg) at (11.2,0.0) {$T$};
+    \node[tensor] (mg) at (12.8,0.0) {$M$};
+    \node[opgood] (g2) at (12.0,-1.2) {Stage 2\\$Y=T\cdot M$};
+    \node[tensor] (yg) at (12.0,-2.3) {$Y$};
+    \draw[arrow] (xg) -- (g1);
+    \draw[arrow] (gg) -- (g1);
+    \draw[arrow] (g1) -- (tg);
+    \draw[arrow] (tg) -- (g2);
+    \draw[arrow] (mg) -- (g2);
+    \draw[arrow] (g2) -- (yg);
+    \node[cost] at (12.0,-3.15) {$\BigO(B(d_p^2\chi + d_p\chi^2))$};
+  \end{tikzpicture}%
+  }
+  \caption{Algorithmic structure of the two-site case study: direct contraction
+  (left) versus contraction-order decomposition into two GEMM-like stages
+  (right).}
+  \label{fig:tn-case-contraction-order-structure}
+\end{figure}
+
 Theoretical operation-ratio improvement (direct vs ordered) is
 \[
   R
@@ -99,41 +146,24 @@ optimisation structure similar to the SGEMM worklog style in
 \cite{boehm2022cuda-mmm}: fix algorithmic work first, then remove memory
 pathologies, then improve scheduling and occupancy, and finally tune.
 
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabularx}{\textwidth}{l l X}
-    \toprule
-    Stage & Typical problem & Why it matters for TN contractions \\
-    \midrule
-    0: Correct baseline & Slow but simple direct contraction &
-    Ensures correctness and provides a reproducible lower-performance
-    reference point. \\
-    1: Contraction order & Redundant arithmetic in naive loop nests &
-    Reduces asymptotic work before low-level tuning, often the largest
-    single gain for TN updates. \\
-    2: Global-memory access & Non-coalesced or strided operand traversal &
-    Determines whether memory traffic scales with useful work or with
-    transaction overhead. \\
-    3: On-chip reuse & Re-reading hot operands from HBM instead of cache/SMEM &
-    Increases arithmetic intensity and reduces long-latency loads. \\
-    4: Scheduler feed (ILP) & Too few independent instructions per warp &
-    Improves eligible-warps and issue efficiency in instruction-dense
-    contraction kernels. \\
-    5: Resource balance & Excess registers reduce occupancy &
-    Preserves latency-hiding capacity and avoids occupancy collapse from
-    over-aggressive unrolling/blocking. \\
-    6: Launch cost & Many tiny kernels around contraction steps &
-    Fusing pre/post transforms amortises host launch overhead for
-    small and medium tensor shapes. \\
-    7: Parameter search & One fixed tile/shape choice for all workloads &
-    Auto-tuning per shape regime is required because optimal mappings are
-    hardware- and size-dependent. \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Stage-wise optimisation path used for the TN contraction case.}
-  \label{tab:tn-optimisation-ladder}
-\end{table}
+\begin{enumerate}
+  \item \textbf{Stage 0 (correct baseline).} Start from a slow but clearly
+  correct direct contraction to define a reproducible reference.
+  \item \textbf{Stage 1 (contraction order).} Remove redundant arithmetic in
+  naive loop nests first; this is often the largest single gain for TN updates.
+  \item \textbf{Stage 2 (global-memory access).} Fix non-coalesced and heavily
+  strided operand traversal so traffic scales with useful work.
+  \item \textbf{Stage 3 (on-chip reuse).} Avoid re-reading hot operands from
+  HBM by increasing L2/shared-memory reuse where possible.
+  \item \textbf{Stage 4 (scheduler feed / ILP).} Increase independent work per
+  warp to improve eligible-warps and issue efficiency.
+  \item \textbf{Stage 5 (resource balance).} Control register growth so
+  occupancy does not collapse under aggressive unrolling/blocking.
+  \item \textbf{Stage 6 (launch cost).} Fuse tiny pre/post kernels around the
+  contraction to amortise host launch overhead.
+  \item \textbf{Stage 7 (parameter search).} Tune tile/shape mappings per
+  regime, since good choices are hardware- and size-dependent.
+\end{enumerate}
 
 \subsection{Profiling Reproducibility}
 

@@ -162,7 +162,7 @@ Using useful FLOPs ($2MNK$) over padded traffic gives the effective intensity
 \]
 
 For the target shape regime, we use $K=64$ and $t=16$.
-\Cref{fig:ai-heatmap-fp32,fig:ai-heatmap-fp64} map
+\Cref{fig:ai-heatmap-fp32} maps
 $I_{\mathrm{ideal}}$ and $I_{\mathrm{eff}}$ across $M,N\in[16,256]$. The trend
 is consistent with an area-to-perimeter argument: larger and more balanced
 rectangles increase intensity, while slender shapes and heavy padding reduce
@@ -204,24 +204,6 @@ $(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
   Right: effective intensity with $16$-element padding on $M,N,K$ (useful FLOPs
   over padded traffic).}
   \label{fig:ai-heatmap-fp32}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \IfFileExists{images/arithmetic_intensity_heatmap_fp64.pdf}{
-    \includegraphics[width=0.98\textwidth]{arithmetic_intensity_heatmap_fp64}
-  }{
-    \fbox{
-      \parbox{0.92\textwidth}{
-        Generate this figure with
-        \texttt{python3 scripts/generate_arithmetic_intensity_heatmap.py}.
-      }
-    }
-  }
-  \caption{Arithmetic-intensity map for rectangular GEMM-like kernels in
-  FP64 at fixed $K=64$. Shape trends match FP32, while absolute intensity is
-  uniformly lower due to the larger element size.}
-  \label{fig:ai-heatmap-fp64}
 \end{figure}
 
 \subsubsection{GEMM Storage Footprint vs A100 Capacity}
@@ -284,7 +266,8 @@ The asymptotic limit as $p\to\infty$ is
   S_{\infty}=\frac{1}{1-f}.
 \]
 Even efficient kernels are capped by serial orchestration, launch overhead,
-synchronisation, and data movement outside the parallel kernel body.
+synchronisation, and data movement outside the parallel kernel
+body~\cite{amdahl1967validity}.
 
 \begin{table}[H]
 \centering
@@ -304,14 +287,6 @@ Parallel fraction $f$ & $S(4)$ & $S_{\infty}$ \\
 These bounds are used as planning constraints: kernel-local optimisation is
 necessary, but end-to-end scaling also requires reducing serial fractions in
 launch and orchestration paths.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.98\textwidth]{roofline_a100_40gb}
-  \caption{Roofline envelopes for A100-SXM4-40GB. The extended intensity axis
-  makes the long TF32 compute-bound plateau explicit.}
-  \label{fig:roofline-a100-40gb}
-\end{figure}
 
 \begin{figure}[H]
   \centering
