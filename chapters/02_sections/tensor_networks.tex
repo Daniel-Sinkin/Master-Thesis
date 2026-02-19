@@ -16,6 +16,54 @@ moderate to small tensor blocks. Those kernels are often embedded in long
 iterative workflows, so both per-kernel efficiency and orchestration overhead
 matter.
 
+\subsection{Matrix Product States (MPS) from a Computational View}
+\label{sec:mps-computational-view}
+
+Matrix Product States (MPS) are a common tensor-network representation where a
+high-order object is factorised into a chain of local tensors. For this thesis,
+the relevant point is not the physics interpretation but the resulting compute
+structure:
+
+\begin{itemize}
+  \item repeated contraction of small and medium dense tensors,
+  \item frequent reshape/permutation steps between contraction phases,
+  \item recurring low-rank truncation steps (typically SVD/QR-based),
+  \item many short kernel sequences within iterative sweeps.
+\end{itemize}
+
+Using a minimal notation, an order-$L$ MPS can be written as
+\[
+  \Psi(i_1,\dots,i_L)=
+  \sum_{\alpha_1,\dots,\alpha_{L-1}}
+  A^{[1]}_{i_1,\alpha_1}
+  A^{[2]}_{\alpha_1,i_2,\alpha_2}
+  \cdots
+  A^{[L]}_{\alpha_{L-1},i_L},
+\]
+where $i_\ell$ is a physical index and $\alpha_\ell$ is a bond index. The bond
+dimension $\chi$ controls both approximation quality and computational cost.
+
+From an HPC perspective, two scaling facts are useful planning rules:
+\begin{enumerate}
+  \item storage for a uniform MPS scales as $\BigO(L\,d\,\chi^2)$ rather than
+    exponentially in $L$,
+  \item dominant kernels in common MPS updates scale roughly with
+    $\BigO(d\,\chi^3)$ per local update step, so increasing $\chi$ quickly
+    shifts pressure to memory traffic and tensor-factorisation kernels.
+\end{enumerate}
+
+In practical implementations, local updates are often executed as:
+\begin{enumerate}
+  \item fuse neighboring local tensors into an effective two-site tensor,
+  \item contract with environment/operator terms,
+  \item reshape to a matrix and run SVD/QR-style truncation,
+  \item redistribute factors back into MPS form.
+\end{enumerate}
+
+This pattern maps directly to the optimisation targets in later chapters:
+GEMM-like contractions, layout transforms, launch overhead control, and
+profiling-guided tuning of memory/occupancy trade-offs.
+
 \subsection{Kernel Motifs Relevant to This Thesis}\label{sec:tn-kernel-motifs}
 
 The optimisation work in this thesis is driven by three recurring motifs:

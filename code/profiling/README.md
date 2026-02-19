@@ -82,3 +82,19 @@ Expected behavior:
 
 - `warp_divergence_good_uniform`: better thread participation and issue behavior.
 - `warp_divergence_bad_divergent`: lower thread participation and lower effective throughput.
+
+## Thesis Phenomena Suite (7 benchmarks)
+
+For a broader set of thesis-ready GPU phenomena plots (divergence sweep,
+coalescing sweep, bank conflicts, launch overhead, ILP/dependency, register
+pressure, arithmetic intensity), use:
+
+```bash
+bash code/profiling/phenomena/submit_all_phenomena.sh
+```
+
+See:
+
+- `code/profiling/phenomena/README.md`
+- `code/profiling/phenomena/slurm/`
+- `code/profiling/phenomena/results/`
