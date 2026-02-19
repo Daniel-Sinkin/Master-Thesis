@@ -1,10 +1,37 @@
 % tex/symbols.tex
-\begin{tabular}{@{}ll@{}}
-  $\tensor{T}$           & Tensor \\
-  $\mat{A}, \mat{B}$     & Matrices \\
-  $\vect{v}$             & Vector \\
-  $\chi$                 & Bond dimension \\
-  $d$                    & Local (physical) dimension \\
-  $N$                    & Matrix/problem size \\
-  $\BigO(\cdot)$         & Asymptotic upper bound \\
-\end{tabular}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+  \toprule
+  Symbol & Meaning \\
+  \midrule
+  $\tensor{T}$ & Generic tensor \\
+  $\mat{A},\mat{B},\mat{C}$ & Matrices \\
+  $\vect{v}$ & Vector \\
+  $\Psi(i_1,\dots,i_L)$ & Many-body wavefunction amplitude \\
+  $L$ & Number of lattice sites / modes \\
+  $d$ & Local physical dimension per site \\
+  $\chi$ & Bond dimension (MPS rank limit) \\
+  $A^{[\ell]}$ & Local MPS tensor at site $\ell$ \\
+  $\alpha_\ell$ & Virtual bond index between neighboring tensors \\
+  $N_{\text{state}}=d^L$ & Number of coefficients in full-state representation \\
+  $N_{\text{MPS}}\sim L\,d\,\chi^2$ & Parameter count of a uniform-bond MPS \\
+  $S=-\sum_a s_a^2\log s_a^2$ & Entanglement entropy from Schmidt coefficients \\
+  $\epsilon_{\text{trunc}}$ & Truncation error after rank reduction \\
+  $M,N,K$ & GEMM dimensions ($\mat{A}\in\R^{M\times K}$, $\mat{B}\in\R^{K\times N}$) \\
+  $F=2MNK$ & Floating-point operation count for dense GEMM \\
+  $Q$ & Data movement volume (bytes) \\
+  $I=F/Q$ & Arithmetic intensity (FLOPs per byte) \\
+  $P$ & Achieved performance (FLOPs/s) \\
+  $P_{\max}$ & Theoretical peak compute throughput \\
+  $B_{\max}$ & Peak memory bandwidth \\
+  $I^\star=P_{\max}/B_{\max}$ & Roofline ridge point \\
+  $\eta=P/P_{\max}$ & Compute efficiency relative to peak \\
+  $T_{\mathrm{H2D}}(\pi,V)$ & Host-to-device transfer time for path class $\pi$ and volume $V$ \\
+  $T_0(\pi)$ & Fixed path-dependent transfer latency term \\
+  $B_{\mathrm{eff}}(\pi)$ & Effective end-to-end transfer bandwidth \\
+  $V$ & Transfer volume in bytes \\
+  $\pi$ & Path class (local, same-socket remote, cross-socket) \\
+  $n_{\mathrm{IF}}$ & Number of additional Infinity Fabric segments in the path \\
+  $\tau_{\mathrm{IF}}$ & Average latency penalty per Infinity Fabric segment \\
+  $\BigO(\cdot)$ & Asymptotic upper bound \\
+  \bottomrule
+\end{tabularx}
