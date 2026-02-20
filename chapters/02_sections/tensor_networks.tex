@@ -16,7 +16,7 @@ was CPU-focused and built around BLAS/LAPACK kernels plus MPI-based
 distribution. Over time, the contraction-heavy parts moved to GPUs, where
 cuBLAS/cuTENSOR-style kernels and communication-aware scheduling became central
 for strong scaling across devices~\cite{springer2017tensor,menczer2023massive,menczer2024efficient-dmrg-gpu}.
-In short: the algorithmic core stayed similar, but the performance bottlenecks
+The algorithmic core stayed similar, but the main performance bottlenecks
 shifted toward memory movement, launch overhead, and multi-GPU orchestration.
 
 \subsection{Why Tensor Networks Are of Interest}\label{sec:tn-interest}
@@ -161,8 +161,8 @@ In practical implementations, local updates are often executed as:
   \label{fig:mps-two-site-kernel-mapping}
 \end{figure}
 
-This pattern maps directly to the optimisation targets in later chapters:
-GEMM-like contractions, layout transforms, launch overhead control, and
+The same structure appears in the optimisation targets of later chapters:
+GEMM-like contractions, layout transforms, launch-overhead control, and
 profiling-guided tuning of memory/occupancy trade-offs.
 
 \subsection{Kernel Patterns Relevant to This Thesis}\label{sec:tn-kernel-motifs}

@@ -1,7 +1,7 @@
 % chapters/05_sections/scaling_behaviour.tex
 \section{Scaling Behaviour}\label{sec:scaling}
 
-This section analyses how performance evolves when moving from one GPU to
+The analysis tracks how performance evolves when moving from one GPU to
 multiple GPUs within a single NVLink-connected node.
 
 \subsection{Strong and Weak Scaling Views}
@@ -26,6 +26,5 @@ Scaling analysis explicitly separates:
   \item host-side orchestration and synchronisation overhead.
 \end{enumerate}
 
-This decomposition identifies when scaling is limited by communication topology
+The decomposition identifies when scaling is limited by communication topology
 rather than kernel efficiency.
-

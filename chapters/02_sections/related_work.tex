@@ -55,9 +55,8 @@ and profile-guided kernel fusion on realistic node topology.
 
 \subsection{Selected Work in Collaborating Research Directions}\label{sec:people-sota}
 
-This section highlights work that is directly relevant to the research
-environment of this thesis, with focus on Wu, Di~Napoli, Rizzi, Waintal,
-Legeza, and closely related collaborators.
+The following review focuses on work that is directly relevant to this thesis
+context: Wu, Di~Napoli, Rizzi, Waintal, Legeza, and close collaborators.
 
 \subsubsection{Wu and Di Napoli: GPU-Distributed Dense Kernels and Communication}
 
@@ -69,8 +68,8 @@ JUWELS-Booster~\cite{wu2022chase-gpu}. The SC-W extension further improves
 distributed behaviour with NCCL-based communication
 optimisations~\cite{wu2023chase-nccl}.
 
-The transferable architectural lesson is that once local kernels are efficient,
-communication orchestration and overlap become first-order bottlenecks.
+A practical architectural lesson is clear: once local kernels are efficient,
+communication orchestration and overlap become major bottlenecks.
 
 \subsubsection{Legeza Group: Massively Parallel DMRG/MPS on CPU--GPU Systems}
 
@@ -83,8 +82,8 @@ mixed-precision/tensor-core acceleration paths
 The 2023 and 2024 studies also report good scaling across heterogeneous
 CPU--GPU systems and explicitly motivate mixed-precision/tensor-core execution
 for contraction-heavy workloads~\cite{menczer2023massive,menczer2024efficient-dmrg-gpu}.
-For this thesis, the concrete transfer is straightforward: reduce launch count
-for small contractions, bucket by shape, and tune stream-level scheduling.
+For this thesis, the direct transfer is straightforward: reduce launch count for
+small contractions, bucket by shape, and tune stream-level scheduling.
 
 \subsubsection{Rizzi and Waintal: Operator-Sum Formulations and Practical TN Performance}
 
@@ -152,6 +151,39 @@ Across the above works, four recurring implementation patterns emerge:
     tensor-core execution is used for throughput, with strict numerical checks.
 \end{enumerate}
 
+\subsubsection{Paper Notes for Implementation Planning (Working Draft)}
+\label{sec:paper-notes-working-draft}
+
+The table below is kept as implementation-oriented notes. It maps paper-level
+results and methodology to concrete optimisation actions for this thesis.
+
+\begin{table}[H]
+\centering
+\caption{Working notes: transfer from selected literature to CUDA optimisation actions in this thesis.}
+\label{tab:paper-transfer-notes}
+\begin{tabularx}{\textwidth}{X X X}
+\toprule
+Paper (focus) & Reported methodology/result signal & Direct action for this thesis \\
+\midrule
+\cite{menczer2023massive} (massively parallel TN state algorithms on CPU--GPU systems) &
+explicit multi-level parallelisation and mixed CPU/GPU execution for contraction-heavy workloads &
+keep kernels bucketed by shape and preserve stream-level concurrency; avoid one-kernel-per-contraction execution for small blocks \\
+\cite{menczer2023nonabelian} (symmetry-aware massively parallel TN implementation) &
+algorithmic structure strongly influences effective performance, not just raw kernel throughput &
+separate profiling by contraction class and layout class; avoid aggregating all kernels into one average metric \\
+\cite{menczer2024efficient-dmrg-gpu} (DMRG implementation/tuning with tensor-core usage) &
+strong emphasis on mixed precision and throughput-oriented kernel organisation &
+keep FP32 baseline, treat TF32 as opt-in path with fixed numerical validation; prioritise high-call-count kernels first \\
+\cite{krinitsin2025ttn-ed} (TTN time evolution, Rizzi/Waintal collaboration) &
+two-level parallelisation and GPU acceleration provide major practical gains in targeted regimes &
+retain local-operator-sum style execution when possible and minimise explicit large intermediates that create extra memory traffic \\
+\cite{wu2022chase-gpu,wu2023chase-nccl} (GPU-distributed dense eigensolver lineage at JSC) &
+once local kernels are efficient, communication/orchestration limits dominate scaling &
+for one-node scope, prepare kernels and APIs so later overlap of local compute and communication is possible without redesign \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Representative CUDA Implementation Patterns}\label{sec:sota-cuda-patterns}
 
 The following snippets are representative implementation skeletons derived from
@@ -205,9 +237,9 @@ accumulate_terms_kernel<<<grid2, block2, 0, stream>>>(state_tmp, state_out);
 \end{lstlisting}
 
 \textbf{Why it matters.}
-This reflects the local-operator-sum idea discussed in recent TTN benchmarking:
-it reduces intermediate tensor construction overhead and often improves cache
-and memory-traffic behaviour~\cite{krinitsin2025ttn-ed}.
+It follows the local-operator-sum idea discussed in recent TTN benchmarking:
+intermediate tensor construction is reduced, and cache/memory-traffic behavior
+often improves~\cite{krinitsin2025ttn-ed}.
 
 \subsubsection{Pattern C: Overlap of Local Compute and Multi-GPU Reduction}
 
@@ -231,6 +263,6 @@ postprocess_kernel<<<grid2, block2, 0, s_compute>>>(global_C);
 \end{lstlisting}
 
 \textbf{Why it matters.}
-This captures the communication/computation orchestration emphasis in
+It mirrors the communication/computation orchestration emphasis in
 Wu--Di~Napoli style distributed GPU kernels and in massively parallel DMRG
 implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2023massive}.

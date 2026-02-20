@@ -30,3 +30,27 @@ the following conditions:
   \item clear exposure to launch overhead or memory-traffic bottlenecks,
   \item portability to both single-GPU and one-node multi-GPU execution.
 \end{itemize}
+
+\subsection{SOTA-Informed Initial Backlog (Working Notes)}
+\label{sec:initial-backlog}
+
+Before full application traces are fixed, the optimisation backlog is organised
+as a set of generic kernel classes that repeatedly appear in the cited
+literature and in early profiling:
+
+\begin{enumerate}
+  \item \textbf{Shape-bucketed small GEMM path.} Group contractions by
+    $(m,n,k)$ class and run batched/device-side execution to reduce launch
+    count.
+  \item \textbf{Layout-heavy micro-pipeline path.} Fuse reshape/pack/contract
+    segments when data dependencies allow it, and track whether reduced launch
+    count offsets higher register/shared-memory pressure.
+  \item \textbf{Local-operator-sum contraction path.} Prefer execution plans
+    that avoid explicit large intermediate operators when equivalent local-term
+    accumulation is available.
+\end{enumerate}
+
+For each class, the first profiling pass records the same minimum metric set:
+kernel runtime, launch count, achieved occupancy, DRAM throughput, and top warp
+stall reasons. This keeps early optimisation choices comparable even before the
+final production kernel list is fixed.

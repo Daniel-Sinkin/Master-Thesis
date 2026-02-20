@@ -103,7 +103,10 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-\usepackage[hidelinks]{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{xurl}
+\Urlmuskip=0mu plus 1mu\relax
 \usepackage[capitalise,noabbrev]{cleveref}  % \cref{fig:x} -> "Figure 1.2"
 
 \usepackage{siunitx}            % \SI{1555}{\giga\byte\per\second}

@@ -13,7 +13,7 @@ All experiments reported in this thesis were conducted on a single compute node 
 Component & Specification \\
 \midrule
 GPUs & $4\times$ NVIDIA A100-SXM4-40GB \\
-GPU memory per device & \SI{40}{\giga\byte} HBM2e \\
+GPU memory per device & \SI{40}{\giga\byte} HBM2 \\
 GPU interconnect & NVLink 3.0, 4 links per GPU pair \\
 NVLink bandwidth per link & \SI{25}{\giga\byte\per\second} (uni-directional) \\
 PCIe & Gen\,4 $\times$16 \\
@@ -21,7 +21,7 @@ CPUs & $2\times$ AMD EPYC 7742, 64 cores per socket \\
 CPU threads (total) & 256 (SMT-2) \\
 NUMA domains & 8 \\
 Host memory & \SI{503}{\gibi\byte} DDR4 \\
-Network & $2\times$ Mellanox ConnectX (mlx5), HDR InfiniBand (\SI{200}{\giga\bit\per\second}) \\
+Network & \shortstack[l]{$2\times$ Mellanox ConnectX (mlx5)\\HDR InfiniBand (\SI{200}{\giga\bit\per\second})} \\
 \bottomrule
 \end{tabularx}
 \end{table}

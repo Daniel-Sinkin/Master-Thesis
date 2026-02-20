@@ -1,8 +1,8 @@
 % chapters/05_sections/single_gpu_performance
 \section{Single-GPU Performance}\label{sec:single-gpu}
 
-This section reports single-device performance for the target kernel set and
-compares custom implementations against cuBLAS/cuTENSOR baselines.
+Single-device performance is reported for the target kernel set, with custom
+implementations compared against cuBLAS/cuTENSOR baselines.
 
 \subsection{Metrics}
 
@@ -25,6 +25,5 @@ Results are stratified by:
   \item kernel variant (baseline, memory-optimised, fused).
 \end{enumerate}
 
-This decomposition makes it possible to separate gains from arithmetic
-optimisation versus gains from reduced launch overhead.
-
+The split separates gains from arithmetic optimisation and gains from reduced
+launch overhead.

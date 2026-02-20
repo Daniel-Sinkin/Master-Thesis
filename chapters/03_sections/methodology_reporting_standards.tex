@@ -2,9 +2,9 @@
 \section{Methodology and Reporting Standards}
 \label{sec:methodology-reporting}
 
-This section defines mandatory rules for experiment design, profiling, and
-result reporting. The goal is to keep optimisation claims causal, reproducible,
-and comparable across kernels and optimisation stages.
+The following rules define experiment design, profiling, and result reporting.
+The goal is to keep optimisation claims causal, reproducible, and comparable
+across kernels and optimisation stages.
 
 \subsection{Profiling Workflow Standard}
 
@@ -22,7 +22,7 @@ Profiling is executed in two stages:
   and can bias short kernels~\cite{nvidia-nsight-compute-profiling-guide}.
 \end{enumerate}
 
-This workflow enforces a strict order: first find \emph{where} time is spent,
+The workflow is deliberately ordered: first find \emph{where} time is spent,
 then explain \emph{why} with counters.
 
 \begin{figure}[H]

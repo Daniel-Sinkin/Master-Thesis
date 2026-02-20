@@ -91,7 +91,11 @@ throughout this thesis.
 
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
-Scientific computing on GPUs has historically defaulted to 64-bit double precision (FP64), matching the convention established by decades of CPU-based numerical software. However, the A100 architecture supports a range of floating-point formats with dramatically different throughput characteristics, and for many workloads---including tensor contractions---FP32 or even reduced-precision formats offer sufficient accuracy at a fraction of the cost. This section reviews the relevant formats and motivates the precision choices made in this thesis.
+Scientific GPU workloads have often defaulted to FP64, following long-standing
+CPU-side numerical practice. A100 supports multiple floating-point formats with
+very different throughput, and for many contraction workloads FP32 or reduced
+precision is accurate enough at much lower cost. The following subsections
+summarize the relevant formats and motivate the precision choices used here.
 
 \subsubsection{IEEE 754 Binary Representation}
 The IEEE 754 standard~\cite{ieee754-2019} defines the binary floating-point formats used across virtually all modern hardware. Each format encodes a real number as
@@ -337,6 +341,67 @@ Base clock frequency (GHz) & \num{1.41} \\
 
 The A100 employs high-bandwidth memory as its main device memory, providing the throughput required to sustain dense linear algebra kernels.
 
+\subsubsection{Large-Die Yield Context (TSMC N7, Approximate)}
+\label{sec:ga100-yield-context}
+
+GA100 is a very large monolithic die (about \SI{826}{\milli\meter\squared})
+with 128 physical SM partitions in the full design, while shipping A100 parts
+expose 108 active SMs in the SXM4-40GB product configuration~\cite{nvidia2020a100,nvidia-ampere-in-depth}.
+This subsection gives a first-order yield sensitivity estimate to provide
+economic context for why large dies are commonly harvested/binned.
+
+Using the standard first-order Poisson defect model for full-die yield,
+\[
+  Y_{\mathrm{full}}(A,D_0)\approx e^{-A D_0},
+\]
+where $A$ is die area in cm$^2$ and $D_0$ is defect density in
+defects/cm$^2$. For GA100, $A=8.26$.
+
+Absolute TSMC N7 defect-density time series are not publicly released in full.
+However, industry-reported anchor values from public disclosures place
+$D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
+$D_0\approx 0.09$ defects/cm$^2$ for N7 around three quarters after high-volume
+manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n5}.
+\cref{fig:ga100-n7-yield-curve} plots the resulting full-die-yield sensitivity.
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/ga100_n7_yield_curve.pdf}{
+    \includegraphics[width=0.9\textwidth]{ga100_n7_yield_curve}
+  }{
+    \fbox{
+      \parbox{0.86\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/generate\_ga100\_n7\_yield\_curve.py}.
+      }
+    }
+  }
+  \caption{First-order defect-limited yield sensitivity for a GA100-sized die
+  ($A=8.26$\,cm$^2$) using $Y_{\mathrm{full}}\approx e^{-A D_0}$. Marker
+  points use industry-reported N7 anchor values ($D_0\approx 0.33$ and
+  $D_0\approx 0.09$).}
+  \label{fig:ga100-n7-yield-curve}
+\end{figure}
+
+At those two anchor points, the model gives
+\[
+  Y_{\mathrm{full}}(D_0=0.33)\approx 6.6\%,\qquad
+  Y_{\mathrm{full}}(D_0=0.09)\approx 47.5\%.
+\]
+This should not be interpreted as NVIDIA's product yield: shipping yield is
+higher due to redundancy, harvesting (disabled units), and performance binning.
+The model is used here only to quantify the sensitivity of large-die economics
+to defect density.
+
+\paragraph{Area increment sanity check.}
+For a die-area increase $\Delta A$, Poisson yield scales as
+\[
+  \frac{Y(A+\Delta A,D_0)}{Y(A,D_0)}=e^{-D_0\Delta A}.
+\]
+With $\Delta A=0.1$\,cm$^2$, this multiplier is about $0.968$ at
+$D_0=0.33$ and $0.991$ at $D_0=0.09$, i.e.\ a \SI{3.2}{\percent} and
+\SI{0.9}{\percent} relative yield drop, respectively.
+
 \subsubsection{GA100 Die vs A100 Module: What Is Around the Chip}
 \label{sec:ga100-vs-a100-module}
 
@@ -413,9 +478,9 @@ Two immediate modeling consequences follow:
   compared with A100-40GB at the same arithmetic intensity.
 \end{enumerate}
 
-In short, A100-80GB primarily increases performance headroom for memory-bound
-and capacity-limited workloads. Compute-pipeline ceilings remain essentially the
-same, so compute-bound kernels do not get a comparable speedup.
+A100-80GB mainly increases headroom for memory-bound and capacity-limited
+workloads. Compute-pipeline ceilings stay almost unchanged, so compute-bound
+kernels should not see comparable speedups.
 
 \subsubsection{Theoretical Peak Performance}
 
@@ -625,10 +690,10 @@ gives the expected ordering
 \[
   T_{\mathrm{local}} < T_{\mathrm{same\ socket\ remote}} < T_{\mathrm{cross\ socket}}.
 \]
-This model is intentionally simple, but it is sufficient for placement policy
-decisions: thread pinning and host-buffer NUMA placement should minimise
-$n_{\mathrm{IF}}$ and maximise $B_{\mathrm{eff}}$. This is consistent with CUDA
-placement recommendations for multi-socket hosts~\cite{nvidia-cuda-guide,nvidia-cuda-best-practices}.
+The model is simple but sufficient for placement policy decisions: thread
+pinning and host-buffer NUMA placement should minimise $n_{\mathrm{IF}}$ and
+maximise $B_{\mathrm{eff}}$. This is consistent with CUDA placement
+recommendations for multi-socket hosts~\cite{nvidia-cuda-guide,nvidia-cuda-best-practices}.
 
 \paragraph{Concrete mapping for this node.}
 Using the measured affinity in \cref{tab:gpu-numa-affinity}, the path classes

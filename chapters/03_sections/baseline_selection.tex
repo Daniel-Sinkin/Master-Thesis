@@ -30,3 +30,22 @@ Reported metrics include median runtime, throughput (GFLOP/s or TFLOP/s),
 effective memory bandwidth, and speedup relative to the strongest baseline per
 workload.
 
+\subsection{Profiling Evidence Gate}
+\label{sec:profiling-evidence-gate}
+
+To keep optimisation claims defensible, each accepted speedup is paired with a
+matching profiler signal:
+
+\begin{enumerate}
+  \item \textbf{Launch-amortisation claim:} lower launch count and lower host
+    or launch-overhead fraction at similar numerical output.
+  \item \textbf{Memory-efficiency claim:} higher effective throughput and/or
+    improved coalescing/reuse indicators with matching or lower runtime.
+  \item \textbf{Occupancy/resource claim:} improved runtime with a coherent
+    change in achieved occupancy and stall breakdown.
+  \item \textbf{Precision-path claim (FP32/TF32):} runtime gain plus explicit
+    numerical-deviation check against the FP64/FP32 reference path.
+\end{enumerate}
+
+This gate is applied uniformly to custom kernels and library-based baselines,
+so comparison quality is maintained while the kernel set is still evolving.

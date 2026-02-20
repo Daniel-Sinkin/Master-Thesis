@@ -4,7 +4,7 @@
 As discussed in \cref{sec:kernel-launch-mechanics}, each CUDA kernel launch
 incurs a fixed overhead of several microseconds regardless of the kernel's
 computational workload. For the small GEMM operations typical of tensor network
-contractions, this overhead can dominate the total runtime. This section
+contractions, this overhead can dominate total runtime. The following benchmark
 quantifies the effect and validates the kernel fusion strategy adopted in this
 thesis.
 
@@ -69,7 +69,7 @@ $n$ & Separate ($\mu$s) & Fused ($\mu$s) & Speedup & Overhead (\%) \\
 
 \subsection{Discussion}
 
-Two observations follow from the data. First, the total time for separate
+Two points are clear from the data. First, the total time for separate
 launches is nearly constant across all matrix sizes, varying only from
 $8022\;\mu\text{s}$ at $n = 1$ to $9752\;\mu\text{s}$ at $n = 32$. This
 confirms that the per-launch overhead of approximately $8\;\mu\text{s}$
@@ -85,8 +85,8 @@ $7.1\times$ faster.
 
 These results directly motivate the kernel fusion strategy employed throughout
 this thesis. Tensor network algorithms typically require many contractions of
-modest size, placing them squarely in the regime where launch overhead
-dominates. By fusing these contractions into a single kernel using cuBLASDx's
+modest size, which places them in the regime where launch overhead dominates. By
+fusing these contractions into a single kernel using cuBLASDx's
 device-side GEMM API, the launch cost is paid once rather than once per
 contraction. The design and implementation of the fused kernels are described in
 \cref{sec:kernel-design}.

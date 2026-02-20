@@ -2,7 +2,7 @@
 \section{Energy Efficiency Considerations}\label{sec:energy-efficiency}
 
 Performance is the primary optimisation target in this thesis, but
-energy-to-solution is a co-equal operational objective in HPC: cluster power
+energy-to-solution is also an operational objective in HPC: cluster power
 budgets are finite, and lower joules per job improve both operating cost and
 system throughput under queue load~\cite{kocot2023energy-aware,green500-top500}.
 For this reason, the same optimisation decisions used for speed (contraction
@@ -76,7 +76,7 @@ with:
   \item $e_{\mathrm{B}}$: effective energy per byte moved through memory.
 \end{itemize}
 
-This model is intentionally coarse, but it is sufficient for optimisation
+The model is intentionally coarse, but it is sufficient for optimisation
 decisions and consistent with the runtime decomposition used in
 \cref{sec:math-foundations}~\cite{williams2009roofline,hockney1988parallel}.
 It captures the central trade-off in this thesis: optimisations that
@@ -99,9 +99,9 @@ The profiling results already support concrete energy-efficiency expectations:
   prolongs runtime and therefore increases $P_{\mathrm{base}}\,T$.
 \end{enumerate}
 
-In short, the same mechanisms that improve throughput in
-\cref{sec:profiling,tab:coalescing-sweep,tab:register-pressure} are also the
-dominant mechanisms for reducing energy-to-solution.
+The same mechanisms that improve throughput in
+\cref{sec:profiling,tab:coalescing-sweep,tab:register-pressure} also dominate
+energy-to-solution.
 
 \subsection{Measurement Protocol on A100 Nodes}
 
@@ -124,7 +124,7 @@ With samples $(t_i,P_i)_{i=1}^m$, the numerical estimate is
 \]
 
 Representative telemetry fields and command syntax are documented in the
-\texttt{nvidia-smi} documentation~\cite{nvidia-smi-doc}. This workflow is
+\texttt{nvidia-smi} documentation~\cite{nvidia-smi-doc}. The workflow is
 appropriate for relative algorithmic comparisons, but absolute values should be
 interpreted with care because board-level telemetry has finite sampling
 granularity and excludes non-GPU node power. Repeated measurements and fixed

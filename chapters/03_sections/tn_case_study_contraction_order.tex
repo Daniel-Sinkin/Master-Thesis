@@ -1,9 +1,9 @@
 \section{Case Study: Contraction Order in a Two-Site TN Update}
 \label{sec:tn-contraction-order-case}
 
-This section introduces a concrete tensor-network-style problem where a
-reasonable first implementation can be much slower than a mathematically
-equivalent alternative.
+A concrete tensor-network-style case shows how a reasonable first
+implementation can be much slower than a mathematically equivalent
+alternative.
 
 \subsection{Problem Definition}
 
@@ -23,6 +23,55 @@ where:
 
 The tensor structure is representative of two-site gate application and local
 environment projection steps in MPS-style workflows.
+
+\subsection{How to Read This as a Practical HPC Task}
+
+The expression can be read as a matrix-chain computation repeated over a batch:
+\begin{itemize}
+  \item for each fixed batch index $b$, interpret $X_{b,\cdot,\cdot}$ as a
+  matrix $X_b\in\mathbb{R}^{d_p\times \chi}$,
+  \item interpret $G$ as $d_p\times d_p$ and $M$ as $\chi\times\chi$,
+  \item compute
+  \[
+    Y_b = (G\,X_b)\,M,\qquad b=0,\dots,B-1.
+  \]
+\end{itemize}
+
+From an implementation point of view, the core is a repeated dense
+linear-algebra pattern where contraction order decides both arithmetic work and
+memory traffic.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+    >=Latex,
+    every node/.style={font=\small, align=center},
+    mat/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=2.8cm, minimum height=1.0cm},
+    stagebox/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=2.4cm, minimum height=1.0cm},
+    arrow/.style={->, very thick}
+  ]
+    \node[mat] (g) at (1.6,0) {$G$\\$(d_p\times d_p)$};
+    \node[mat] (x) at (5.4,0) {$X_b$\\$(d_p\times \chi)$};
+    \node[stagebox] (s1) at (8.8,0) {Stage 1};
+    \node[mat] (t) at (12.2,0) {$T_b$\\$(d_p\times \chi)$};
+    \node[mat] (m) at (15.6,0) {$M$\\$(\chi\times \chi)$};
+    \node[stagebox] (s2) at (19.0,0) {Stage 2};
+    \node[mat] (y) at (22.4,0) {$Y_b$\\$(d_p\times \chi)$};
+
+    \draw[arrow] (g) -- node[above]{GEMM $(m,n,k)=(d_p,\chi,d_p)$} (s1);
+    \draw[arrow] (x) -- (s1);
+    \draw[arrow] (s1) -- (t);
+    \draw[arrow] (t) -- node[above]{GEMM $(m,n,k)=(d_p,\chi,\chi)$} (s2);
+    \draw[arrow] (m) -- (s2);
+    \draw[arrow] (s2) -- (y);
+  \end{tikzpicture}%
+  }
+  \caption{Per-batch matrix view of the two-site update. The tensor expression
+  is equivalent to a two-stage GEMM chain with a shared $G$ and $M$ across
+  batches.}
+  \label{fig:tn-case-matrix-view}
+\end{figure}
 
 \subsection{Plausible Baseline (Bad)}
 
@@ -108,6 +157,97 @@ Theoretical operation-ratio improvement (direct vs ordered) is
 \]
 For the benchmarked shape $d_p=16$, $\chi=256$, this gives
 $R\approx 15.1$, before any hardware-level optimisations.
+
+\subsection{Worked Numerical Example (Shape Used in This Thesis)}
+
+Using the benchmarked shape $B=1$, $d_p=16$, $\chi=256$:
+\begin{itemize}
+  \item output size is $d_p\chi=4096$ elements,
+  \item direct variant evaluates $d_p\chi=4096$ inner terms per output element,
+  \item total direct term evaluations are
+  \[
+    N_{\text{direct}} = d_p^2\chi^2 = 16{,}777{,}216.
+  \]
+\end{itemize}
+
+For ordered contraction:
+\[
+  N_{\text{stage1}} = d_p^2\chi = 65{,}536,\qquad
+  N_{\text{stage2}} = d_p\chi^2 = 1{,}048{,}576,
+\]
+so
+\[
+  N_{\text{ordered}} = N_{\text{stage1}}+N_{\text{stage2}} = 1{,}114{,}112.
+\]
+This gives
+\[
+  \frac{N_{\text{direct}}}{N_{\text{ordered}}}\approx 15.06,
+\]
+which matches the asymptotic ratio above.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{l r r}
+    \toprule
+    Variant & Term evaluations & Relative to ordered \\
+    \midrule
+    Direct contraction & $16{,}777{,}216$ & $15.06\times$ \\
+    Ordered contraction (two-stage) & $1{,}114{,}112$ & $1.00\times$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Work comparison for the thesis reference shape ($B=1$, $d_p=16$,
+  $\chi=256$).}
+  \label{tab:tn-case-worked-example}
+\end{table}
+
+\subsection{Practice Problems (Implementation-Oriented)}
+
+\begin{enumerate}
+  \item \textbf{Work counting.} For $B=4$, $d_p=32$, $\chi=64$, compute
+  $N_{\text{direct}}$ and $N_{\text{ordered}}$.
+  \item \textbf{GEMM mapping.} Write the two GEMMs in $(m,n,k)$ form for stage 1
+  and stage 2, and identify which operands are shared across the batch.
+  \item \textbf{Shape intuition.} Using
+  $R=\frac{d_p\chi}{d_p+\chi}$, determine whether increasing $d_p$ or
+  increasing $\chi$ helps more when $\chi\gg d_p$.
+  \item \textbf{Memory layout choice.} Pick a layout where the hottest
+  contracted index is unit stride in both stages, and state one layout
+  transform needed between stage 1 and stage 2.
+\end{enumerate}
+
+\paragraph{Short answer key.}
+\begin{enumerate}
+  \item $N_{\text{direct}}=16{,}777{,}216$,
+  $N_{\text{ordered}}=786{,}432$ ($\approx 21.3\times$ reduction).
+  \item Stage 1: $(m,n,k)=(d_p,\chi,d_p)$, Stage 2:
+  $(m,n,k)=(d_p,\chi,\chi)$; $G$ and $M$ are batch-shared.
+  \item For $\chi\gg d_p$, ratio $R\approx d_p$, so increasing $d_p$ gives the
+  stronger marginal gain.
+  \item Any valid answer should keep the reduction index contiguous in the
+  innermost access pattern of each stage.
+\end{enumerate}
+
+\subsection{Diagram Blueprint for Manual Drawing}
+
+To explain this section in one slide or one page, a compact three-panel diagram
+works well:
+\begin{enumerate}
+  \item \textbf{Panel A: expression view.} Write
+  $Y_{b,p,r}=\sum_{q,c}G_{p,q}X_{b,q,c}M_{c,r}$ and highlight contracted
+  indices ($q,c$) in one color.
+  \item \textbf{Panel B: direct implementation.} Draw one big ``direct
+  contraction'' block with arrows from $G$, $X$, and $M$ to $Y$; annotate
+  $\BigO(Bd_p^2\chi^2)$.
+  \item \textbf{Panel C: ordered implementation.} Draw two blocks:
+  $T=G\cdot X$ then $Y=T\cdot M$; annotate
+  $\BigO(B(d_p^2\chi+d_p\chi^2))$ and the ratio
+  $\frac{d_p\chi}{d_p+\chi}$.
+\end{enumerate}
+
+For readability in Excalidraw, keep only five tensor nodes
+($G,X,M,T,Y$), color contracted indices consistently, and place the work
+numbers directly below each panel.
 
 \subsection{Design Decisions Behind the Better Variant}
 

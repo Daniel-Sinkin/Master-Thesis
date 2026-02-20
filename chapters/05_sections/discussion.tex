@@ -1,8 +1,8 @@
 % chapters/05_sections/discussion.tex
 \section{Discussion}\label{sec:discussion}
 
-This section combines kernel-level and system-level findings into practical
-guidance for future optimisation cycles.
+Kernel-level and system-level findings are combined here into practical guidance
+for future optimisation cycles.
 
 \subsection{What Improved and Why}
 
@@ -31,8 +31,8 @@ pressure study (\cref{tab:register-pressure,fig:phenomena-register-pressure}).
 
 For coalescing, the stride-1 to stride-32 degradation quantifies how quickly
 memory efficiency collapses when warp lanes lose contiguous access patterns.
-This supports prioritising layout transforms and contraction ordering that keep
-the hottest contracted index unit-stride in memory.
+The result supports prioritising layout transforms and contraction ordering that
+keep the hottest contracted index unit-stride in memory.
 
 For register pressure, the occupancy drop from $100\%$ to $62.5\%$ with an
 accompanying throughput loss shows that ``more in-register work'' is not
