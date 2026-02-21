@@ -4,7 +4,10 @@
 \subsection{Streaming Multiprocessor and Warp Execution}\label{sec:sm-warps}
 
 The Streaming Multiprocessor (SM) is the fundamental compute unit of the GPU. Each 
-A100 GPU contains 108 SMs, and all CUDA threads ultimately execute on one of them. 
+A100-SXM4 GPU in this thesis exposes 108 active SMs. The GA100 die itself has
+128 physical SM partitions, with 20 disabled through harvesting/binning (see
+\cref{sec:ga100-yield-context}), and all CUDA threads ultimately execute on one
+of the active SMs.
 Understanding the internal structure of an SM is essential for reasoning about 
 occupancy, register pressure, and warp scheduling.
 
@@ -345,8 +348,8 @@ The A100 employs high-bandwidth memory as its main device memory, providing the 
 \label{sec:ga100-yield-context}
 
 GA100 is a very large monolithic die (about \SI{826}{\milli\meter\squared})
-with 128 physical SM partitions in the full design, while shipping A100 parts
-expose 108 active SMs in the SXM4-40GB product configuration~\cite{nvidia2020a100,nvidia-ampere-in-depth}.
+with 128 physical SM partitions in the full design. Shipping A100 SXM4-40GB
+parts expose 108 active SMs (20 disabled)~\cite{nvidia2020a100,nvidia-ampere-in-depth}.
 This subsection gives a first-order yield sensitivity estimate to provide
 economic context for why large dies are commonly harvested/binned.
 
@@ -362,7 +365,11 @@ However, industry-reported anchor values from public disclosures place
 $D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
 $D_0\approx 0.09$ defects/cm$^2$ for N7 around three quarters after high-volume
 manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n5}.
-\cref{fig:ga100-n7-yield-curve} plots the resulting full-die-yield sensitivity.
+\Cref{fig:ga100-n7-yield-curve} overlays three large-die area references:
+GA100 (\SI{826}{\milli\meter\squared}), GV100/V100
+(\SI{815}{\milli\meter\squared}), and GH100/H200
+(\SI{814}{\milli\meter\squared}). The comparison is area-only; process-node
+effects are not modeled in this plot~\cite{nvidia-ampere-in-depth,nvidia2022h100}.
 
 \begin{figure}[H]
   \centering
@@ -376,10 +383,12 @@ manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n
       }
     }
   }
-  \caption{First-order defect-limited yield sensitivity for a GA100-sized die
-  ($A=8.26$\,cm$^2$) using $Y_{\mathrm{full}}\approx e^{-A D_0}$. Marker
-  points use industry-reported N7 anchor values ($D_0\approx 0.33$ and
-  $D_0\approx 0.09$).}
+  \caption{First-order defect-limited yield sensitivity under
+  $Y_{\mathrm{full}}\approx e^{-A D_0}$ for GA100 area
+  (\SI{826}{\milli\meter\squared}), GV100/V100 area
+  (\SI{815}{\milli\meter\squared}), and GH100/H200 area
+  (\SI{814}{\milli\meter\squared}). Marker points use industry-reported N7
+  anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
   \label{fig:ga100-n7-yield-curve}
 \end{figure}
 

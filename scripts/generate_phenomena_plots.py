@@ -229,21 +229,6 @@ def plot_coalescing(rows: list[dict[str, str]], out_path: Path) -> None:
     ax2.set_ylabel("Normalized effective bandwidth proxy")
     ax2.set_ylim(bottom=0.0)
     ax1.axvspan(64, 128, color="#dddddd", alpha=0.3, zorder=0)
-
-    ax1.text(
-        1.3,
-        max(ms) * 0.88,
-        "Higher stride generally degrades coalescing.",
-        fontsize=9.5,
-        color="#333333",
-    )
-    ax1.text(
-        66,
-        max(ms) * 0.97,
-        "High-stride region can include index-aliasing artifacts",
-        fontsize=8.6,
-        color="#444444",
-    )
     save_plot(fig, out_path)
 
 
@@ -341,6 +326,8 @@ def plot_register_pressure(rows: list[dict[str, str]], out_path: Path) -> None:
     ax2.bar([i + 0.18 for i in x], occ, width=0.36, color="#ff7f0e", label="Theoretical occupancy (%)", alpha=0.9)
     ax2.set_ylabel("Theoretical occupancy [%]")
     ax2.set_ylim(0, 110)
+    ax1.grid(False)
+    ax2.grid(False)
 
     h1, l1 = ax1.get_legend_handles_labels()
     h2, l2 = ax2.get_legend_handles_labels()

@@ -168,7 +168,11 @@ profile evidence comparable across optimisation steps.
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.85\textwidth]{phenomena_coalescing_sweep}
-  \caption{Global-memory coalescing sweep over stride.}
+  \caption{Global-memory coalescing sweep over stride. The trend from stride
+  1 to 32 shows the expected coalescing degradation (higher time, lower
+  normalized bandwidth proxy). The shaded high-stride region (64--128) is
+  retained for completeness and may include index-aliasing artifacts from the
+  synthetic mapping.}
   \label{fig:phenomena-coalescing}
 \end{figure}
 }{}
@@ -192,14 +196,14 @@ monotonic degradation regime up to stride 32.
 \begin{table}[t]
   \centering
   \small
-  \begin{tabular}{l r r r}
+  \begin{tabularx}{\textwidth}{@{}l >{\raggedleft\arraybackslash}p{2.5cm} >{\raggedleft\arraybackslash}p{2.8cm} >{\raggedleft\arraybackslash}p{3.2cm}@{}}
     \toprule
     Variant & Avg.\ kernel time (ms) & Core effective TFLOP/s & Theoretical occupancy (\%) \\
     \midrule
     Low register pressure  & 0.594150 & 14.46 & 100.0 \\
     High register pressure & 0.671002 & 12.80 & 62.5 \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
   \caption{Register-pressure microbenchmark results on A100 (FP32 arithmetic
     core work).}
   \label{tab:register-pressure}
@@ -208,7 +212,7 @@ monotonic degradation regime up to stride 32.
 \IfFileExists{images/phenomena_register_pressure.pdf}{
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.85\textwidth]{phenomena_register_pressure}
+  \includegraphics[width=0.72\textwidth]{phenomena_register_pressure}
   \caption{Register pressure versus throughput and occupancy.}
   \label{fig:phenomena-register-pressure}
 \end{figure}

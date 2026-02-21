@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a simple defect-density yield curve for GA100-sized dies.
+"""Generate a simple defect-density yield curve for large GPU die areas.
 
 Run from repository root:
     python3 scripts/generate_ga100_n7_yield_curve.py
@@ -24,9 +24,10 @@ except ModuleNotFoundError as exc:
 ROOT = Path(__file__).resolve().parents[1]
 IMAGES = ROOT / "images"
 
-# Die areas in cm^2
-GA100_AREA_CM2 = 8.26  # 826 mm^2
-ILLUSTRATIVE_SMALLER_DIE_CM2 = 6.0  # 600 mm^2
+# Die areas in cm^2 (area-only sensitivity comparison).
+GA100_AREA_CM2 = 8.26  # 826 mm^2 (A100 / GA100)
+GV100_V100_AREA_CM2 = 8.15  # 815 mm^2 (V100 / GV100)
+GH100_H200_AREA_CM2 = 8.14  # 814 mm^2 (H100/H200 / GH100)
 
 
 def poisson_yield(area_cm2: float, defect_density_cm2: float) -> float:
@@ -57,9 +58,8 @@ def main() -> None:
 
     d0_values = [0.02 + i * 0.001 for i in range(381)]  # [0.02, 0.40]
     y_ga100 = [100.0 * poisson_yield(GA100_AREA_CM2, d0) for d0 in d0_values]
-    y_small = [
-        100.0 * poisson_yield(ILLUSTRATIVE_SMALLER_DIE_CM2, d0) for d0 in d0_values
-    ]
+    y_v100 = [100.0 * poisson_yield(GV100_V100_AREA_CM2, d0) for d0 in d0_values]
+    y_h200 = [100.0 * poisson_yield(GH100_H200_AREA_CM2, d0) for d0 in d0_values]
 
     # Reported N7 anchor points from industry coverage of TSMC/Intel disclosures.
     anchors = [
@@ -77,11 +77,19 @@ def main() -> None:
     )
     ax.plot(
         d0_values,
-        y_small,
+        y_v100,
         color="#ff7f0e",
         linewidth=2.2,
         linestyle="--",
-        label="Illustrative smaller die (600 mm$^2$)",
+        label="GV100 / V100 area (815 mm$^2$)",
+    )
+    ax.plot(
+        d0_values,
+        y_h200,
+        color="#2ca02c",
+        linewidth=2.2,
+        linestyle="-.",
+        label="GH100 / H200 area (814 mm$^2$)",
     )
 
     for idx, (label, d0) in enumerate(anchors):
@@ -102,7 +110,7 @@ def main() -> None:
     ax.set_ylim(0.0, 100.0)
     ax.set_xlabel("Defect density $D_0$ [defects/cm$^2$]")
     ax.set_ylabel("Predicted full-die yield [%]")
-    ax.set_title("First-order Defect-Limited Yield Sensitivity for GA100-Sized Dies")
+    ax.set_title("First-order Defect-Limited Yield Sensitivity by Large-Die Area")
     ax.legend(loc="upper right")
 
     fig.tight_layout()
