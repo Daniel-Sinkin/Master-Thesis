@@ -2,7 +2,8 @@
 \section{Integration and Build System}\label{sec:build-system}
 
 The implementation is integrated as a reproducible CUDA/C++ project with clear
-separation between benchmark harness, kernel library, and profiling scripts.
+separation between benchmark harness and kernel library, with profiling scripts
+kept independent.
 This structure is necessary to compare optimisation variants consistently across
 multiple datasets and precision modes.
 
@@ -34,4 +35,3 @@ Kernel entry points are exposed through a common interface that supports:
 
 Using a unified interface allows controlled A/B testing with minimal host-side
 differences between variants.
-

@@ -17,7 +17,8 @@ distribution. Over time, the contraction-heavy parts moved to GPUs, where
 cuBLAS/cuTENSOR-style kernels and communication-aware scheduling became central
 for strong scaling across devices~\cite{springer2017tensor,menczer2023massive,menczer2024efficient-dmrg-gpu}.
 The algorithmic core stayed similar, but the main performance bottlenecks
-shifted toward memory movement, launch overhead, and multi-GPU orchestration.
+shifted toward memory movement and launch overhead, then to multi-GPU
+orchestration at larger scale.
 
 \subsection{Why Tensor Networks Are of Interest}\label{sec:tn-interest}
 
@@ -45,11 +46,11 @@ and the von Neumann entropy
 \]
 is effectively controlled by the retained rank $\chi$.
 
-From an HPC perspective, tensor networks are also interesting because they are a
-stress test for modern GPUs: many dense contractions, repeated reshapes, and
-long iterative workflows with short kernels. This combination makes them a good
-case for studying both kernel-level efficiency and system-level orchestration
-costs~\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}.
+From an HPC perspective, tensor networks are also interesting because they
+stress modern GPUs through dense contractions with repeated reshapes inside
+iterative workflows dominated by short kernels. This makes them a good case for studying
+kernel efficiency and orchestration costs together
+~\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}.
 
 \subsection{Computational Context}\label{sec:tensor-context}
 
@@ -57,8 +58,8 @@ Tensor-network methods arise in quantum many-body simulation, where the full
 state space of the Schr\"odinger equation is reduced to a structured set of
 lower-rank objects. In this thesis, tensor networks are treated as an
 \emph{application source of computational patterns}, not as a physics topic.
-Detailed notation, model assumptions, and algorithmic physics choices are
-outside scope here and are introduced separately with domain experts.
+Detailed notation and model-specific physics choices are outside scope here and
+are introduced separately with domain experts.
 
 From a high-performance computing perspective, the relevant point is that
 tensor-network codes repeatedly execute dense linear-algebra-like kernels on
@@ -162,8 +163,8 @@ In practical implementations, local updates are often executed as:
 \end{figure}
 
 The same structure appears in the optimisation targets of later chapters:
-GEMM-like contractions, layout transforms, launch-overhead control, and
-profiling-guided tuning of memory/occupancy trade-offs.
+GEMM-like contractions and layout transforms, together with launch-overhead
+control and profiling-guided tuning of memory/occupancy trade-offs.
 
 \subsection{Kernel Patterns Relevant to This Thesis}\label{sec:tn-kernel-motifs}
 
@@ -182,9 +183,8 @@ The optimisation work in this thesis is driven by three recurring patterns:
     \cref{sec:kernel-launch-mechanics,sec:launch-overhead-benchmark}).
 \end{enumerate}
 
-This computational profile aligns directly with CUDA optimisation topics such as
-occupancy control, shared-memory tiling, register pressure, launch fusion, and
-host-device scheduling.
+The profile aligns directly with CUDA topics such as occupancy control,
+shared-memory tiling and launch fusion, plus host-device scheduling.
 
 \subsection{Scope Boundary}\label{sec:tn-scope-boundary}
 
@@ -196,5 +196,5 @@ To keep the thesis focused and technically coherent, we explicitly exclude:
   \item algorithmic comparisons driven primarily by physics accuracy criteria.
 \end{itemize}
 
-Instead, we evaluate kernels by HPC criteria: runtime, achieved throughput,
+Instead, kernels are evaluated by HPC criteria: runtime, achieved throughput,
 memory efficiency, and scaling behaviour on Ampere-class GPUs.

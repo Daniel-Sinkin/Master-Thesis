@@ -547,7 +547,10 @@ HBM global memory & \num{500} \\
 
 \subsection{Compute Node Topology}\label{sec:node-topology}
 
-The performance of GPU-accelerated applications depends not only on the GPU itself but also on the topology of the compute node---how CPUs, GPUs, and memory are interconnected. This subsection describes the node architecture of the JURECA-DC system used throughout this thesis, which is representative of modern multi-GPU HPC nodes.
+The performance of GPU-accelerated applications depends on more than the GPU
+itself. Node topology matters: CPU placement, GPU placement, and memory
+connectivity. This subsection describes the JURECA-DC node architecture used in
+this thesis, representative of modern multi-GPU HPC nodes.
 
 \subsubsection{CPU and NUMA Topology}
 
@@ -621,7 +624,7 @@ Although both are high-speed interconnects, they serve different roles:
 \end{itemize}
 
 Practical rule: use PCIe-local NUMA placement to minimise host-device staging
-costs, and rely on NVLink for inter-GPU tensor redistribution whenever possible
+costs. Use NVLink for inter-GPU tensor redistribution whenever possible
 ~\cite{nvidia-a100-product-specs,nvidia-cuda-guide}.
 
 Each GPU is physically attached via PCIe Gen\,4 $\times$16 to a specific NUMA domain on one of the two CPU sockets:

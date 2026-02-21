@@ -51,6 +51,6 @@ literature and in early profiling:
 \end{enumerate}
 
 For each class, the first profiling pass records the same minimum metric set:
-kernel runtime, launch count, achieved occupancy, DRAM throughput, and top warp
-stall reasons. This keeps early optimisation choices comparable even before the
+kernel runtime, launch count, achieved occupancy, DRAM throughput, plus dominant
+warp-stall reasons. This keeps early optimisation choices comparable even before the
 final production kernel list is fixed.

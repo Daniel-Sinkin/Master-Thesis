@@ -1,10 +1,20 @@
 % chapters/02_sections/cuda_programming_model.tex
 \section{CUDA Programming Model}\label{sec:cuda}
-CUDA (Compute Unified Device Architecture) is NVIDIA's parallel programming platform for general-purpose computation on GPUs. A CUDA program consists of host code, which runs on the CPU, and \emph{kernels}, which are functions launched from the host but executed in parallel across many GPU threads. The programmer specifies the parallelism by choosing a grid of thread blocks at launch time; the hardware then schedules those blocks onto the available SMs.
+CUDA (Compute Unified Device Architecture) is NVIDIA's parallel programming
+platform for general-purpose computation on GPUs. A CUDA program combines host
+code (CPU side) with \emph{kernels} launched on the GPU. Parallelism is
+specified through a grid of thread blocks at launch time, and the hardware
+schedules those blocks onto the available SMs.
 
 \subsection{Thread Hierarchy and Kernel Launch}\label{sec:cuda-threads}
 
-CUDA organises parallel execution into a three-level hierarchy: \emph{grids}, \emph{thread blocks} (or simply \emph{blocks}), and \emph{threads}. A kernel launch creates a single grid, which is partitioned into blocks. Each block contains a fixed number of threads that execute concurrently on the same SM and can cooperate through shared memory and synchronisation barriers. Threads in different blocks cannot synchronise with each other during kernel execution.
+CUDA organises parallel execution into a three-level hierarchy:
+\emph{grids}, \emph{thread blocks} (or simply \emph{blocks}), and
+\emph{threads}. A kernel launch creates one grid, which is partitioned into
+blocks. Each block contains a fixed number of threads that execute concurrently
+on the same SM and can cooperate through shared memory and synchronisation
+barriers. Threads in different blocks cannot synchronise with each other during
+kernel execution.
 
 Both the grid and each block can be specified with up to three dimensions, which provides a natural mapping for problems defined over multidimensional arrays. The dimensions are set via the \texttt{dim3} type, and each thread identifies its position using the built-in variables \texttt{threadIdx}, \texttt{blockIdx}, \texttt{blockDim}, and \texttt{gridDim}.
 
@@ -15,7 +25,9 @@ Both the grid and each block can be specified with up to three dimensions, which
   \label{fig:cuda-thread-hierarchy}
 \end{figure}
 
-The hierarchical organisation of grids, thread blocks, and threads is illustrated in \cref{fig:cuda-thread-hierarchy}. Within each block, threads are further grouped into \emph{warps} of 32 threads that execute instructions in lock-step on the SM's SIMT (Single Instruction, Multiple Thread) execution units.
+The hierarchy in \cref{fig:cuda-thread-hierarchy} also includes \emph{warps}:
+groups of 32 threads that execute in lock-step on the SM's SIMT (Single
+Instruction, Multiple Thread) units.
 
 \subsubsection{Kernel Syntax and Launch Configuration}
 

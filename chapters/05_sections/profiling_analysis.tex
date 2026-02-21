@@ -2,7 +2,7 @@
 \section{Profiling Analysis}\label{sec:profiling}
 
 Nsight Compute data is used to explain \emph{why} performance changes after each
-optimisation, not only \emph{how much} it changes.
+optimisation, not just \emph{how much} it changes.
 
 \subsection{KPI Pack Used for Attribution}
 
@@ -215,8 +215,8 @@ monotonic degradation regime up to stride 32.
 }{}
 
 Increasing live register state reduces theoretical occupancy from
-$100.0\%$ to $62.5\%$, increases runtime by about $12.9\%$, and reduces core
-effective throughput from $14.46$ to $12.80\;\text{TFLOP/s}$ (about $11.5\%$).
+$100.0\%$ to $62.5\%$. Runtime rises by about $12.9\%$, and core effective
+throughput drops from $14.46$ to $12.80\;\text{TFLOP/s}$ (about $11.5\%$).
 This indicates that the high-register variant exposes less latency hiding due
 to fewer concurrently resident warps per SM. For contraction kernels, this
 supports limiting accumulator blocking and aggressive unrolling when they push

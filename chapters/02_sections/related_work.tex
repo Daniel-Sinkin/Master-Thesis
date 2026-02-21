@@ -38,7 +38,7 @@ particularly the emphasis on bottleneck-driven optimisation.
 \subsection{Existing GPU Tensor Network Implementations}\label{sec:existing-tn-gpu}
 
 Prior work on tensor contractions shows that performance is sensitive to index
-ordering, data layout, and mapping of contractions to BLAS kernels
+ordering and data layout, plus the mapping of contractions to BLAS kernels
 (\cite{springer2017tensor} provides an early and still useful reference point).
 Across implementations, two recurring observations are relevant here:
 
@@ -50,13 +50,13 @@ Across implementations, two recurring observations are relevant here:
 \end{enumerate}
 
 This thesis builds on those observations with a stricter focus on Ampere-era
-execution details: launch overhead, occupancy limits, memory hierarchy effects,
-and profile-guided kernel fusion on realistic node topology.
+execution details: launch overhead, occupancy limits, memory-hierarchy effects,
+plus profile-guided fusion on a realistic node topology.
 
 \subsection{Selected Work in Collaborating Research Directions}\label{sec:people-sota}
 
 The following review focuses on work that is directly relevant to this thesis
-context: Wu, Di~Napoli, Rizzi, Waintal, Legeza, and close collaborators.
+context: Wu, Di~Napoli, Rizzi, Waintal, Legeza, and their close collaborators.
 
 \subsubsection{Wu and Di Napoli: GPU-Distributed Dense Kernels and Communication}
 
@@ -83,7 +83,7 @@ The 2023 and 2024 studies also report good scaling across heterogeneous
 CPU--GPU systems and explicitly motivate mixed-precision/tensor-core execution
 for contraction-heavy workloads~\cite{menczer2023massive,menczer2024efficient-dmrg-gpu}.
 For this thesis, the direct transfer is straightforward: reduce launch count for
-small contractions, bucket by shape, and tune stream-level scheduling.
+small contractions, bucket by shape, then tune stream-level scheduling.
 
 \subsubsection{Rizzi and Waintal: Operator-Sum Formulations and Practical TN Performance}
 
@@ -99,8 +99,8 @@ simulation perspectives for circuit-style tensor-network workloads
 (\cite{zhou2020limits,ayral2023dmrg-circuit-fidelity}).
 Even where papers are not CUDA-kernel papers, the computational patterns they
 identify (many medium/small contractions, truncation-heavy iterative sweeps)
-match the exact regime where launch overhead, layout efficiency, and batching
-matter most on A100-class hardware.
+match the exact regime where launch overhead and layout efficiency matter most,
+with batching as the main countermeasure on A100-class hardware.
 
 \subsubsection{A100 CUDA Optimisation Practice (Documentation SOTA)}
 
@@ -118,8 +118,8 @@ application papers. The recurring recommendations are:
   \item validate each optimisation with metric-level profiling instead of
     relying on throughput numbers alone.
 \end{enumerate}
-These points are consistent across the Ampere tuning guide, CUDA best-practice
-guide, and Nsight Compute profiling guide
+These points are consistent across the Ampere tuning guide, the CUDA
+best-practices guide, and the Nsight Compute profiling guide
 (\cite{nvidia-ampere-tuning-guide,nvidia-cuda-best-practices,nvidia-nsight-compute-profiling-guide}).
 
 \paragraph{Integration plan used in this thesis.}
@@ -237,8 +237,8 @@ accumulate_terms_kernel<<<grid2, block2, 0, stream>>>(state_tmp, state_out);
 \end{lstlisting}
 
 \textbf{Why it matters.}
-It follows the local-operator-sum idea discussed in recent TTN benchmarking:
-intermediate tensor construction is reduced, and cache/memory-traffic behavior
+It follows the local-operator-sum idea discussed in recent TTN benchmarking.
+Intermediate tensor construction is reduced, and cache/memory-traffic behavior
 often improves~\cite{krinitsin2025ttn-ed}.
 
 \subsubsection{Pattern C: Overlap of Local Compute and Multi-GPU Reduction}

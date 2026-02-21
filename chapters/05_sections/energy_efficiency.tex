@@ -13,8 +13,8 @@ an energy perspective as well.
 
 The target workload class (tensor-network-style contractions) executes many
 short and medium kernels in iterative loops. In this regime, wasted launches,
-redundant arithmetic, and avoidable memory traffic increase not only runtime but
-also board energy. On A100-class GPUs, where arithmetic throughput is high and
+redundant arithmetic, and avoidable memory traffic increase both runtime and
+board energy. On A100-class GPUs, where arithmetic throughput is high and
 kernel orchestration is often the bottleneck for moderate sizes, runtime
 improvements frequently translate directly into energy improvements at fixed
 clock/power settings~\cite{nvidia2020a100,nvidia-cuda-best-practices}.

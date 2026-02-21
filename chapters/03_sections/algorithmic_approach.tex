@@ -22,7 +22,8 @@ Four axes are prioritised throughout the implementation chapters:
   \item \textbf{Launch amortisation:} reduce host-side orchestration overhead
     through kernel fusion and device-side composition.
   \item \textbf{Memory-efficiency optimisation:} maximise coalesced access and
-    data reuse via layout control, shared-memory tiling, and register blocking.
+    data reuse via layout control and on-chip reuse (shared memory plus register
+    blocking).
   \item \textbf{Occupancy-resource balance:} tune block sizes and
     launch-bounds against register and shared-memory budgets.
   \item \textbf{Precision-performance trade-offs:} evaluate FP64, FP32, and
@@ -125,10 +126,10 @@ Here $\eta$ is a roofline efficiency ratio relative to the active bound.
 Interpretation for optimisation decisions:
 \begin{itemize}
   \item if $I_{\mathrm{meas}}<I^\star$ and $\eta$ is low, prioritise memory
-    coalescing, reuse, and layout changes;
+    coalescing and data reuse; adjust layouts where needed;
   \item if $I_{\mathrm{meas}}\ge I^\star$ and $\eta$ is low, prioritise
-    instruction-level efficiency, occupancy/resource balance, and launch
-    overhead reduction;
+    instruction-level efficiency and occupancy/resource balance, then reduce
+    launch overhead;
   \item if end-to-end speedup is still low while kernel $\eta$ improves,
     serial orchestration is likely the limiting factor (Amdahl regime).
 \end{itemize}
@@ -265,9 +266,10 @@ The asymptotic limit as $p\to\infty$ is
 \[
   S_{\infty}=\frac{1}{1-f}.
 \]
-Even efficient kernels are capped by serial orchestration, launch overhead,
-synchronisation, and data movement outside the parallel kernel
-body~\cite{amdahl1967validity}.
+Even efficient kernels are capped by serial orchestration overhead outside the
+parallel kernel body, including launches, synchronisation points, and staging
+traffic
+~\cite{amdahl1967validity}.
 
 \begin{table}[H]
 \centering

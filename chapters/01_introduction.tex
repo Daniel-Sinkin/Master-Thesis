@@ -5,7 +5,8 @@ Tensor-network simulations increasingly rely on GPU-accelerated dense kernels,
 yet practical workloads often run in a regime where library defaults are not
 fully efficient: matrix blocks are small or irregular, kernel sequences are
 short, and memory-layout transforms are frequent. In this regime, launch
-overhead, data movement, and occupancy limits can dominate the total runtime.
+overhead and data movement can dominate the total runtime, with occupancy limits
+amplifying the effect.
 
 This thesis is conducted in collaboration with the J\"ulich Supercomputing
 Centre (JSC), where partner teams in computational physics require reliable
@@ -30,14 +31,15 @@ The work is organised around the following technical questions:
   \item Which kernel patterns are the primary bottlenecks on A100 for the target
     workload distribution (small/medium contractions, layout transforms, short
     kernel sequences)?
-  \item How much performance can be recovered through launch reduction, kernel
-    fusion, data-layout control, and occupancy-aware tuning?
+  \item How much performance can be recovered by reducing launches and fusing
+    short kernels? How much additional gain comes from layout and
+    occupancy-aware tuning?
   \item How closely do optimised kernels approach hardware limits predicted by
     bandwidth and throughput models, and where do residual stalls remain?
 \end{enumerate}
 
-The thesis addresses these questions with a measurement-first methodology based
-on reproducible benchmarks and Nsight profiling, and compares custom kernels
+The thesis addresses these questions with a measurement-first workflow based on
+reproducible benchmarks and Nsight profiling. Custom kernels are compared
 against established vendor baselines (cuBLAS/cuTENSOR).
 
 \section{Contributions}\label{sec:contributions}
@@ -60,11 +62,11 @@ The contributions of this thesis are:
 \section{Outline}\label{sec:outline}
 \Cref{ch:background} introduces the CUDA and hardware concepts required for the
 optimisation work, and frames tensor networks only as computational motivation.
-\Cref{ch:design} defines the target kernels, baseline choices, and data-layout
-strategy.
+\Cref{ch:design} defines the target kernels and baseline choices, then
+introduces the data-layout strategy.
 \Cref{ch:implementation} details the kernel design and integration choices used
 to realise the optimisation approach.
 \Cref{ch:results} reports benchmark and profiling results, including launch
 overhead experiments and comparison against library baselines.
-\Cref{ch:conclusion} summarises findings, limitations, and next optimisation
-steps.
+\Cref{ch:conclusion} summarises the findings, states the main limitations, and
+defines the next optimisation steps.

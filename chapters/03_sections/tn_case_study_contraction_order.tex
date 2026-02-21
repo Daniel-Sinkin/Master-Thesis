@@ -246,8 +246,8 @@ works well:
 \end{enumerate}
 
 For readability in Excalidraw, keep only five tensor nodes
-($G,X,M,T,Y$), color contracted indices consistently, and place the work
-numbers directly below each panel.
+($G,X,M,T,Y$) and color contracted indices consistently. Place the work numbers
+directly below each panel.
 
 \subsection{Design Decisions Behind the Better Variant}
 
@@ -284,7 +284,7 @@ execution mapping.
 Beyond the single ``bad vs good'' comparison, this case follows a staged
 optimisation structure similar to the SGEMM worklog style in
 \cite{boehm2022cuda-mmm}: fix algorithmic work first, then remove memory
-pathologies, then improve scheduling and occupancy, and finally tune.
+pathologies. After that, improve scheduling/occupancy and tune.
 
 \begin{enumerate}
   \item \textbf{Stage 0 (correct baseline).} Start from a slow but clearly
