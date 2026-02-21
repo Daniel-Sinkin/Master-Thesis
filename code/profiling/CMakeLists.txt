@@ -51,6 +51,14 @@ add_executable(tn_two_site_bad_direct tn_two_site_bad_direct.cu)
 target_link_libraries(tn_two_site_bad_direct PRIVATE CUDA::cudart)
 apply_common_cuda_flags(tn_two_site_bad_direct)
 
+add_executable(tn_irregular_direct_bad_seq tn_irregular_direct_bad_seq.cu)
+target_link_libraries(tn_irregular_direct_bad_seq PRIVATE CUDA::cudart)
+apply_common_cuda_flags(tn_irregular_direct_bad_seq)
+
+add_executable(tn_irregular_batched_good tn_irregular_batched_good.cu)
+target_link_libraries(tn_irregular_batched_good PRIVATE CUDA::cudart)
+apply_common_cuda_flags(tn_irregular_batched_good)
+
 add_executable(warp_divergence_good_uniform warp_divergence_good_uniform.cu)
 target_link_libraries(warp_divergence_good_uniform PRIVATE CUDA::cudart)
 apply_common_cuda_flags(warp_divergence_good_uniform)

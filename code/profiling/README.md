@@ -27,6 +27,10 @@ The scripts print the exact metric names they selected in the SLURM stdout log.
   cuBLAS strided-batched GEMM
 - `tn_two_site_bad_direct.cu`: direct two-site contraction kernel with poor
   contraction order and low reuse
+- `tn_irregular_direct_bad_seq.cu`: irregular contraction path with repeated
+  layout repack, one-launch-per-batch execution, and explicit sync/copies
+- `tn_irregular_batched_good.cu`: same contraction family with coalesced access
+  and one batched kernel launch per iteration
 
 ## Folder layout
 
@@ -35,6 +39,8 @@ The scripts print the exact metric names they selected in the SLURM stdout log.
 - `code/profiling/ncu_warp_divergence_profile.slurm`: one-shot compile + divergence profile
 - `code/profiling/ncu_tn_contraction_profile.slurm`: one-shot compile + TN
   contraction-order profile
+- `code/profiling/nsight_irregular_training_profile.slurm`: combined Nsight
+  Systems + Nsight Compute training pass for irregular contraction bottlenecks
 
 ## Build manually (from repository root)
 
@@ -108,6 +114,30 @@ Expected behavior:
   contraction order + batched GEMM mapping.
 - `tn_two_site_bad_direct`: lower throughput from direct $O(d^2\chi^2)$-style
   contraction with weak data reuse.
+
+## Irregular contraction training (Nsight Systems + Compute)
+
+```bash
+sbatch code/profiling/nsight_irregular_training_profile.slurm
+```
+
+Outputs:
+
+- `code/profiling/nsight-irregular-out.<jobid>`
+- `code/profiling/nsight-irregular-err.<jobid>`
+- `code/profiling/nsys_irregular_bad.<jobid>.nsys-rep`
+- `code/profiling/nsys_irregular_good.<jobid>.nsys-rep`
+- `code/profiling/bad_irregular_repack_metrics.<jobid>.csv`
+- `code/profiling/bad_irregular_direct_metrics.<jobid>.csv`
+- `code/profiling/good_irregular_batched_metrics.<jobid>.csv`
+
+Training intent:
+
+- Use Nsight Systems to confirm where end-to-end time is spent
+  (kernel launch serialization, explicit synchronizations, D2H copies).
+- Use Nsight Compute to attribute mechanism on selected kernels:
+  repack kernel (memory/layout path), direct irregular kernel (serial-launch
+  regime), and batched good kernel (coalesced/throughput-oriented regime).
 
 ## Thesis Phenomena Suite (7 benchmarks)
 
