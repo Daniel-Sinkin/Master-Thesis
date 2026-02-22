@@ -39,3 +39,12 @@ accompanying throughput loss shows that ``more in-register work'' is not
 monotonically beneficial. In practice, this motivates tuning unroll depth and
 accumulator count jointly with occupancy targets rather than maximising
 instruction-level reuse in isolation.
+
+The irregular training pair in \cref{tab:irregular-training-runtime,tab:irregular-training-kpi}
+adds one immediately usable rule for upcoming kernels with skewed shapes
+(e.g.\ $47\times84$ blocks): prioritise launch structure and host/device
+orchestration before low-level arithmetic tuning. In that run, moving from
+serial per-batch launches to one batched launch per step gave a
+$71.7\times$ step-time reduction while K10 stayed nearly unchanged, which
+indicates that scheduler feed and launch/copy structure, not divergence,
+dominated performance.

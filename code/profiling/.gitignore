@@ -1,0 +1,13 @@
+build/
+results/
+
+*.nsys-rep
+*.sqlite
+
+ncu-*-out.*
+ncu-*-err.*
+nsight-irregular-out.*
+nsight-irregular-err.*
+
+*_metrics.*.csv
+nsys_irregular_*_stats.*.csv

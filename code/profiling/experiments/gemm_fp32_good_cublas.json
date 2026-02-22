@@ -1,0 +1,12 @@
+{
+  "profile": "ncu",
+  "libs": ["cudart", "cublas"],
+  "run_args": [],
+  "nvcc_flags": [],
+  "arch": 80,
+  "account": "slai",
+  "partition": "dc-gpu-devel",
+  "time": "00:20:00",
+  "cpus_per_task": 12,
+  "gpus": 1
+}

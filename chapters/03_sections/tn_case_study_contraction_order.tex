@@ -83,7 +83,7 @@ cost
 \]
 with weak reuse of $X$ and $M$ across threads and heavy global-memory traffic.
 This baseline is implemented in
-\path{code/profiling/tn_two_site_bad_direct.cu}.
+\path{code/profiling/experiments/tn_two_site_bad_direct.cu}.
 
 \subsection{Improved Algorithm (Better)}
 
@@ -98,7 +98,7 @@ This reduces asymptotic work to
   \BigO\!\left(B\,(d_p^2\chi + d_p\chi^2)\right),
 \]
 and maps directly to two strided-batched GEMMs. The implementation is
-\path{code/profiling/tn_two_site_good_batched_gemm.cu}.
+\path{code/profiling/experiments/tn_two_site_good_batched_gemm.cu}.
 
 \begin{figure}[H]
   \centering

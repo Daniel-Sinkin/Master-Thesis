@@ -23,6 +23,19 @@ else
 fi
 
 SCRIPT_DIR="${REPO_ROOT}/code/profiling"
+RESULTS_BASE="${PROFILE_RESULTS_ROOT:-${SCRIPT_DIR}/results/irregular}"
+RUN_DIR="${RESULTS_BASE}/job_${SLURM_JOB_ID}"
+mkdir -p "${RUN_DIR}"
+
+# Mirror job output into a run-local log so retrieval is deterministic.
+exec > >(tee -a "${RUN_DIR}/run.log")
+exec 2>&1
+
+echo "SLURM_JOB_ID=${SLURM_JOB_ID}"
+echo "REPO_ROOT=${REPO_ROOT}"
+echo "RUN_DIR=${RUN_DIR}"
+echo "Started (UTC): $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
 module load Stages/2025 CMake/3.29.3 CUDA/12 GCC/13.3.0
 export CUDA_VISIBLE_DEVICES=0
 
@@ -53,7 +66,7 @@ nsys profile \
   --sample=none \
   --trace=cuda,osrt \
   --stats=true \
-  -o "${SCRIPT_DIR}/nsys_irregular_bad.${SLURM_JOB_ID}" \
+  -o "${RUN_DIR}/nsys_irregular_bad.${SLURM_JOB_ID}" \
   "${SCRIPT_DIR}/build/tn_irregular_direct_bad_seq" "${BAD_NSYS_ARGS[@]}"
 
 echo "=== Nsight Systems pass: GOOD irregular pipeline ==="
@@ -62,15 +75,15 @@ nsys profile \
   --sample=none \
   --trace=cuda,osrt \
   --stats=true \
-  -o "${SCRIPT_DIR}/nsys_irregular_good.${SLURM_JOB_ID}" \
+  -o "${RUN_DIR}/nsys_irregular_good.${SLURM_JOB_ID}" \
   "${SCRIPT_DIR}/build/tn_irregular_batched_good" "${GOOD_NSYS_ARGS[@]}"
 
 for tag in bad good; do
   nsys stats \
     --report cuda_api_sum,cuda_gpu_kern_sum \
     --format csv \
-    --output "${SCRIPT_DIR}/nsys_irregular_${tag}_stats.${SLURM_JOB_ID}" \
-    "${SCRIPT_DIR}/nsys_irregular_${tag}.${SLURM_JOB_ID}.nsys-rep" >/dev/null 2>&1 || true
+    --output "${RUN_DIR}/nsys_irregular_${tag}_stats.${SLURM_JOB_ID}" \
+    "${RUN_DIR}/nsys_irregular_${tag}.${SLURM_JOB_ID}.nsys-rep" >/dev/null 2>&1 || true
 done
 
 ALL_METRICS="$(ncu --query-metrics --query-metrics-mode all 2>/dev/null || true)"
@@ -149,27 +162,46 @@ echo "=== Nsight Compute pass: BAD repack kernel (memory/layout) ==="
 ncu --metrics "${METRICS_CSV}" \
   -k tn_irregular_repack_bad_kernel \
   --launch-skip 1 --launch-count 1 \
-  --csv --log-file "${SCRIPT_DIR}/bad_irregular_repack_metrics.${SLURM_JOB_ID}.csv" \
+  --csv --log-file "${RUN_DIR}/bad_irregular_repack_metrics.${SLURM_JOB_ID}.csv" \
   "${SCRIPT_DIR}/build/tn_irregular_direct_bad_seq" "${BAD_NCU_ARGS[@]}"
 
 echo "=== Nsight Compute pass: BAD direct kernel (serial launch regime) ==="
 ncu --metrics "${METRICS_CSV}" \
   -k tn_irregular_direct_bad_kernel \
   --launch-skip 32 --launch-count 2 \
-  --csv --log-file "${SCRIPT_DIR}/bad_irregular_direct_metrics.${SLURM_JOB_ID}.csv" \
+  --csv --log-file "${RUN_DIR}/bad_irregular_direct_metrics.${SLURM_JOB_ID}.csv" \
   "${SCRIPT_DIR}/build/tn_irregular_direct_bad_seq" "${BAD_NCU_ARGS[@]}"
 
 echo "=== Nsight Compute pass: GOOD batched kernel ==="
 ncu --metrics "${METRICS_CSV}" \
   -k tn_irregular_batched_good_kernel \
   --launch-skip 20 --launch-count 2 \
-  --csv --log-file "${SCRIPT_DIR}/good_irregular_batched_metrics.${SLURM_JOB_ID}.csv" \
+  --csv --log-file "${RUN_DIR}/good_irregular_batched_metrics.${SLURM_JOB_ID}.csv" \
   "${SCRIPT_DIR}/build/tn_irregular_batched_good" "${GOOD_NCU_ARGS[@]}"
 
-echo "Generated outputs:"
-echo "  ${SCRIPT_DIR}/nsys_irregular_bad.${SLURM_JOB_ID}.nsys-rep"
-echo "  ${SCRIPT_DIR}/nsys_irregular_good.${SLURM_JOB_ID}.nsys-rep"
-echo "  ${SCRIPT_DIR}/bad_irregular_repack_metrics.${SLURM_JOB_ID}.csv"
-echo "  ${SCRIPT_DIR}/bad_irregular_direct_metrics.${SLURM_JOB_ID}.csv"
-echo "  ${SCRIPT_DIR}/good_irregular_batched_metrics.${SLURM_JOB_ID}.csv"
+{
+  echo "job_id=${SLURM_JOB_ID}"
+  echo "hostname=$(hostname)"
+  echo "submit_dir=${SLURM_SUBMIT_DIR:-unknown}"
+  echo "repo_root=${REPO_ROOT}"
+  echo "run_dir=${RUN_DIR}"
+  echo "bad_nsys_args=${BAD_NSYS_ARGS[*]}"
+  echo "good_nsys_args=${GOOD_NSYS_ARGS[*]}"
+  echo "bad_ncu_args=${BAD_NCU_ARGS[*]}"
+  echo "good_ncu_args=${GOOD_NCU_ARGS[*]}"
+  echo "selected_metrics=${METRICS_CSV}"
+  echo "finished_utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+} > "${RUN_DIR}/run_meta.txt"
 
+tar -C "${RESULTS_BASE}" -czf "${RESULTS_BASE}/irregular_job_${SLURM_JOB_ID}.tar.gz" "job_${SLURM_JOB_ID}"
+echo "${SLURM_JOB_ID}" > "${RESULTS_BASE}/latest_job_id.txt"
+
+echo "Generated outputs:"
+echo "  ${RUN_DIR}/nsys_irregular_bad.${SLURM_JOB_ID}.nsys-rep"
+echo "  ${RUN_DIR}/nsys_irregular_good.${SLURM_JOB_ID}.nsys-rep"
+echo "  ${RUN_DIR}/bad_irregular_repack_metrics.${SLURM_JOB_ID}.csv"
+echo "  ${RUN_DIR}/bad_irregular_direct_metrics.${SLURM_JOB_ID}.csv"
+echo "  ${RUN_DIR}/good_irregular_batched_metrics.${SLURM_JOB_ID}.csv"
+echo "  ${RUN_DIR}/run_meta.txt"
+echo "  ${RUN_DIR}/run.log"
+echo "  ${RESULTS_BASE}/irregular_job_${SLURM_JOB_ID}.tar.gz"

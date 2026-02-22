@@ -19,17 +19,17 @@ The scripts print the exact metric names they selected in the SLURM stdout log.
 
 ## Cases
 
-- `gemm_fp32_good_cublas.cu`: cuBLAS FP32 GEMM with pedantic FP32 compute
-- `gemm_fp32_bad_naive.cu`: naive FP32 GEMM kernel (intentionally inefficient)
-- `warp_divergence_good_uniform.cu`: warp-uniform branch behavior (good)
-- `warp_divergence_bad_divergent.cu`: forced intra-warp divergence (bad)
-- `tn_two_site_good_batched_gemm.cu`: ordered two-step TN-style contraction via
+- `experiments/gemm_fp32_good_cublas.cu`: cuBLAS FP32 GEMM with pedantic FP32 compute
+- `experiments/gemm_fp32_bad_naive.cu`: naive FP32 GEMM kernel (intentionally inefficient)
+- `experiments/warp_divergence_good_uniform.cu`: warp-uniform branch behavior (good)
+- `experiments/warp_divergence_bad_divergent.cu`: forced intra-warp divergence (bad)
+- `experiments/tn_two_site_good_batched_gemm.cu`: ordered two-step TN-style contraction via
   cuBLAS strided-batched GEMM
-- `tn_two_site_bad_direct.cu`: direct two-site contraction kernel with poor
+- `experiments/tn_two_site_bad_direct.cu`: direct two-site contraction kernel with poor
   contraction order and low reuse
-- `tn_irregular_direct_bad_seq.cu`: irregular contraction path with repeated
+- `experiments/tn_irregular_direct_bad_seq.cu`: irregular contraction path with repeated
   layout repack, one-launch-per-batch execution, and explicit sync/copies
-- `tn_irregular_batched_good.cu`: same contraction family with coalesced access
+- `experiments/tn_irregular_batched_good.cu`: same contraction family with coalesced access
   and one batched kernel launch per iteration
 
 ## Folder layout
@@ -41,6 +41,57 @@ The scripts print the exact metric names they selected in the SLURM stdout log.
   contraction-order profile
 - `code/profiling/nsight_irregular_training_profile.slurm`: combined Nsight
   Systems + Nsight Compute training pass for irregular contraction bottlenecks
+- `code/profiling/experiments/`: single source location for standalone `.cu`
+  experiments and optional sidecar `.json` defaults
+- `code/profiling/slurm/generic_experiment_profile.slurm`: generic one-file
+  compile/run/profile SLURM runner used by Python orchestration
+- `code/profiling/orchestrate.py`: Python orchestration CLI (`init-venv`,
+  `list`, `new`, `submit`, `pull`)
+- `code/profiling/submit_irregular_profile.sh`: submit helper that always writes
+  to a per-job results folder
+- `code/profiling/pull_irregular_results.sh`: local helper to fetch one run from
+  a cluster login node
+
+## Python orchestration (recommended)
+
+Create local venv:
+
+```bash
+python3.12 code/profiling/orchestrate.py init-venv
+```
+
+List experiments:
+
+```bash
+python3.12 code/profiling/orchestrate.py list
+```
+
+Submit one experiment (uses sidecar defaults when present):
+
+```bash
+python3.12 code/profiling/orchestrate.py submit tn_irregular_batched_good
+```
+
+Override run args/profile/libs from CLI:
+
+```bash
+python3.12 code/profiling/orchestrate.py submit tn_irregular_direct_bad_seq \
+  --profile both \
+  --run-args "128 47 84 64 1 4" \
+  --libs cudart
+```
+
+Pull results to local clone:
+
+```bash
+python3.12 code/profiling/orchestrate.py pull <user@cluster-login> tn_irregular_direct_bad_seq latest
+```
+
+Results are collected under one folder:
+
+- `code/profiling/results/experiments/job_<jobid>/`
+
+All generated files in the run folder are prefixed with `<experiment>_`.
 
 ## Build manually (from repository root)
 
@@ -118,18 +169,33 @@ Expected behavior:
 ## Irregular contraction training (Nsight Systems + Compute)
 
 ```bash
-sbatch code/profiling/nsight_irregular_training_profile.slurm
+bash code/profiling/submit_irregular_profile.sh
 ```
 
 Outputs:
 
-- `code/profiling/nsight-irregular-out.<jobid>`
-- `code/profiling/nsight-irregular-err.<jobid>`
-- `code/profiling/nsys_irregular_bad.<jobid>.nsys-rep`
-- `code/profiling/nsys_irregular_good.<jobid>.nsys-rep`
-- `code/profiling/bad_irregular_repack_metrics.<jobid>.csv`
-- `code/profiling/bad_irregular_direct_metrics.<jobid>.csv`
-- `code/profiling/good_irregular_batched_metrics.<jobid>.csv`
+- `code/profiling/results/irregular/slurm-<jobid>.out`
+- `code/profiling/results/irregular/slurm-<jobid>.err`
+- `code/profiling/results/irregular/job_<jobid>/run.log`
+- `code/profiling/results/irregular/job_<jobid>/run_meta.txt`
+- `code/profiling/results/irregular/job_<jobid>/nsys_irregular_bad.<jobid>.nsys-rep`
+- `code/profiling/results/irregular/job_<jobid>/nsys_irregular_good.<jobid>.nsys-rep`
+- `code/profiling/results/irregular/job_<jobid>/bad_irregular_repack_metrics.<jobid>.csv`
+- `code/profiling/results/irregular/job_<jobid>/bad_irregular_direct_metrics.<jobid>.csv`
+- `code/profiling/results/irregular/job_<jobid>/good_irregular_batched_metrics.<jobid>.csv`
+- `code/profiling/results/irregular/irregular_job_<jobid>.tar.gz`
+
+Fetch results to local clone:
+
+```bash
+bash code/profiling/pull_irregular_results.sh <user@cluster-login> <jobid>
+```
+
+or for latest:
+
+```bash
+bash code/profiling/pull_irregular_results.sh <user@cluster-login> latest
+```
 
 Training intent:
 

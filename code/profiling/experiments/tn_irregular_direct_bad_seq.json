@@ -1,0 +1,17 @@
+{
+  "profile": "both",
+  "libs": ["cudart"],
+  "run_args": ["128", "47", "84", "64", "1", "4"],
+  "nvcc_flags": [],
+  "arch": 80,
+  "account": "slai",
+  "partition": "dc-gpu-devel",
+  "time": "00:30:00",
+  "cpus_per_task": 12,
+  "gpus": 1,
+  "nsys_trace": "cuda,osrt",
+  "nsys_sample": "none",
+  "ncu_kernel": "tn_irregular_direct_bad_kernel",
+  "ncu_launch_skip": 32,
+  "ncu_launch_count": 2
+}

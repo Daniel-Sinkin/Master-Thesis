@@ -309,10 +309,81 @@ Where CPUs use deep cache hierarchies to hide latency, GPUs prioritise bandwidth
   \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB used in this thesis provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
 \end{itemize}
 
-Most scientific GPU kernels, including tensor contractions, are
-memory-bandwidth-bound rather than compute-bound. Performance depends on reuse
-in registers and shared memory, plus coalesced, bandwidth-efficient HBM access
-patterns.
+On Ampere-class GPUs, memory behavior is often the dominant constraint before
+arithmetic throughput saturates. For HBM-backed global memory, row-buffer
+locality and coalesced warp accesses strongly influence achieved bandwidth;
+strided or irregular patterns can reduce effective throughput substantially. For
+this reason, the optimisation strategy in this thesis prioritises three levers:
+\textit{(i)} layout and access regularity (\cref{sec:coalescing,sec:hbm-row-column-path}),
+\textit{(ii)} occupancy-aware block sizing, typically starting from
+\numrange{128}{256} threads per block and then tuning against resource limits
+(\cref{sec:block-size}), and \textit{(iii)} profiler-guided iteration with
+Nsight Compute and Nsight Systems (\cref{sec:nsight,sec:profiling}).
+
+\subsubsection{HBM Row/Column Access Path (Conceptual)}
+\label{sec:hbm-row-column-path}
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/HBMRowColumnSensePath.pdf}{
+    \includegraphics[width=0.92\textwidth]{HBMRowColumnSensePath}
+  }{
+    \resizebox{0.92\textwidth}{!}{%
+    \begin{tikzpicture}[>=Latex, line width=0.8pt, every node/.style={font=\small, align=center}]
+      % Bank array and decoders
+      \draw[fill=gray!12] (0,0) rectangle (10,6);
+      \node at (5,5.7) {DRAM bank array (conceptual)};
+      \draw[fill=blue!14] (-1.9,0) rectangle (-0.5,6);
+      \node[rotate=90] at (-1.2,3) {Row decoder};
+      \draw[fill=blue!14] (0,6.25) rectangle (10,7.2);
+      \node at (5,6.72) {Column decoder};
+
+      % Sense amps and I/O buffer
+      \draw[fill=green!24] (0,5.35) rectangle (10,5.8);
+      \node at (5,5.57) {Sense amplifiers (row buffer)};
+      \draw[fill=gray!18] (10.45,5.05) rectangle (12.2,6.05);
+      \node at (11.33,5.55) {Data\\buffers};
+      \draw[<->] (10,5.55) -- (10.45,5.55);
+
+      % Highlighted active row and transfer arrows
+      \draw[fill=green!18] (0,2.45) rectangle (10,2.8);
+      \node[anchor=west] at (0.1,2.62) {active row};
+      \foreach \x in {0.7,1.4,2.1,2.8,3.5,4.2,4.9,5.6,6.3,7.0,7.7,8.4,9.1} {
+        \draw[->,green!55!black] (\x,2.8) -- (\x,5.35);
+      }
+
+      % Bitfield annotation
+      \node[anchor=west] at (-2.0,8.0) {Address split: \textcolor{green!45!black}{row bits} + \textcolor{blue!60!black}{column bits}};
+      \draw[->,green!55!black] (1.8,7.85) -- (-1.2,6.0);
+      \draw[->,blue!60!black] (5.8,7.85) -- (5.0,7.2);
+    \end{tikzpicture}}
+  }
+  \caption{Placeholder schematic for HBM/DRAM row-column access (to be replaced
+  by a final custom diagram). A read activates one row, latches it into sense
+  amplifiers, then uses the column decoder to select transferred data.}
+  \label{fig:hbm-row-column-path}
+\end{figure}
+
+At a conceptual level, the read path is:
+\emph{row activate} $\rightarrow$ \emph{sense-amplifier latch/restore}
+$\rightarrow$ \emph{column select} $\rightarrow$ \emph{I/O transfer}.
+The row-activation step moves a full row into the sense amplifiers (often
+called the row buffer or ``page'' in architecture talks). DRAM cell charge is
+disturbed by this operation and then restored through the sense amplifiers
+while the row stays open.
+
+For kernel design, this matters because row-buffer hits are cheaper than
+repeated row switches in the same bank. Coalesced accesses and shape-bucketed
+launches increase locality; highly strided or scattered accesses raise the rate
+of row misses/conflicts and reduce effective bandwidth. The coalescing trends in
+\cref{tab:coalescing-sweep,fig:phenomena-coalescing} are consistent with this
+hardware-level mechanism.
+
+Finally, the practical block-size implication is a heuristic, not a hard rule:
+for bandwidth-sensitive kernels on A100, \num{128} threads per block is a good
+starting point (four warps provide enough independent requests for latency
+hiding), but it is not mandatory. The optimal block size still depends on
+register pressure, shared-memory footprint, and scheduler efficiency.
 
 \subsection{NVIDIA A100 Ampere Architecture}\label{sec:a100}
 \subsubsection{Hardware Overview}
