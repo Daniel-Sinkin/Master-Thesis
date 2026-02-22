@@ -33,9 +33,7 @@ class RooflineConfig:
     bandwidth_tbps: float
     fp64_tflops: float
     fp32_tflops: float
-    tf32_tflops: float
     ymax: float
-    output_name: str
 
 
 def setup_style() -> None:
@@ -61,19 +59,16 @@ def roofline_value(intensity: float, peak_tflops: float, bandwidth_tbps: float) 
     return min(peak_tflops, bandwidth_tbps * intensity)
 
 
-def generate_roofline_plot(cfg: RooflineConfig, xmax: float = 350.0) -> None:
+def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 350.0) -> None:
     x_points = [xmax * i / 1400.0 for i in range(1401)]
 
     y_mem = [cfg.bandwidth_tbps * x for x in x_points]
     y_fp64 = [roofline_value(x, cfg.fp64_tflops, cfg.bandwidth_tbps) for x in x_points]
     y_fp32 = [roofline_value(x, cfg.fp32_tflops, cfg.bandwidth_tbps) for x in x_points]
-    y_tf32 = [roofline_value(x, cfg.tf32_tflops, cfg.bandwidth_tbps) for x in x_points]
 
     i64 = cfg.fp64_tflops / cfg.bandwidth_tbps
     i32 = cfg.fp32_tflops / cfg.bandwidth_tbps
-    i_tf32 = cfg.tf32_tflops / cfg.bandwidth_tbps
 
-    fig, ax = plt.subplots()
     ax.plot(
         x_points,
         y_mem,
@@ -84,12 +79,10 @@ def generate_roofline_plot(cfg: RooflineConfig, xmax: float = 350.0) -> None:
     )
     ax.plot(x_points, y_fp64, color="#D62728", linewidth=3.0, label=f"FP64 roof ({cfg.fp64_tflops:.1f})")
     ax.plot(x_points, y_fp32, color="#FF7F0E", linewidth=3.0, label=f"FP32 roof ({cfg.fp32_tflops:.1f})")
-    ax.plot(x_points, y_tf32, color="#2CA02C", linewidth=3.0, label=f"TF32 roof ({cfg.tf32_tflops:.1f})")
 
     guides = [
         (i64, cfg.fp64_tflops, "#D62728", "FP64"),
         (i32, cfg.fp32_tflops, "#FF7F0E", "FP32"),
-        (i_tf32, cfg.tf32_tflops, "#2CA02C", "TF32"),
     ]
     for ix, ypeak, color, label in guides:
         ax.axvline(ix, color="#8A8A8A", linestyle=(0, (2, 3)), linewidth=1.3, zorder=0)
@@ -108,8 +101,16 @@ def generate_roofline_plot(cfg: RooflineConfig, xmax: float = 350.0) -> None:
     ax.set_ylabel("Performance [TFLOP/s]")
     ax.set_title(cfg.title)
     ax.legend(loc="upper left")
+
+
+def generate_combined_roofline_plot(configs: list[RooflineConfig], output_name: str, xmax: float = 350.0) -> None:
+    fig, axes = plt.subplots(1, len(configs), figsize=(15.6, 6.8), sharex=True)
+    if len(configs) == 1:
+        axes = [axes]
+    for ax, cfg in zip(axes, configs):
+        _plot_roofline_on_axis(ax, cfg, xmax=xmax)
     fig.tight_layout()
-    fig.savefig(IMAGES / cfg.output_name, format="pdf", bbox_inches="tight")
+    fig.savefig(IMAGES / output_name, format="pdf", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -151,42 +152,30 @@ def main() -> None:
 
     roofline_configs = [
         RooflineConfig(
-            title="Roofline Model - NVIDIA A100-SXM4 40GB",
-            bandwidth_tbps=1.555,
-            fp64_tflops=9.7,
-            fp32_tflops=19.5,
-            tf32_tflops=156.0,
-            ymax=175.0,
-            output_name="roofline_a100_40gb.pdf",
-        ),
-        RooflineConfig(
             title="Roofline Model - NVIDIA A100-SXM4 80GB",
             bandwidth_tbps=2.039,
             fp64_tflops=9.7,
             fp32_tflops=19.5,
-            tf32_tflops=156.0,
-            ymax=175.0,
-            output_name="roofline_a100_80gb.pdf",
+            ymax=30.0,
         ),
         RooflineConfig(
             title="Roofline Model - NVIDIA H100-SXM5 80GB",
             bandwidth_tbps=3.350,
             fp64_tflops=33.5,
             fp32_tflops=67.0,
-            tf32_tflops=494.0,
-            ymax=550.0,
-            output_name="roofline_h100_80gb.pdf",
+            ymax=80.0,
         ),
     ]
 
-    for cfg in roofline_configs:
-        generate_roofline_plot(cfg, xmax=350.0)
+    generate_combined_roofline_plot(
+        roofline_configs,
+        output_name="roofline_a100_h100_combined.pdf",
+        xmax=350.0,
+    )
     generate_amdahl_plot()
 
     print("Generated:")
-    print("  images/roofline_a100_40gb.pdf")
-    print("  images/roofline_a100_80gb.pdf")
-    print("  images/roofline_h100_80gb.pdf")
+    print("  images/roofline_a100_h100_combined.pdf")
     print("  images/amdahl_speedup.pdf")
 
 

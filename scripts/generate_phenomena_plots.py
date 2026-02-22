@@ -212,8 +212,6 @@ def plot_coalescing(rows: list[dict[str, str]], out_path: Path) -> None:
     rows = _sorted_rows(rows, "stride")
     stride = [_parse_float(r["stride"]) for r in rows]
     ms = [_parse_float(r["avg_ms"]) for r in rows]
-    bw = [_parse_float(r["effective_bw_gbps"]) for r in rows]
-    bw_norm = [v / bw[0] for v in bw]
 
     fig, ax1 = plt.subplots()
     ax1.plot(stride, ms, marker="o", linewidth=2.6, color="#9467bd")
@@ -223,12 +221,7 @@ def plot_coalescing(rows: list[dict[str, str]], out_path: Path) -> None:
     ax1.set_xlabel("Stride")
     ax1.set_ylabel("Kernel time [ms]")
     ax1.set_title("Global-Memory Coalescing Sweep")
-
-    ax2 = ax1.twinx()
-    ax2.plot(stride, bw_norm, marker="s", linewidth=2.0, color="#2ca02c")
-    ax2.set_ylabel("Normalized effective bandwidth proxy")
-    ax2.set_ylim(bottom=0.0)
-    ax1.axvspan(64, 128, color="#dddddd", alpha=0.3, zorder=0)
+    ax1.grid(False)
     save_plot(fig, out_path)
 
 

@@ -122,7 +122,7 @@ These points are consistent across the Ampere tuning guide, the CUDA
 best-practices guide, and the Nsight Compute profiling guide
 (\cite{nvidia-ampere-tuning-guide,nvidia-cuda-best-practices,nvidia-nsight-compute-profiling-guide}).
 
-\paragraph{Integration plan used in this thesis.}
+\paragraph{Integration plan.}
 Given the current project scope (single A100 node, contraction-heavy short
 kernel sequences), the most relevant near-term integration steps are:
 \begin{enumerate}
@@ -159,11 +159,11 @@ results and methodology to concrete optimisation actions for this thesis.
 
 \begin{table}[H]
 \centering
-\caption{Working notes: transfer from selected literature to CUDA optimisation actions in this thesis.}
+\caption{Working notes: transfer from selected literature to CUDA optimisation actions in the project.}
 \label{tab:paper-transfer-notes}
 \begin{tabularx}{\textwidth}{X X X}
 \toprule
-Paper (focus) & Reported methodology/result signal & Direct action for this thesis \\
+Paper (focus) & Reported methodology/result signal & Direct project action \\
 \midrule
 \cite{menczer2023massive} (massively parallel TN state algorithms on CPU--GPU systems) &
 explicit multi-level parallelisation and mixed CPU/GPU execution for contraction-heavy workloads &

@@ -166,18 +166,18 @@ Using the benchmarked shape $B=1$, $d_p=16$, $\chi=256$:
   \item direct variant evaluates $d_p\chi=4096$ inner terms per output element,
   \item total direct term evaluations are
   \[
-    N_{\text{direct}} = d_p^2\chi^2 = 16{,}777{,}216.
+    N_{\text{direct}} = d_p^2\chi^2 = 16\,777\,216.
   \]
 \end{itemize}
 
 For ordered contraction:
 \[
-  N_{\text{stage1}} = d_p^2\chi = 65{,}536,\qquad
-  N_{\text{stage2}} = d_p\chi^2 = 1{,}048{,}576,
+  N_{\text{stage1}} = d_p^2\chi = 65\,536,\qquad
+  N_{\text{stage2}} = d_p\chi^2 = 1\,048\,576,
 \]
 so
 \[
-  N_{\text{ordered}} = N_{\text{stage1}}+N_{\text{stage2}} = 1{,}114{,}112.
+  N_{\text{ordered}} = N_{\text{stage1}}+N_{\text{stage2}} = 1\,114\,112.
 \]
 This gives
 \[
@@ -192,8 +192,8 @@ which matches the asymptotic ratio above.
     \toprule
     Variant & Term evaluations & Relative to ordered \\
     \midrule
-    Direct contraction & $16{,}777{,}216$ & $15.06\times$ \\
-    Ordered contraction (two-stage) & $1{,}114{,}112$ & $1.00\times$ \\
+    Direct contraction & $16\,777\,216$ & $15.06\times$ \\
+    Ordered contraction (two-stage) & $1\,114\,112$ & $1.00\times$ \\
     \bottomrule
   \end{tabularx}
   \caption{Work comparison for the thesis reference shape ($B=1$, $d_p=16$,
@@ -218,8 +218,8 @@ which matches the asymptotic ratio above.
 
 \paragraph{Short answer key.}
 \begin{enumerate}
-  \item $N_{\text{direct}}=16{,}777{,}216$,
-  $N_{\text{ordered}}=786{,}432$ ($\approx 21.3\times$ reduction).
+  \item $N_{\text{direct}}=16\,777\,216$,
+  $N_{\text{ordered}}=786\,432$ ($\approx 21.3\times$ reduction).
   \item Stage 1: $(m,n,k)=(d_p,\chi,d_p)$, Stage 2:
   $(m,n,k)=(d_p,\chi,\chi)$; $G$ and $M$ are batch-shared.
   \item For $\chi\gg d_p$, ratio $R\approx d_p$, so increasing $d_p$ gives the
@@ -309,5 +309,5 @@ pathologies. After that, improve scheduling/occupancy and tune.
 
 The complete compile-and-profile job is provided as
 \path{code/profiling/ncu_tn_contraction_profile.slurm}.
-It collects the same KPI pack used in the rest of this thesis and writes
+It collects the same KPI pack used in the other profiling sections and writes
 separate CSV files for both variants.

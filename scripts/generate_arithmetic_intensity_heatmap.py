@@ -15,6 +15,7 @@ try:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import numpy as np
 except ModuleNotFoundError as exc:
     raise SystemExit(
         "Missing dependency: matplotlib. Install with "
@@ -126,6 +127,61 @@ def render_heatmap(
     print(f"Generated {output}")
 
 
+def render_padded_surface_fp32(
+    ms: list[int],
+    ns: list[int],
+    k: int,
+    tile: int,
+    elem_bytes: int,
+    output: Path,
+    stride: int,
+) -> None:
+    z = np.array(
+        [
+            [ai_effective_with_padding(m, n, k, tile, elem_bytes) for n in ns]
+            for m in ms
+        ],
+        dtype=float,
+    )
+    n_grid, m_grid = np.meshgrid(np.array(ns, dtype=float), np.array(ms, dtype=float))
+
+    plt.rcParams.update(
+        {
+            "figure.figsize": (9.2, 6.8),
+            "figure.dpi": 140,
+            "font.size": 11.0,
+            "axes.titlesize": 13.5,
+            "axes.labelsize": 12.0,
+        }
+    )
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    surf = ax.plot_surface(
+        n_grid,
+        m_grid,
+        z,
+        cmap="magma",
+        linewidth=0.0,
+        antialiased=True,
+        rstride=max(1, stride),
+        cstride=max(1, stride),
+    )
+
+    ax.set_xlabel("N dimension")
+    ax.set_ylabel("M dimension")
+    ax.set_zlabel("Effective AI [FLOP/byte]")
+    ax.set_title(f"Padded arithmetic-intensity surface (FP32), K={k}, tile={tile}")
+    ax.view_init(elev=27, azim=-130)
+    fig.colorbar(surf, shrink=0.72, pad=0.08, label="Effective AI [FLOP/byte]")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(output, format="pdf", bbox_inches="tight")
+    plt.close(fig)
+    print(f"Generated {output}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--k", type=int, default=64, help="Fixed K dimension.")
@@ -144,6 +200,18 @@ def main() -> None:
         type=Path,
         default=Path("images/arithmetic_intensity_heatmap_fp64.pdf"),
         help="Output PDF path for FP64 heatmap.",
+    )
+    parser.add_argument(
+        "--output-fp32-surface",
+        type=Path,
+        default=Path("images/arithmetic_intensity_surface_padded_fp32.pdf"),
+        help="Output PDF path for FP32 padded 3D surface.",
+    )
+    parser.add_argument(
+        "--surface-stride",
+        type=int,
+        default=4,
+        help="Subsampling stride for 3D surface rendering.",
     )
     args = parser.parse_args()
 
@@ -166,6 +234,15 @@ def main() -> None:
         elem_bytes=8,
         precision_label="FP64",
         output=args.output_fp64,
+    )
+    render_padded_surface_fp32(
+        ms=ms,
+        ns=ns,
+        k=args.k,
+        tile=args.tile,
+        elem_bytes=4,
+        output=args.output_fp32_surface,
+        stride=args.surface_stride,
     )
 
 

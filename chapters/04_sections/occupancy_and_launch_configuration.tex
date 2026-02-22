@@ -49,15 +49,16 @@ This corresponds to:
   \item shared-memory share per block: $48/160 = 30\%$.
 \end{itemize}
 
-The block residency limits are:
+The block residency limits are (thread limit $N_t$, register limit $N_r$,
+shared-memory limit $N_s$):
 \begin{align}
-  N_{\text{threads}} &= \left\lfloor \frac{2048}{256} \right\rfloor = 8, \\
-  N_{\text{regs}} &= \left\lfloor \frac{65536}{16384} \right\rfloor = 4, \\
-  N_{\text{shm}} &= \left\lfloor \frac{160}{48} \right\rfloor = 3.
+  N_t &= \left\lfloor \frac{2048}{256} \right\rfloor = 8, \\
+  N_r &= \left\lfloor \frac{65536}{16384} \right\rfloor = 4, \\
+  N_s &= \left\lfloor \frac{160}{48} \right\rfloor = 3.
 \end{align}
 Therefore
 \begin{align}
-  N_{\text{res}} = \min(8,4,3)=3,
+  N_{\text{res}} = \min(N_t,N_r,N_s)=\min(8,4,3)=3,
 \end{align}
 so this case is \textbf{shared-memory occupancy limited}
 (\cref{fig:occupancy-sm-limited}).
@@ -68,11 +69,11 @@ After reducing shared memory to
 \end{align}
 the shared-memory limit becomes
 \begin{align}
-  N_{\text{shm}} = \left\lfloor \frac{160}{32} \right\rfloor = 5.
+  N_s = \left\lfloor \frac{160}{32} \right\rfloor = 5.
 \end{align}
 Now
 \begin{align}
-  N_{\text{res}} = \min(8,4,5)=4,
+  N_{\text{res}} = \min(N_t,N_r,N_s)=\min(8,4,5)=4,
 \end{align}
 so the limiting resource changes to \textbf{registers}
 (\cref{fig:occupancy-reg-limited}).
@@ -87,7 +88,7 @@ $3\cdot256=768$ to $4\cdot256=1024$, i.e.\ from \SI{37.5}{\percent} to
     \centering
     \includegraphics[width=\textwidth]{SMOccupancyLimited}
     \caption{Initial setup with \SI{48}{\kilo\byte} shared memory per block.
-    Shared memory is the binding occupancy limit.}
+    Occupancy is limited by shared memory.}
     \label{fig:occupancy-sm-limited}
   \end{subfigure}
   \hfill
@@ -95,11 +96,13 @@ $3\cdot256=768$ to $4\cdot256=1024$, i.e.\ from \SI{37.5}{\percent} to
     \centering
     \includegraphics[width=\textwidth]{RegisterOccupancyLimited}
     \caption{After reducing to \SI{32}{\kilo\byte} shared memory per block.
-    One additional block fits; registers become the binding limit.}
+    Occupancy increases by one block, then registers become the occupancy
+    limit.}
     \label{fig:occupancy-reg-limited}
   \end{subfigure}
-  \caption{Occupancy transition example on one A100 SM: shared-memory-limited
-  to register-limited residency.}
+  \caption{Occupancy transition example on one A100 SM: from a
+  shared-memory-limited occupancy regime to a register-limited occupancy
+  regime.}
   \label{fig:occupancy-visual-example}
 \end{figure}
 

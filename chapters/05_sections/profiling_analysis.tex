@@ -140,7 +140,7 @@ expected half-warp execution efficiency for a lane-based $16/16$ branch split.
 Using a fixed KPI pack reduces trial-and-error profiler exploration and keeps
 profile evidence comparable across optimisation steps.
 
-\subsection{Irregular Contraction Training Run (SLURM Job 14507928)}
+\subsection{Irregular Contraction Training Run}
 
 The first end-to-end irregular pipeline run used
 $\texttt{batch}=128$, $m=47$, $n=84$, and $k=64$ on one A100.
@@ -151,21 +151,20 @@ Two variants were compared:
 \begin{table}[t]
   \centering
   \small
-  \begin{tabularx}{\textwidth}{@{}X c c r r@{}}
+  \begin{tabularx}{\textwidth}{@{}X r r@{}}
     \toprule
-    Variant & Warm-up & Timed iters & Avg.\ step time (ms) & Executed TFLOP/s \\
+    Variant & Avg.\ step time (ms) & TFLOP/s \\
     \midrule
-    Bad direct (serial launches) & 2 & 20  & 2.843314 & 0.020681 \\
-    Good batched (one launch/step) & 20 & 200 & 0.039640 & 1.631807 \\
+    Bad direct (serial launches) & 2.843314 & 0.020681 \\
+    Good batched (one launch/step) & 0.039640 & 1.631807 \\
     \bottomrule
   \end{tabularx}
-  \caption{Unprofiled timing summary for the irregular contraction training
-    pair (job 14507928).}
+  \caption{Timing summary for the irregular contraction training pair.}
   \label{tab:irregular-training-runtime}
 \end{table}
 
 Normalising by step time, the batched variant is $71.7\times$ faster, and its
-executed throughput is $78.9\times$ higher.
+throughput is $78.9\times$ higher.
 
 \begin{table}[t]
   \centering
@@ -183,7 +182,7 @@ executed throughput is $78.9\times$ higher.
     K10: Thread-inst/inst (\%) & 86.14 & 86.01 & 100.00 \\
     \bottomrule
   \end{tabularx}
-  \caption{Selected Nsight Compute counters for job 14507928. Direct and
+  \caption{Selected Nsight Compute counters for the irregular training pair. Direct and
   batched values are averages over two sampled launches.}
   \label{tab:irregular-training-kpi}
 \end{table}
@@ -214,14 +213,14 @@ hot loop.
     \toprule
     Stride & Avg.\ kernel time (ms) & Effective BW (GB/s) & BW/BW$_{s=1}$ \\
     \midrule
-    1   & 0.107776 & 1245.34 & 1.000 \\
-    2   & 0.152576 & 879.68  & 0.706 \\
-    4   & 0.242893 & 552.58  & 0.444 \\
-    8   & 0.432947 & 310.01  & 0.249 \\
-    16  & 0.822886 & 163.11  & 0.131 \\
-    32  & 0.841216 & 159.55  & 0.128 \\
-    64  & 0.600320 & 223.58  & 0.180 \\
-    128 & 0.237824 & 564.36  & 0.453 \\
+    1   & 0.1078 & 1245.34 & 1.000 \\
+    2   & 0.1526 & 879.68  & 0.706 \\
+    4   & 0.2429 & 552.58  & 0.444 \\
+    8   & 0.4329 & 310.01  & 0.249 \\
+    16  & 0.8229 & 163.11  & 0.131 \\
+    32  & 0.8412 & 159.55  & 0.128 \\
+    64  & 0.6003 & 223.58  & 0.180 \\
+    128 & 0.2378 & 564.36  & 0.453 \\
     \bottomrule
   \end{tabular}
   \caption{Coalescing sweep results from the synthetic stride microbenchmark on
@@ -233,11 +232,7 @@ hot loop.
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.85\textwidth]{phenomena_coalescing_sweep}
-  \caption{Global-memory coalescing sweep over stride. The trend from stride
-  1 to 32 shows the expected coalescing degradation (higher time, lower
-  normalized bandwidth proxy). The shaded high-stride region (64--128) is
-  retained for completeness and may include index-aliasing artifacts from the
-  synthetic mapping.}
+  \caption{Global-memory coalescing sweep over stride.}
   \label{fig:phenomena-coalescing}
 \end{figure}
 }{}
@@ -265,8 +260,8 @@ monotonic degradation regime up to stride 32.
     \toprule
     Variant & Avg.\ kernel time (ms) & Core effective TFLOP/s & Theoretical occupancy (\%) \\
     \midrule
-    Low register pressure  & 0.594150 & 14.46 & 100.0 \\
-    High register pressure & 0.671002 & 12.80 & 62.5 \\
+    Low register pressure  & 0.5942 & 14.46 & 100.0 \\
+    High register pressure & 0.6710 & 12.80 & 62.5 \\
     \bottomrule
   \end{tabularx}
   \caption{Register-pressure microbenchmark results on A100 (FP32 arithmetic
@@ -277,7 +272,7 @@ monotonic degradation regime up to stride 32.
 \IfFileExists{images/phenomena_register_pressure.pdf}{
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.72\textwidth]{phenomena_register_pressure}
+  \includegraphics[width=0.50\textwidth]{phenomena_register_pressure}
   \caption{Register pressure versus throughput and occupancy.}
   \label{fig:phenomena-register-pressure}
 \end{figure}

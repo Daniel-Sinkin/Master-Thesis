@@ -4,7 +4,7 @@
 \subsection{Streaming Multiprocessor and Warp Execution}\label{sec:sm-warps}
 
 The Streaming Multiprocessor (SM) is the fundamental compute unit of the GPU. Each 
-A100-SXM4 GPU in this thesis exposes 108 active SMs. The GA100 die itself has
+A100-SXM4 GPU exposes 108 active SMs. The GA100 die itself has
 128 physical SM partitions, with 20 disabled through harvesting/binning (see
 \cref{sec:ga100-yield-context}), and all CUDA threads ultimately execute on one
 of the active SMs.
@@ -59,7 +59,7 @@ independently, an SM can have four instructions from four different warps in fli
 simultaneously, which is the primary mechanism for hiding memory and instruction 
 latency.
 
-For capacity accounting in this thesis, the A100 limit of \num{64} resident warps
+For capacity accounting, the A100 limit of \num{64} resident warps
 (\num{2048} threads) per SM implies up to \num{16} resident warps
 (\num{512} threads) per processing block under an even split across the four
 sub-partitions. Across \num{108} active SMs, this gives a device-level maximum
@@ -107,7 +107,10 @@ precision is accurate enough at much lower cost. The following subsections
 summarize the relevant formats and motivate the precision choices used here.
 
 \subsubsection{IEEE 754 Binary Representation}
-The IEEE 754 standard~\cite{ieee754-2019} defines the binary floating-point formats used across virtually all modern hardware. Each format encodes a real number as
+The IEEE 754 standard~\cite{ieee754-2019} defines the binary floating-point
+formats used across virtually all modern hardware. Modern NVIDIA GPUs follow
+IEEE 754 for the standard FP64/FP32/FP16 formats considered
+here~\cite{ieee754-2019}. Each format encodes a real number as
 \begin{equation}\label{eq:ieee754}
   (-1)^{s} \times 2^{e - \text{bias}} \times (1 + f),
 \end{equation}
@@ -130,19 +133,25 @@ where $k$ is the number of exponent bits.
 \label{tab:fp-bit-layout}
 \begin{tabularx}{\textwidth}{l r r r r r}
 \toprule
-Format & Total bits & Sign & Exponent & Bias & Mantissa\footnotemark[1] \\
+Format & Total bits & Sign & Exponent & Bias & Mantissa\textsuperscript{1} \\
 \midrule
 FP64 (double) & 64 & 1 & 11 & 1023 & 52 \\
 FP32 (single) & 32 & 1 & 8  & 127  & 23 \\
 TF32           & 19 & 1 & 8  & 127  & 10 \\
 BF16 (bfloat16)& 16 & 1 & 8  & 127  & 7  \\
 FP16 (half)    & 16 & 1 & 5  & 15   & 10 \\
-FP8 (E5M2)\footnotemark[2] & 8 & 1 & 5 & 15 & 2 \\
-FP8 (E4M3)\footnotemark[2] & 8 & 1 & 4 & 7  & 3 \\
+FP8 (E5M2)\textsuperscript{2} & 8 & 1 & 5 & 15 & 2 \\
+FP8 (E4M3)\textsuperscript{2} & 8 & 1 & 4 & 7  & 3 \\
 \bottomrule
 \end{tabularx}
-\footnotetext[1]{IEEE 754 uses the term \emph{significand}; \emph{mantissa} is used here as it is more widely recognised.}
-\footnotetext[2]{FP8 formats are not supported on the A100 (Ampere); they were introduced with the H100 (Hopper) architecture.}
+\vspace{0.35em}
+\begin{minipage}{\textwidth}
+\footnotesize
+\textsuperscript{1} IEEE 754 uses the term \emph{significand}; \emph{mantissa}
+is used here as it is more widely recognised.\\
+\textsuperscript{2} FP8 formats are not supported on the A100 (Ampere); they
+were introduced with the H100 (Hopper) architecture.
+\end{minipage}
 \end{table}
 
 The number of exponent bits determines the \emph{dynamic range} (the ratio of the largest to smallest representable magnitudes), while the number of significand bits determines the \emph{precision} (the spacing between adjacent representable values). These properties are summarised in \cref{tab:fp-properties}.
@@ -312,14 +321,14 @@ Where CPUs use deep cache hierarchies to hide latency, GPUs prioritise bandwidth
   \item \textbf{Registers} reside in the SM and offer single-cycle access. They are private to each thread and are the scarcest on-chip resource: the number of registers a kernel uses directly limits occupancy.
   \item \textbf{Shared memory} is also on-chip but visible to all threads in a block, making it the primary mechanism for explicit data reuse and inter-thread communication. Most high-performance kernels---tiled matrix multiplications, tensor contractions---stage data through shared memory to avoid repeated global loads.
   \item \textbf{L2 cache} is shared across all SMs and transparently caches global memory traffic. On the A100 it is \SI{40}{\mega\byte}, modest relative to the core count, which reflects the throughput-oriented design.
-  \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB used in this thesis provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
+  \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
 \end{itemize}
 
 On Ampere-class GPUs, memory behavior is often the dominant constraint before
 arithmetic throughput saturates. For HBM-backed global memory, row-buffer
 locality and coalesced warp accesses strongly influence achieved bandwidth;
 strided or irregular patterns can reduce effective throughput substantially. For
-this reason, the optimisation strategy in this thesis prioritises three levers:
+this reason, the optimisation strategy prioritises three levers:
 \textit{(i)} layout and access regularity (\cref{sec:coalescing,sec:hbm-row-column-path}),
 \textit{(ii)} occupancy-aware block sizing, typically starting from
 \numrange{128}{256} threads per block and then tuning against resource limits
@@ -331,8 +340,8 @@ Nsight Compute and Nsight Systems (\cref{sec:nsight,sec:profiling}).
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.92\textwidth]{RowColumnAccessor}
-  \caption{Custom schematic for HBM/DRAM row-column access. A read activates one
+  \includegraphics[width=0.55\textwidth]{RowColumnAccessor}
+  \caption{Schematic for HBM/DRAM row-column access. A read activates one
   row, latches it into the sense amplifiers, and then uses the column decoder to
   select transferred data (including burst reads from the open row buffer).}
   \label{fig:hbm-row-column-path}
@@ -345,6 +354,11 @@ The row-activation step moves a full row into the sense amplifiers (often
 called the row buffer or ``page'' in architecture talks). DRAM cell charge is
 disturbed by this operation and then restored through the sense amplifiers
 while the row stays open.
+The \emph{burst size} is the fixed data amount returned by one column-read
+transfer once the row is open; in the HBM2-style model used here, this is
+\SI{64}{\byte} per burst. Practically, this means several nearby values can be
+served from the same open row with burst transfers before a row switch is
+needed.
 
 Using standard DRAM timing notation, a row-buffer hit read is approximated by
 the column-read latency $t_{\mathrm{CL}}$. A row switch (page switch) requires
@@ -359,7 +373,7 @@ $T_{\text{switch}}/T_{\text{hit}}$. Representative HBM/HBM2 timing values
 reported in the memory-systems literature are near-symmetric
 ($t_{\mathrm{RP}} \approx t_{\mathrm{RCD}} \approx t_{\mathrm{CL}} \approx
 \SI{14}{\nano\second}$), which gives a $\approx 3\times$ row-switch cost in the
-same way as the pedagogical \num{16}/\num{16}/\num{16}-cycle example used in
+same way as the \num{16}/\num{16}/\num{16}-cycle example used in
 the NVIDIA GTC explanation (\num{48} cycles for switch versus \num{16} for a
 column read)~\cite{li2018highspeed-dram,jones2022cuda-how-works}.
 
@@ -381,38 +395,44 @@ register pressure, shared-memory footprint, and scheduler efficiency.
 
 \begin{table}[H]
 \centering
-\caption{A100 KPI card (SXM4-40GB baseline) for performance modeling.}
+\caption{A100 KPI card (SXM4-40GB baseline) grouped by scope for performance
+  modeling.}
 \label{tab:a100-specs}
-\begin{tabularx}{\textwidth}{X r}
+\begin{tabularx}{\textwidth}{@{}l X r@{}}
 \toprule
-Property & Value \\
+Scope & Property & Value \\
 \midrule
-Streaming Multiprocessors (SMs) & \num{108} \\
-Processing blocks (sub-partitions) per SM & \num{4} \\
-Warp schedulers per processing block & \num{1} \\
-Warp dispatch units per processing block & \num{1} \\
-FP32 CUDA cores per processing block & \num{16} \\
-FP64 CUDA cores per processing block & \num{8} \\
-Tensor cores per processing block & \num{1} \\
-FP32 CUDA cores per SM & \num{64} \\
-FP64 CUDA cores per SM & \num{32} \\
-Tensor cores per SM & \num{4} \\
-Warp schedulers per SM & \num{4} \\
-Warp dispatch units per SM & \num{4} \\
-Maximum warps per processing block (derived) & \num{16} \\
-Maximum threads per processing block (derived) & \num{512} \\
-Maximum threads per SM & \num{2048} \\
-Maximum warps per SM & \num{64} \\
-Maximum blocks per SM & \num{32} \\
-Register file size per SM (32-bit registers) & \num{65536} \\
-Shared memory per SM (KB) & \num{164} \\
-L2 cache size (MB) & \num{40} \\
-HBM memory capacity (GB) & \num{40} \\
-Peak memory bandwidth (GB/s) & \num{1555} \\
-Base clock frequency (GHz) & \num{1.41} \\
-Total processing blocks on full GPU & \num{432} \\
-Maximum resident warps on full GPU & \num{6912} \\
-Maximum resident threads on full GPU & \num{221184} \\
+\multicolumn{3}{@{}l}{\textbf{Per processing core (SM sub-partition)}} \\
+Processing core & Warp schedulers & \num{1} \\
+Processing core & Warp dispatch units & \num{1} \\
+Processing core & FP32 CUDA cores & \num{16} \\
+Processing core & FP64 CUDA cores & \num{8} \\
+Processing core & Tensor cores & \num{1} \\
+Processing core & Maximum warps (derived) & \num{16} \\
+Processing core & Maximum resident threads (derived) & \num{512} \\
+\addlinespace[2pt]
+\multicolumn{3}{@{}l}{\textbf{Per SM}} \\
+SM & Processing cores (sub-partitions) & \num{4} \\
+SM & FP32 CUDA cores & \num{64} \\
+SM & FP64 CUDA cores & \num{32} \\
+SM & Tensor cores & \num{4} \\
+SM & Warp schedulers & \num{4} \\
+SM & Warp dispatch units & \num{4} \\
+SM & Maximum resident threads & \num{2048} \\
+SM & Maximum resident warps & \num{64} \\
+SM & Maximum resident blocks & \num{32} \\
+SM & Register file (32-bit registers) & \num{65536} \\
+SM & Shared memory (KB) & \num{164} \\
+\addlinespace[2pt]
+\multicolumn{3}{@{}l}{\textbf{Per GPU}} \\
+GPU & Streaming multiprocessors (SMs) & \num{108} \\
+GPU & Total processing cores (sub-partitions) & \num{432} \\
+GPU & Maximum resident warps & \num{6912} \\
+GPU & Maximum resident threads & \num{221184} \\
+GPU & L2 cache (MB) & \num{40} \\
+GPU & HBM capacity (GB) & \num{40} \\
+GPU & Peak HBM bandwidth (GB/s) & \num{1555} \\
+GPU & Base clock frequency (GHz) & \num{1.41} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -441,6 +461,8 @@ However, industry-reported anchor values from public disclosures place
 $D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
 $D_0\approx 0.09$ defects/cm$^2$ for N7 around three quarters after high-volume
 manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n5}.
+These two regimes are retained as the marker points in
+\cref{fig:ga100-n7-yield-curve}.
 \Cref{fig:ga100-n7-yield-curve} overlays three large-die area references:
 GA100 (\SI{826}{\milli\meter\squared}), GV100/V100
 (\SI{815}{\milli\meter\squared}), and GH100/H200
@@ -496,7 +518,7 @@ caches, memory controllers, and I/O logic). The A100 is the packaged and
 integrated product used in systems (SXM4 or PCIe form factor), which adds
 memory stacks, package/interposer, power delivery, and board/module interfaces.
 
-For architectural reasoning in this thesis, the main package-level components
+For architectural reasoning, the main package-level components
 around GA100 are:
 \begin{itemize}
   \item \textbf{HBM stacks on the same package:} A100 places high-bandwidth
@@ -569,7 +591,7 @@ kernels should not see comparable speedups.
 
 \subsubsection{Theoretical Peak Performance}
 
-\noindent\textbf{TPP definition used in this thesis.}
+\noindent\textbf{TPP definition.}
 Here, TPP denotes theoretical peak performance.
 For CUDA-core arithmetic on A100, using fused multiply-add (2 FLOPs/cycle):
 \[
@@ -599,7 +621,7 @@ for one FLOP per fetched value is
 
 \begin{table}[H]
 \centering
-\caption{A100 throughput ceilings used in the thesis performance model.}
+\caption{A100 throughput ceilings for the performance model.}
 \label{tab:a100-peak-performance}
 \begin{tabularx}{\textwidth}{X X r}
 \toprule
@@ -621,29 +643,34 @@ Bandwidth-based FP32 ceiling (1 FLOP/value) & $1555/4$ & \num{388.8} GFLOP/s \\
 
 \begin{table}[H]
 \centering
-\caption{Derived A100 limits and capacity counts used throughout this thesis.}
+\caption{Derived A100 limits and capacity counts for performance analysis.}
 \label{tab:a100-derived}
-\begin{tabularx}{\textwidth}{X r}
+\begin{tabularx}{\textwidth}{@{}l X r@{}}
 \toprule
-Metric & Value \\
+Scope & Metric & Value \\
 \midrule
-Peak FP32 performance per processing block (GFLOP/s) & \num{45.12} \\
-Peak FP64 performance per processing block (GFLOP/s) & \num{22.56} \\
-Peak FP32 performance per SM (GFLOP/s) & \num{180.48} \\
-Peak FP64 performance per SM (GFLOP/s) & \num{90.24} \\
-Tensor-core FP16 performance per SM (TFLOP/s) & \num{2.89} \\
-Memory bandwidth per SM (GB/s) & \num{14.40} \\
-Bandwidth-based FP64 ceiling (1 FLOP/value) (GFLOP/s) & \num{194.4} \\
-Bandwidth-based FP32 ceiling (1 FLOP/value) (GFLOP/s) & \num{388.8} \\
-Total FP32 CUDA cores & \num{6912} \\
-Total FP64 cores & \num{3456} \\
-Total processing blocks (sub-partitions) & \num{432} \\
-Maximum resident warps per processing block (derived) & \num{16} \\
-Maximum resident threads per processing block (derived) & \num{512} \\
-Maximum resident warps on full GPU & \num{6912} \\
-Maximum resident threads on full GPU & \num{221184} \\
-Arithmetic intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
-Arithmetic intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
+\multicolumn{3}{@{}l}{\textbf{Per processing core (SM sub-partition)}} \\
+Processing core & Peak FP32 performance (GFLOP/s) & \num{45.12} \\
+Processing core & Peak FP64 performance (GFLOP/s) & \num{22.56} \\
+Processing core & Maximum resident warps (derived) & \num{16} \\
+Processing core & Maximum resident threads (derived) & \num{512} \\
+\addlinespace[2pt]
+\multicolumn{3}{@{}l}{\textbf{Per SM}} \\
+SM & Peak FP32 performance (GFLOP/s) & \num{180.48} \\
+SM & Peak FP64 performance (GFLOP/s) & \num{90.24} \\
+SM & Tensor-core FP16 performance (TFLOP/s) & \num{2.89} \\
+SM & Memory bandwidth share (GB/s) & \num{14.40} \\
+SM & Arithmetic-intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
+SM & Arithmetic-intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
+\addlinespace[2pt]
+\multicolumn{3}{@{}l}{\textbf{Per GPU}} \\
+GPU & Bandwidth-based FP64 ceiling (1 FLOP/value) (GFLOP/s) & \num{194.4} \\
+GPU & Bandwidth-based FP32 ceiling (1 FLOP/value) (GFLOP/s) & \num{388.8} \\
+GPU & Total FP32 CUDA cores & \num{6912} \\
+GPU & Total FP64 CUDA cores & \num{3456} \\
+GPU & Total processing cores (sub-partitions) & \num{432} \\
+GPU & Maximum resident warps & \num{6912} \\
+GPU & Maximum resident threads & \num{221184} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -676,10 +703,11 @@ this thesis, representative of modern multi-GPU HPC nodes.
 
 \subsubsection{CPU and NUMA Topology}
 
-Each compute node contains two AMD EPYC 7742 processors (Rome, Zen\,2
-microarchitecture), each with 64 physical cores. The chips follow a chiplet
-design. Since the terms are easy to mix up, we fix the naming used in this
-thesis:
+Each compute node contains two AMD EPYC 7742 processors, each with
+64 physical cores~\cite{jureca-config}. The EPYC 7002 generation is based on
+Zen\,2 and follows a chiplet organization with core chiplets and a central I/O
+die~\cite{amd2020epyc7002-rdbms}. Since the terms are easy to mix up, we fix
+the naming used here:
 
 \begin{itemize}
   \item \textbf{CCD} (\emph{Core Complex Die}): a compute chiplet containing CPU cores.
@@ -689,8 +717,8 @@ thesis:
     memory controllers, PCIe root complexes, and fabric routing.
 \end{itemize}
 
-On this Rome generation, each CCX contains four cores with a private
-\SI{16}{\mega\byte} L3 cache. The hierarchy is shown in
+On this EPYC 7002 generation, each CCX contains four cores with a private
+\SI{16}{\mega\byte} L3 cache~\cite{amd2020epyc7002-rdbms}. The hierarchy is shown in
 \cref{fig:numa-cpu-node}.
 
 \begin{figure}[H]
@@ -734,7 +762,7 @@ latency and can reduce effective bandwidth.
 
 Each node has four NVIDIA A100-SXM4-40GB GPUs arranged in a fully connected mesh via NVLink\,3.0. Every GPU pair is connected by four NVLink bridges (denoted NV4 in NVIDIA's topology notation), providing \SI{100}{\giga\byte\per\second} of uni-directional bandwidth between any two devices. This symmetric, all-to-all connectivity means that multi-GPU tensor contractions do not suffer from topology-dependent bandwidth asymmetries.
 
-\paragraph{PCIe and NVLink in this thesis.}
+\paragraph{PCIe and NVLink roles.}
 Although both are high-speed interconnects, they serve different roles:
 \begin{itemize}
   \item \textbf{PCIe Gen4 $\times$16} is the primary host-device path. On A100
@@ -778,7 +806,7 @@ The full topology, including the three classes of CPU--GPU data paths, is illust
 
 The distinction between these paths matters for host--device data transfers. A \texttt{cudaMemcpy} initiated from a CPU thread pinned to a GPU's local NUMA domain takes the shortest PCIe path through the I/O die. If the source thread or memory allocation resides on the wrong NUMA domain---or worse, the wrong socket---the transfer must additionally traverse Infinity Fabric, increasing latency. For GPU-to-GPU communication, NVLink bypasses the CPU subsystem entirely, making the CPU topology irrelevant for peer-to-peer transfers.
 
-\paragraph{Fast-path policy used in this thesis.}
+\paragraph{Fast-path policy.}
 For runs that include host-device staging, the following policy is applied:
 \begin{enumerate}
   \item pin the orchestration thread to cores in the GPU-affine NUMA domain,
@@ -917,7 +945,7 @@ system-performance analysis~\cite{hockney1988parallel,jain1991art}.
 Once fitted, the above expressions directly provide predicted staging overhead
 for any $(N,V_{\mathrm{tot}})$ in the workload.
 
-\paragraph{Per-GPU path classes used in this thesis.}
+\paragraph{Per-GPU path classes.}
 The local and same-socket ``remote'' NUMA domains used for orchestration are:
 \begin{table}[H]
   \centering
@@ -940,7 +968,7 @@ For each row in \cref{tab:gpu-path-class-mapping}, the same
 $n_{\mathrm{IF}}=\{0,1,2\}$ model applies, so the transfer-cost expressions
 above are directly reusable across all four GPUs.
 
-In practice, this topology has two implications for the work in this thesis:
+In practice, this topology has two implications for the workload:
 
 \begin{itemize}
   \item \textbf{Single-GPU kernels:} the CPU topology is largely invisible, since kernel launch overhead is small and tensor data resides in GPU memory throughout the computation.

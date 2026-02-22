@@ -62,10 +62,7 @@ def main() -> None:
     y_h200 = [100.0 * poisson_yield(GH100_H200_AREA_CM2, d0) for d0 in d0_values]
 
     # Reported N7 anchor points from industry coverage of TSMC/Intel disclosures.
-    anchors = [
-        ("Reported pre-MP reference", 0.33),
-        ("Reported N7 at +3Q HVM", 0.09),
-    ]
+    anchors = [0.33, 0.09]
 
     fig, ax = plt.subplots()
     ax.plot(
@@ -92,18 +89,16 @@ def main() -> None:
         label="GH100 / H200 area (814 mm$^2$)",
     )
 
-    for idx, (label, d0) in enumerate(anchors):
+    for d0 in anchors:
         y = 100.0 * poisson_yield(GA100_AREA_CM2, d0)
-        ax.axvline(d0, color="#6b7280", linestyle=(0, (3, 3)), linewidth=1.2)
-        ax.scatter([d0], [y], color="#1f77b4", s=35, zorder=5)
-        x_shift = 0.006 if idx == 0 else 0.003
-        y_shift = -6.0 if idx == 0 else 5.0
-        ax.text(
-            d0 + x_shift,
-            y + y_shift,
-            f"{label}\n$D_0={d0:.2f}$, $Y={y:.1f}\\%$",
-            fontsize=10,
-            color="#111827",
+        ax.scatter(
+            [d0],
+            [y],
+            color="#1f77b4",
+            edgecolors="#0f172a",
+            linewidths=0.6,
+            s=42,
+            zorder=5,
         )
 
     ax.set_xlim(0.02, 0.40)

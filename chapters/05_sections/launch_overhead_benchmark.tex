@@ -35,15 +35,14 @@ separate-launch time attributable to overhead.
 
 \begin{table}[H]
 \centering
-\caption{Total execution time for 1000 GEMM operations ($n \times n$, FP64) on
-  an A100 GPU. \emph{Separate} denotes 1000 individual kernel launches;
-  \emph{Fused} denotes a single kernel performing all 1000 operations
-  internally. The overhead column gives the fraction of the separate-launch
-  time attributable to launch overhead rather than computation.}
+\small
+\caption{Total time for 1000 FP64 GEMMs ($n \times n$) on A100. \emph{Sep.}
+  denotes 1000 kernel launches, \emph{Fuse.} denotes one fused kernel, and
+  \emph{Overhd.} is the launch-overhead fraction of the separate-launch time.}
 \label{tab:launch-overhead}
-\begin{tabularx}{\textwidth}{r r r r r}
+\begin{tabular}{@{}r r r r r@{}}
 \toprule
-$n$ & Separate ($\mu$s) & Fused ($\mu$s) & Speedup & Overhead (\%) \\
+$n$ & Sep.\ ($\si{\micro\second}$) & Fuse.\ ($\si{\micro\second}$) & Speedup & Overhd.\ (\%) \\
 \midrule
 1   & 8022  & 172   & 46.7$\times$ & 97.9 \\
 2   & 7941  & 185   & 43.0$\times$ & 97.7 \\
@@ -54,7 +53,7 @@ $n$ & Separate ($\mu$s) & Fused ($\mu$s) & Speedup & Overhead (\%) \\
 23  & 9217  & 717   & 12.9$\times$ & 92.2 \\
 32  & 9752  & 1380  & 7.1$\times$  & 85.9 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 \begin{figure}[H]
