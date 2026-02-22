@@ -250,7 +250,10 @@ Key metrics reported by Nsight Compute that are relevant to the optimisations di
   \item \textbf{L2 cache hit rate:} the fraction of global memory requests served by the L2 cache, relevant for understanding data reuse across thread blocks.
 \end{itemize}
 
-Throughout the implementation chapters of this thesis, Nsight Compute profiles are used to validate performance models, confirm that kernels are operating in the expected regime (compute-bound or memory-bound), and guide iterative optimisation of tensor contraction kernels.
+In the implementation chapters, Nsight Compute profiles are used to validate
+performance models, confirm that kernels operate in the expected regime
+(compute-bound or memory-bound), and guide iterative optimisation of tensor
+contraction kernels.
 
 \subsection{Kernel Launch Mechanics}\label{sec:kernel-launch-mechanics}
 

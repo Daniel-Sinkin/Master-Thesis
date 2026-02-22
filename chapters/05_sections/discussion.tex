@@ -1,14 +1,14 @@
 % chapters/05_sections/discussion.tex
 \section{Discussion}\label{sec:discussion}
 
-Kernel-level and system-level findings are combined here into practical guidance
-for future optimisation cycles.
+This section combines kernel-level and system-level findings into practical
+guidance for the next optimisation cycle.
 
 \subsection{What Improved and Why}
 
-The main question is not just whether performance improved; it is which
-mechanism caused the improvement (launch reduction, memory locality, occupancy
-tuning, or precision-path choice). Profiling evidence is used to support each claim,
+Beyond raw speedup, the key question is which mechanism caused the improvement
+(launch reduction, memory locality, occupancy tuning, or precision-path
+choice). Profiling evidence is used to support each claim,
 using the fixed KPI pack defined in \cref{tab:kpi-pack} so that attributions
 remain comparable across kernels and optimisation stages.
 

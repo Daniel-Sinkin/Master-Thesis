@@ -2,10 +2,9 @@
 \section{Methodology and Reporting Standards}
 \label{sec:methodology-reporting}
 
-The following rules define experiment execution and profiling. They also set
-reporting requirements.
-The goal is to keep optimisation claims traceable and reproducible across
-kernels and optimisation stages.
+This section defines experiment execution, profiling order, and reporting
+requirements. The aim is to keep optimisation claims traceable and reproducible
+across kernels and optimisation stages.
 
 \subsection{Profiling Workflow Standard}
 
@@ -24,8 +23,8 @@ Profiling is executed in two stages:
   and can bias short kernels~\cite{nvidia-nsight-compute-profiling-guide}.
 \end{enumerate}
 
-The workflow is deliberately ordered: first find \emph{where} time is spent,
-then explain \emph{why} with counters.
+The order is intentional: first find \emph{where} time is spent, then explain
+\emph{why} with counters.
 
 \begin{figure}[H]
   \centering
@@ -103,7 +102,7 @@ and reporting standards in benchmark suites~\cite{spec-cpu2017-runrules}.
     Artifacts & Script paths for run submission, CSV extraction, and figure generation. \\
     \bottomrule
   \end{tabularx}
-  \caption{Mandatory disclosure checklist for this thesis.}
+  \caption{Mandatory disclosure checklist for the benchmark campaign.}
   \label{tab:methodology-reporting-checklist}
 \end{table}
 

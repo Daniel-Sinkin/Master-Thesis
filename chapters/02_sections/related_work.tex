@@ -14,7 +14,7 @@ launch-amortisation strategies that are difficult to implement with host-only
 library calls~\cite{cublasdx}. The launch-overhead benchmark in this
 thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
 
-In this thesis, custom kernels are evaluated against these libraries as
+Custom kernels are evaluated against these libraries as
 performance baselines rather than replacements. The objective is to understand
 where workload-specific structure can beat general-purpose interfaces.
 
@@ -24,7 +24,7 @@ The ChASE line of work provides relevant experience in GPU-oriented numerical
 software engineering, especially for hybrid CPU--GPU execution and scalable
 performance tuning~\cite{winkelmann2019chase,wu2022chase-gpu,wu2023chase-nccl}.
 Although ChASE targets eigenvalue problems rather than tensor networks, it
-shares core HPC concerns with this thesis:
+shares core HPC concerns with this work:
 
 \begin{itemize}
   \item balancing algorithmic structure with hardware-aware implementation,
@@ -49,13 +49,13 @@ Across implementations, two recurring observations are relevant here:
     accesses can erase gains from nominally fast compute kernels.
 \end{enumerate}
 
-This thesis builds on those observations with a stricter focus on Ampere-era
+This work builds on those observations with a stricter focus on Ampere-era
 execution details: launch overhead, occupancy limits, memory-hierarchy effects,
 plus profile-guided fusion on a realistic node topology.
 
 \subsection{Selected Work in Collaborating Research Directions}\label{sec:people-sota}
 
-The following review focuses on work that is directly relevant to this thesis
+The following review focuses on work that is directly relevant to this project
 context: Wu, Di~Napoli, Rizzi, Waintal, Legeza, and their close collaborators.
 
 \subsubsection{Wu and Di Napoli: GPU-Distributed Dense Kernels and Communication}
@@ -73,16 +73,17 @@ communication orchestration and overlap become major bottlenecks.
 
 \subsubsection{Legeza Group: Massively Parallel DMRG/MPS on CPU--GPU Systems}
 
-Menczer et al.\ present a sequence of works on massively parallel DMRG-style
-workloads that are highly relevant for kernel engineering: lock-free scheduling,
-task buffering, explicit overlap of communication and computation, and
-mixed-precision/tensor-core acceleration paths
-(\cite{menczer2023massive,menczer2023nonabelian,menczer2024efficient-dmrg-gpu}).
+Menczer and Legeza report peer-reviewed JCTC results on massively parallel
+tensor-network algorithms and accelerator-oriented implementations, with
+complementary preprints for symmetry-aware and newest H100-focused
+optimisations
+(\cite{menczer2025massive-jctc,menczer2024ai-accelerators-jctc,menczer2023nonabelian,menczer2024efficient-dmrg-gpu}).
 
-The 2023 and 2024 studies also report good scaling across heterogeneous
-CPU--GPU systems and explicitly motivate mixed-precision/tensor-core execution
-for contraction-heavy workloads~\cite{menczer2023massive,menczer2024efficient-dmrg-gpu}.
-For this thesis, the direct transfer is straightforward: reduce launch count for
+These studies report good scaling across heterogeneous CPU--GPU systems and
+explicitly motivate mixed-precision/tensor-core execution for
+contraction-heavy workloads
+~\cite{menczer2025massive-jctc,menczer2024ai-accelerators-jctc,menczer2024efficient-dmrg-gpu}.
+The direct transfer for this project is straightforward: reduce launch count for
 small contractions, bucket by shape, then tune stream-level scheduling.
 
 \subsubsection{Rizzi and Waintal: Operator-Sum Formulations and Practical TN Performance}
@@ -90,7 +91,7 @@ small contractions, bucket by shape, then tune stream-level scheduling.
 Krinitsin, Rizzi, and Waintal present a TTN time-evolution implementation with
 two-level parallelisation (shared and distributed memory) and report order of
 magnitude speedups from GPU acceleration in the targeted workload
-regime~\cite{krinitsin2025ttn-ed}. A practical point for this thesis is their
+regime~\cite{krinitsin2025ttn-ed}. A practical point for this project is their
 emphasis on local operator-sum formulations, which can avoid expensive explicit
 intermediate constructions in contraction pipelines.
 
@@ -122,7 +123,7 @@ These points are consistent across the Ampere tuning guide, the CUDA
 best-practices guide, and the Nsight Compute profiling guide
 (\cite{nvidia-ampere-tuning-guide,nvidia-cuda-best-practices,nvidia-nsight-compute-profiling-guide}).
 
-\paragraph{Integration plan.}
+\paragraph{Integration priorities.}
 Given the current project scope (single A100 node, contraction-heavy short
 kernel sequences), the most relevant near-term integration steps are:
 \begin{enumerate}
@@ -155,7 +156,7 @@ Across the above works, four recurring implementation patterns emerge:
 \label{sec:paper-notes-working-draft}
 
 The table below is kept as implementation-oriented notes. It maps paper-level
-results and methodology to concrete optimisation actions for this thesis.
+results and methodology to concrete optimisation actions for this project.
 
 \begin{table}[H]
 \centering
@@ -165,11 +166,11 @@ results and methodology to concrete optimisation actions for this thesis.
 \toprule
 Paper (focus) & Reported methodology/result signal & Direct project action \\
 \midrule
-\cite{menczer2023massive} (massively parallel TN state algorithms on CPU--GPU systems) &
+\cite{menczer2025massive-jctc} (massively parallel TN state algorithms on CPU--GPU systems) &
 explicit multi-level parallelisation and mixed CPU/GPU execution for contraction-heavy workloads &
 keep kernels bucketed by shape and preserve stream-level concurrency; avoid one-kernel-per-contraction execution for small blocks \\
-\cite{menczer2023nonabelian} (symmetry-aware massively parallel TN implementation) &
-algorithmic structure strongly influences effective performance, not just raw kernel throughput &
+\cite{menczer2024ai-accelerators-jctc} (TN algorithms on AI accelerators) &
+hardware-specific kernel organisation and execution strategy strongly influence effective performance, not just raw peak throughput &
 separate profiling by contraction class and layout class; avoid aggregating all kernels into one average metric \\
 \cite{menczer2024efficient-dmrg-gpu} (DMRG implementation/tuning with tensor-core usage) &
 strong emphasis on mixed precision and throughput-oriented kernel organisation &
@@ -265,4 +266,4 @@ postprocess_kernel<<<grid2, block2, 0, s_compute>>>(global_C);
 \textbf{Why it matters.}
 It mirrors the communication/computation orchestration emphasis in
 Wu--Di~Napoli style distributed GPU kernels and in massively parallel DMRG
-implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2023massive}.
+implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2025massive-jctc}.

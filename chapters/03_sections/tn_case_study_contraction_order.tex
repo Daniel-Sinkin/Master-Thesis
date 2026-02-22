@@ -24,7 +24,7 @@ where:
 The tensor structure is representative of two-site gate application and local
 environment projection steps in MPS-style workflows.
 
-\subsection{How to Read This as a Practical HPC Task}
+\subsection{HPC Formulation}
 
 The expression can be read as a matrix-chain computation repeated over a batch:
 \begin{itemize}
@@ -73,7 +73,7 @@ memory traffic.
   \label{fig:tn-case-matrix-view}
 \end{figure}
 
-\subsection{Plausible Baseline (Bad)}
+\subsection{Direct Baseline}
 
 A straightforward GPU implementation computes one output element
 $Y_{b,p,r}$ per thread and evaluates both sums directly. This gives a direct
@@ -85,9 +85,9 @@ with weak reuse of $X$ and $M$ across threads and heavy global-memory traffic.
 This baseline is implemented in
 \path{code/profiling/experiments/tn_two_site_bad_direct.cu}.
 
-\subsection{Improved Algorithm (Better)}
+\subsection{Ordered Contraction Formulation}
 
-The key change is contraction order:
+The change is the contraction order:
 \[
   T_{b,p,c} = \sum_{q=0}^{d_p-1} G_{p,q}X_{b,q,c},
   \qquad
@@ -174,7 +174,7 @@ Theoretical operation-ratio improvement (direct vs ordered) is
 For the benchmarked shape $d_p=16$, $\chi=256$, this gives
 $R\approx 15.1$, before any hardware-level optimisations.
 
-\subsection{Worked Numerical Example (Shape Used in This Thesis)}
+\subsection{Worked Numerical Example (Reference Shape)}
 
 Using the benchmarked shape $B=1$, $d_p=16$, $\chi=256$:
 \begin{itemize}
@@ -217,54 +217,6 @@ which matches the asymptotic ratio above.
   \label{tab:tn-case-worked-example}
 \end{table}
 
-\subsection{Practice Problems (Implementation-Oriented)}
-
-\begin{enumerate}
-  \item \textbf{Work counting.} For $B=4$, $d_p=32$, $\chi=64$, compute
-  $N_{\text{direct}}$ and $N_{\text{ordered}}$.
-  \item \textbf{GEMM mapping.} Write the two GEMMs in $(m,n,k)$ form for stage 1
-  and stage 2, and identify which operands are shared across the batch.
-  \item \textbf{Shape intuition.} Using
-  $R=\frac{d_p\chi}{d_p+\chi}$, determine whether increasing $d_p$ or
-  increasing $\chi$ helps more when $\chi\gg d_p$.
-  \item \textbf{Memory layout choice.} Pick a layout where the hottest
-  contracted index is unit stride in both stages, and state one layout
-  transform needed between stage 1 and stage 2.
-\end{enumerate}
-
-\paragraph{Short answer key.}
-\begin{enumerate}
-  \item $N_{\text{direct}}=16\,777\,216$,
-  $N_{\text{ordered}}=786\,432$ ($\approx 21.3\times$ reduction).
-  \item Stage 1: $(m,n,k)=(d_p,\chi,d_p)$, Stage 2:
-  $(m,n,k)=(d_p,\chi,\chi)$; $G$ and $M$ are batch-shared.
-  \item For $\chi\gg d_p$, ratio $R\approx d_p$, so increasing $d_p$ gives the
-  stronger marginal gain.
-  \item Any valid answer should keep the reduction index contiguous in the
-  innermost access pattern of each stage.
-\end{enumerate}
-
-\subsection{Diagram Blueprint for Manual Drawing}
-
-To explain this section in one slide or one page, a compact three-panel diagram
-works well:
-\begin{enumerate}
-  \item \textbf{Panel A: expression view.} Write
-  $Y_{b,p,r}=\sum_{q,c}G_{p,q}X_{b,q,c}M_{c,r}$ and highlight contracted
-  indices ($q,c$) in one color.
-  \item \textbf{Panel B: direct implementation.} Draw one big ``direct
-  contraction'' block with arrows from $G$, $X$, and $M$ to $Y$; annotate
-  $\BigO(Bd_p^2\chi^2)$.
-  \item \textbf{Panel C: ordered implementation.} Draw two blocks:
-  $T=G\cdot X$ then $Y=T\cdot M$; annotate
-  $\BigO(B(d_p^2\chi+d_p\chi^2))$ and the ratio
-  $\frac{d_p\chi}{d_p+\chi}$.
-\end{enumerate}
-
-For readability in Excalidraw, keep only five tensor nodes
-($G,X,M,T,Y$) and color contracted indices consistently. Place the work numbers
-directly below each panel.
-
 \subsection{Design Decisions Behind the Better Variant}
 
 The implementation sequence follows the staged optimisation style from
@@ -285,7 +237,7 @@ execution mapping.
     scalar loops. \\
     Reuse shared operands with zero stride & $G$ and $M$ are reused across the
     whole batch without host-side relaunch loops. \\
-    Keep FP32 pedantic math mode & Preserves strict FP32 behavior while
+    Keep strict FP32 math mode & Preserves strict FP32 behavior while
     comparing algorithmic variants. \\
     Profile with fixed KPI pack & Separates true algorithm gains from incidental
     launch/measurement noise. \\
@@ -297,10 +249,10 @@ execution mapping.
 
 \subsection{Optimisation Ladder (Structured After SGEMM Worklogs)}
 
-Beyond the single ``bad vs good'' comparison, this case follows a staged
+Beyond the single direct-vs-ordered comparison, this case follows a staged
 optimisation structure similar to the SGEMM worklog style in
 \cite{boehm2022cuda-mmm}: fix algorithmic work first, then remove memory
-pathologies. After that, improve scheduling/occupancy and tune.
+inefficiencies. After that, improve scheduling/occupancy and tune.
 
 \begin{enumerate}
   \item \textbf{Stage 0 (correct baseline).} Start from a slow but clearly

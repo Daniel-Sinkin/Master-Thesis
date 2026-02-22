@@ -1,10 +1,9 @@
 % chapters/03_sections/data_layout_and_memory_strategy.tex
 \section{Data Layout and Memory Strategy}\label{sec:data-layout}
 
-Data layout is treated as a first-class optimisation variable rather than a
-post-processing detail. For contraction-heavy workloads, memory access patterns
-often dominate arithmetic cost, so layout decisions are made jointly with
-kernel design.
+Data layout is handled early in kernel design, not patched in afterwards.
+For contraction-heavy workloads, memory access patterns often dominate
+arithmetic cost, so layout and kernel structure are decided together.
 
 \subsection{Layout Principles}
 
@@ -20,8 +19,8 @@ The implementation follows four layout rules:
     efficiency and vectorised loads.
 \end{enumerate}
 
-At warp level, this section uses one concrete rule: lane $i$ should map to a
-nearby address, ideally
+At warp level, a practical rule is that lane $i$ should map to a nearby
+address, ideally
 \[
   \mathrm{addr}(i)=\mathrm{base}+4i.
 \]

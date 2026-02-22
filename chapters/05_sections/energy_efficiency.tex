@@ -1,7 +1,7 @@
 % chapters/05_sections/energy_efficiency.tex
 \section{Energy Efficiency Considerations}\label{sec:energy-efficiency}
 
-Performance is the primary optimisation target in this thesis, but
+Performance is the primary optimisation target, but
 energy-to-solution is also an operational objective in HPC: cluster power
 budgets are finite, and lower joules per job improve both operating cost and
 system throughput under queue load~\cite{kocot2023energy-aware,green500-top500}.
@@ -9,7 +9,7 @@ For this reason, the same optimisation decisions used for speed (contraction
 order, coalescing, launch reduction, occupancy control) are evaluated here from
 an energy perspective as well.
 
-\subsection{Why Energy Matters in This Thesis}
+\subsection{Why Energy Matters}
 
 The target workload class (tensor-network-style contractions) executes many
 short and medium kernels in iterative loops. In this regime, wasted launches,
@@ -79,11 +79,11 @@ with:
 The model is intentionally coarse, but it is sufficient for optimisation
 decisions and consistent with the runtime decomposition used in
 \cref{sec:math-foundations}~\cite{williams2009roofline,hockney1988parallel}.
-It captures the central trade-off in this thesis: optimisations that
+It captures the central trade-off: optimisations that
 reduce runtime $T$, redundant work $F$, or memory traffic $Q$ usually improve
 energy efficiency simultaneously.
 
-\subsection{Implications for This Thesis}
+\subsection{Implications for the Current Kernel Set}
 
 The profiling results already support concrete energy-efficiency expectations:
 \begin{enumerate}
@@ -124,8 +124,31 @@ With samples $(t_i,P_i)_{i=1}^m$, the numerical estimate is
 \]
 
 Representative telemetry fields and command syntax are documented in the
-\texttt{nvidia-smi} documentation~\cite{nvidia-smi-doc}. The workflow is
-appropriate for relative algorithmic comparisons, but absolute values should be
-interpreted with care because board-level telemetry has finite sampling
-granularity and excludes non-GPU node power. Repeated measurements and fixed
-protocols mitigate this risk~\cite{kalibera2013rigorous}.
+\texttt{nvidia-smi} documentation~\cite{nvidia-smi-doc}. However, recent
+analysis of NVIDIA's built-in power sensor shows important caveats for short
+kernel windows: sampling is asynchronous to kernel boundaries, short transients
+can be under-resolved, and naive polling can bias integrated energy if the
+window is too short~\cite{yang2024parttime-power-arxiv,yang2024gpu-energy-sc24}.
+
+Accordingly, the measurement protocol uses the following safeguards:
+\begin{enumerate}
+  \item \textbf{Windowing for observability.} Integrate energy over repeated
+  benchmark windows (many kernel iterations) rather than single tiny kernels,
+  so each measurement covers multiple telemetry updates.
+  \item \textbf{Strict boundary control.} Place \texttt{cudaDeviceSynchronize}
+  at measurement boundaries and timestamp only after synchronisation to avoid
+  host/device skew.
+  \item \textbf{Warm-up and stationarity.} Exclude warm-up iterations and run
+  only after clocks/thermals stabilise to reduce drift.
+  \item \textbf{Uncertainty reporting.} Report median and spread over repeated
+  runs with a fixed protocol, consistent with rigorous benchmarking practice
+  ~\cite{kalibera2013rigorous}.
+  \item \textbf{Cross-check subset.} When possible, validate a subset of runs
+  against an independent measurement path (for example node-level meter or
+  alternative telemetry stack) before drawing absolute-power conclusions.
+\end{enumerate}
+
+With these constraints, \texttt{nvidia-smi}-based integration is appropriate
+for \emph{relative} algorithmic comparisons in this work. Absolute board
+energy values should still be interpreted conservatively, and whole-node/facility
+energy remains out of scope.

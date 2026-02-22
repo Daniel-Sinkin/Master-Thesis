@@ -54,25 +54,22 @@ kernel efficiency and orchestration costs together
 
 \subsection{Computational Context}\label{sec:tensor-context}
 
-Tensor-network methods arise in quantum many-body simulation, where the full
-state space of the Schr\"odinger equation is reduced to a structured set of
-lower-rank objects. In this thesis, tensor networks are treated as an
-\emph{application source of computational patterns}, not as a physics topic.
-Detailed notation and model-specific physics choices are outside scope here and
-are introduced separately with domain experts.
+This section treats tensor networks as an \emph{application source of
+computational patterns}, not as a physics topic. Detailed notation and
+model-specific physics choices are outside scope here and are introduced
+separately with domain experts.
 
-From a high-performance computing perspective, the relevant point is that
-tensor-network codes repeatedly execute dense linear-algebra-like kernels on
-moderate to small tensor blocks. Those kernels are often embedded in long
-iterative workflows, so both per-kernel efficiency and orchestration overhead
-matter.
+For high-performance computing, the relevant point is that tensor-network codes
+repeatedly execute dense linear-algebra-like kernels on moderate to small
+tensor blocks inside long iterative loops. Both per-kernel efficiency and
+orchestration overhead therefore matter.
 
 \subsection{Matrix Product States (MPS) from a Computational View}
 \label{sec:mps-computational-view}
 
 Matrix Product States (MPS) are a common tensor-network representation where a
-high-order object is factorised into a chain of local tensors. For this thesis,
-the relevant point is not the physics interpretation but the resulting compute
+high-order object is factorised into a chain of local tensors. The relevant
+point here is not the physics interpretation but the resulting compute
 structure:
 
 \begin{itemize}
@@ -166,9 +163,9 @@ The same structure appears in the optimisation targets of later chapters:
 GEMM-like contractions and layout transforms, together with launch-overhead
 control and profiling-guided tuning of memory/occupancy trade-offs.
 
-\subsection{Kernel Patterns Relevant to This Thesis}\label{sec:tn-kernel-motifs}
+\subsection{Kernel Patterns Relevant to This Work}\label{sec:tn-kernel-motifs}
 
-The optimisation work in this thesis is driven by three recurring patterns:
+The optimisation work is driven by three recurring patterns:
 
 \begin{enumerate}
   \item \textbf{Small and medium dense contractions.} After index reshaping,

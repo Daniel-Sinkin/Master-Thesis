@@ -6,7 +6,7 @@
 The Streaming Multiprocessor (SM) is the fundamental compute unit of the GPU. Each 
 A100-SXM4 GPU exposes 108 active SMs. The GA100 die itself has
 128 physical SM partitions, with 20 disabled through harvesting/binning (see
-\cref{sec:ga100-yield-context}), and all CUDA threads ultimately execute on one
+\cref{sec:ga100-yield-appendix}), and all CUDA threads ultimately execute on one
 of the active SMs.
 Understanding the internal structure of an SM is essential for reasoning about 
 occupancy, register pressure, and warp scheduling.
@@ -65,7 +65,7 @@ For capacity accounting, the A100 limit of \num{64} resident warps
 sub-partitions. Across \num{108} active SMs, this gives a device-level maximum
 of \num{6912} resident warps and \num{221184} resident threads.
 
-\subsection{What Is New in A100 for This Thesis}\label{sec:a100-whats-new}
+\subsection{What Matters in A100 for This Work}\label{sec:a100-whats-new}
 
 Relative to the previous Volta generation, the A100 changes several hardware
 limits that matter directly for tensor-network kernels~\cite{nvidia2020a100,nvidia-ampere-tuning-guide}:
@@ -84,19 +84,10 @@ limits that matter directly for tensor-network kernels~\cite{nvidia2020a100,nvid
     penalty.
 \end{itemize}
 
-For performance modeling, these changes can be summarized with a roofline bound
-\[
-  P \le \min\!\bigl(P_{\max},\, B_{\max}\,I\bigr),
-\]
-where $I$ is arithmetic intensity (FLOPs/byte). The ridge point
-\[
-  I^\star = \frac{P_{\max}}{B_{\max}}
-\]
-is the minimum intensity needed for compute-bound execution. Using A100 FP32
-peaks ($P_{\max}\approx\SI{19.5}{\tera\flops}$,
-$B_{\max}\approx\SI{1555}{\giga\byte\per\second}$), we get
-$I^\star\approx 12.5$ FLOPs/byte, which is the practical threshold used
-throughout this thesis.
+For performance modeling, we use the canonical roofline framework
+defined in \cref{sec:math-foundations}. For A100-SXM4-40GB, the FP32 ridge
+point is approximately $I^\star\approx 12.5$ FLOPs/byte, used as the practical
+memory-vs-compute regime threshold in later optimisation chapters.
 
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
@@ -295,7 +286,11 @@ For tensor network algorithms, several factors favour FP32:
   \item \textbf{Bandwidth amplification.} Since tensor contractions are frequently memory-bandwidth-bound (\cref{sec:gpu-memory-hierarchy}), the $2\times$ reduction in data movement from FP32 translates almost directly into a $2\times$ speedup for bandwidth-limited kernels, before accounting for any compute throughput gains.
 \end{enumerate}
 
-The combination of these factors yields a practical speedup well in excess of the raw $2\times$ compute ratio, as demonstrated in the benchmarks in \cref{ch:results}. Where necessary, mixed-precision strategies---accumulating in FP32 while storing in FP16 or BF16---can push performance further (see~\cite{higham2022mixed} for a rigorous treatment), though this thesis focuses on FP32 as the primary working precision.
+Combined, these factors often yield speedups larger than the raw $2\times$
+compute ratio, as shown in \cref{ch:results}. Where needed, mixed-precision
+strategies---accumulating in FP32 while storing in FP16 or BF16---can push
+performance further (see~\cite{higham2022mixed} for a rigorous treatment),
+while FP32 remains the primary working precision in this work.
 
 \subsection{Memory Hierarchy}\label{sec:gpu-memory-hierarchy}
 \begin{figure}[H]
@@ -395,44 +390,63 @@ register pressure, shared-memory footprint, and scheduler efficiency.
 
 \begin{table}[H]
 \centering
-\caption{A100 KPI card (SXM4-40GB baseline) grouped by scope for performance
-  modeling.}
-\label{tab:a100-specs}
-\begin{tabularx}{\textwidth}{@{}l X r@{}}
+\caption{A100 KPI card (SXM4-40GB baseline): per processing core
+  (SM sub-partition).}
+\label{tab:a100-specs-core}
+\begin{tabularx}{\textwidth}{X r}
 \toprule
-Scope & Property & Value \\
+Property & Value \\
 \midrule
-\multicolumn{3}{@{}l}{\textbf{Per processing core (SM sub-partition)}} \\
-Processing core & Warp schedulers & \num{1} \\
-Processing core & Warp dispatch units & \num{1} \\
-Processing core & FP32 CUDA cores & \num{16} \\
-Processing core & FP64 CUDA cores & \num{8} \\
-Processing core & Tensor cores & \num{1} \\
-Processing core & Maximum warps (derived) & \num{16} \\
-Processing core & Maximum resident threads (derived) & \num{512} \\
-\addlinespace[2pt]
-\multicolumn{3}{@{}l}{\textbf{Per SM}} \\
-SM & Processing cores (sub-partitions) & \num{4} \\
-SM & FP32 CUDA cores & \num{64} \\
-SM & FP64 CUDA cores & \num{32} \\
-SM & Tensor cores & \num{4} \\
-SM & Warp schedulers & \num{4} \\
-SM & Warp dispatch units & \num{4} \\
-SM & Maximum resident threads & \num{2048} \\
-SM & Maximum resident warps & \num{64} \\
-SM & Maximum resident blocks & \num{32} \\
-SM & Register file (32-bit registers) & \num{65536} \\
-SM & Shared memory (KB) & \num{164} \\
-\addlinespace[2pt]
-\multicolumn{3}{@{}l}{\textbf{Per GPU}} \\
-GPU & Streaming multiprocessors (SMs) & \num{108} \\
-GPU & Total processing cores (sub-partitions) & \num{432} \\
-GPU & Maximum resident warps & \num{6912} \\
-GPU & Maximum resident threads & \num{221184} \\
-GPU & L2 cache (MB) & \num{40} \\
-GPU & HBM capacity (GB) & \num{40} \\
-GPU & Peak HBM bandwidth (GB/s) & \num{1555} \\
-GPU & Base clock frequency (GHz) & \num{1.41} \\
+Warp schedulers & \num{1} \\
+Warp dispatch units & \num{1} \\
+FP32 CUDA cores & \num{16} \\
+FP64 CUDA cores & \num{8} \\
+Tensor cores & \num{1} \\
+Maximum warps (derived) & \num{16} \\
+Maximum resident threads (derived) & \num{512} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{A100 KPI card (SXM4-40GB baseline): per SM.}
+\label{tab:a100-specs-sm}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Property & Value \\
+\midrule
+Processing cores (sub-partitions) & \num{4} \\
+FP32 CUDA cores & \num{64} \\
+FP64 CUDA cores & \num{32} \\
+Tensor cores & \num{4} \\
+Warp schedulers & \num{4} \\
+Warp dispatch units & \num{4} \\
+Maximum resident threads & \num{2048} \\
+Maximum resident warps & \num{64} \\
+Maximum resident blocks & \num{32} \\
+Register file (32-bit registers) & \num{65536} \\
+Shared memory (KB) & \num{164} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{A100 KPI card (SXM4-40GB baseline): per GPU.}
+\label{tab:a100-specs}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Property & Value \\
+\midrule
+Streaming multiprocessors (SMs) & \num{108} \\
+Total processing cores (sub-partitions) & \num{432} \\
+Maximum resident warps & \num{6912} \\
+Maximum resident threads & \num{221184} \\
+L2 cache (MB) & \num{40} \\
+HBM capacity (GB) & \num{40} \\
+Peak HBM bandwidth (GB/s) & \num{1555} \\
+Base clock frequency (GHz) & \num{1.41} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -440,74 +454,10 @@ GPU & Base clock frequency (GHz) & \num{1.41} \\
 The A100 employs high-bandwidth memory as its main device memory, providing the
 throughput required to sustain dense linear algebra kernels.
 
-\subsubsection{Large-Die Yield Context (TSMC N7, Approximate)}
-\label{sec:ga100-yield-context}
-
-GA100 is a very large monolithic die (about \SI{826}{\milli\meter\squared})
-with 128 physical SM partitions in the full design. Shipping A100 SXM4-40GB
-parts expose 108 active SMs (20 disabled)~\cite{nvidia2020a100,nvidia-ampere-in-depth}.
-This subsection gives a first-order yield sensitivity estimate to provide
-economic context for why large dies are commonly harvested/binned.
-
-Using the standard first-order Poisson defect model for full-die yield,
-\[
-  Y_{\mathrm{full}}(A,D_0)\approx e^{-A D_0},
-\]
-where $A$ is die area in cm$^2$ and $D_0$ is defect density in
-defects/cm$^2$. For GA100, $A=8.26$.
-
-Absolute TSMC N7 defect-density time series are not publicly released in full.
-However, industry-reported anchor values from public disclosures place
-$D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
-$D_0\approx 0.09$ defects/cm$^2$ for N7 around three quarters after high-volume
-manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n5}.
-These two regimes are retained as the marker points in
-\cref{fig:ga100-n7-yield-curve}.
-\Cref{fig:ga100-n7-yield-curve} overlays three large-die area references:
-GA100 (\SI{826}{\milli\meter\squared}), GV100/V100
-(\SI{815}{\milli\meter\squared}), and GH100/H200
-(\SI{814}{\milli\meter\squared}). The comparison is area-only; process-node
-effects are not modeled in this plot~\cite{nvidia-ampere-in-depth,nvidia2022h100}.
-
-\begin{figure}[H]
-  \centering
-  \IfFileExists{images/ga100_n7_yield_curve.pdf}{
-    \includegraphics[width=0.9\textwidth]{ga100_n7_yield_curve}
-  }{
-    \fbox{
-      \parbox{0.86\textwidth}{
-        Generate this figure with
-        \texttt{python3 scripts/generate\_ga100\_n7\_yield\_curve.py}.
-      }
-    }
-  }
-  \caption{First-order defect-limited yield sensitivity under
-  $Y_{\mathrm{full}}\approx e^{-A D_0}$ for GA100 area
-  (\SI{826}{\milli\meter\squared}), GV100/V100 area
-  (\SI{815}{\milli\meter\squared}), and GH100/H200 area
-  (\SI{814}{\milli\meter\squared}). Marker points use industry-reported N7
-  anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
-  \label{fig:ga100-n7-yield-curve}
-\end{figure}
-
-At those two anchor points, the model gives
-\[
-  Y_{\mathrm{full}}(D_0=0.33)\approx 6.6\%,\qquad
-  Y_{\mathrm{full}}(D_0=0.09)\approx 47.5\%.
-\]
-This should not be interpreted as NVIDIA's product yield: shipping yield is
-higher due to redundancy, harvesting (disabled units), and performance binning.
-The model is used here only to quantify the sensitivity of large-die economics
-to defect density.
-
-\paragraph{Area increment sanity check.}
-For a die-area increase $\Delta A$, Poisson yield scales as
-\[
-  \frac{Y(A+\Delta A,D_0)}{Y(A,D_0)}=e^{-D_0\Delta A}.
-\]
-With $\Delta A=0.1$\,cm$^2$, this multiplier is about $0.968$ at
-$D_0=0.33$ and $0.991$ at $D_0=0.09$, i.e.\ a \SI{3.2}{\percent} and
-\SI{0.9}{\percent} relative yield drop, respectively.
+\paragraph{Yield context.}
+The detailed first-order yield sensitivity model and area-scaling calculation
+for GA100 are provided in \cref{sec:ga100-yield-appendix} to keep this chapter
+focused on kernel-relevant execution concepts.
 
 \subsubsection{GA100 Die vs A100 Module: What Is Around the Chip}
 \label{sec:ga100-vs-a100-module}
@@ -543,7 +493,8 @@ host staging dominates, PCIe plus CPU-NUMA placement becomes critical.
 \subsubsection{A100 40GB vs 80GB: HBM2 vs HBM2e}
 \label{sec:a100-40-80}
 
-For this thesis, the key architectural difference between A100-SXM4-40GB and
+For the benchmark setup used here, the key architectural difference between
+A100-SXM4-40GB and
 A100-SXM4-80GB is the memory subsystem, not the SM compute front end. The
 40GB card uses HBM2, while the 80GB card uses HBM2e with higher aggregate
 bandwidth and doubled capacity. A concise comparison is given in
@@ -592,7 +543,7 @@ kernels should not see comparable speedups.
 \subsubsection{Theoretical Peak Performance}
 
 \noindent\textbf{TPP definition.}
-Here, TPP denotes theoretical peak performance.
+TPP denotes theoretical peak performance.
 For CUDA-core arithmetic on A100, using fused multiply-add (2 FLOPs/cycle):
 \[
   P_{\mathrm{FP32}}^{\mathrm{TPP}}
@@ -643,34 +594,56 @@ Bandwidth-based FP32 ceiling (1 FLOP/value) & $1555/4$ & \num{388.8} GFLOP/s \\
 
 \begin{table}[H]
 \centering
-\caption{Derived A100 limits and capacity counts for performance analysis.}
-\label{tab:a100-derived}
-\begin{tabularx}{\textwidth}{@{}l X r@{}}
+\caption{Derived A100 limits and capacity counts for performance analysis:
+  per processing core (SM sub-partition).}
+\label{tab:a100-derived-core}
+\begin{tabularx}{\textwidth}{X r}
 \toprule
-Scope & Metric & Value \\
+Metric & Value \\
 \midrule
-\multicolumn{3}{@{}l}{\textbf{Per processing core (SM sub-partition)}} \\
-Processing core & Peak FP32 performance (GFLOP/s) & \num{45.12} \\
-Processing core & Peak FP64 performance (GFLOP/s) & \num{22.56} \\
-Processing core & Maximum resident warps (derived) & \num{16} \\
-Processing core & Maximum resident threads (derived) & \num{512} \\
-\addlinespace[2pt]
-\multicolumn{3}{@{}l}{\textbf{Per SM}} \\
-SM & Peak FP32 performance (GFLOP/s) & \num{180.48} \\
-SM & Peak FP64 performance (GFLOP/s) & \num{90.24} \\
-SM & Tensor-core FP16 performance (TFLOP/s) & \num{2.89} \\
-SM & Memory bandwidth share (GB/s) & \num{14.40} \\
-SM & Arithmetic-intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
-SM & Arithmetic-intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
-\addlinespace[2pt]
-\multicolumn{3}{@{}l}{\textbf{Per GPU}} \\
-GPU & Bandwidth-based FP64 ceiling (1 FLOP/value) (GFLOP/s) & \num{194.4} \\
-GPU & Bandwidth-based FP32 ceiling (1 FLOP/value) (GFLOP/s) & \num{388.8} \\
-GPU & Total FP32 CUDA cores & \num{6912} \\
-GPU & Total FP64 CUDA cores & \num{3456} \\
-GPU & Total processing cores (sub-partitions) & \num{432} \\
-GPU & Maximum resident warps & \num{6912} \\
-GPU & Maximum resident threads & \num{221184} \\
+Peak FP32 performance (GFLOP/s) & \num{45.12} \\
+Peak FP64 performance (GFLOP/s) & \num{22.56} \\
+Maximum resident warps (derived) & \num{16} \\
+Maximum resident threads (derived) & \num{512} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Derived A100 limits and capacity counts for performance analysis:
+  per SM.}
+\label{tab:a100-derived}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Metric & Value \\
+\midrule
+Peak FP32 performance (GFLOP/s) & \num{180.48} \\
+Peak FP64 performance (GFLOP/s) & \num{90.24} \\
+Tensor-core FP16 performance (TFLOP/s) & \num{2.89} \\
+Memory bandwidth share (GB/s) & \num{14.40} \\
+Arithmetic-intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
+Arithmetic-intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Derived A100 limits and capacity counts for performance analysis:
+  per GPU.}
+\label{tab:a100-derived-gpu}
+\begin{tabularx}{\textwidth}{X r}
+\toprule
+Metric & Value \\
+\midrule
+Bandwidth-based FP64 ceiling (1 FLOP/value) (GFLOP/s) & \num{194.4} \\
+Bandwidth-based FP32 ceiling (1 FLOP/value) (GFLOP/s) & \num{388.8} \\
+Total FP32 CUDA cores & \num{6912} \\
+Total FP64 CUDA cores & \num{3456} \\
+Total processing cores (sub-partitions) & \num{432} \\
+Maximum resident warps & \num{6912} \\
+Maximum resident threads & \num{221184} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -699,7 +672,7 @@ HBM global memory & \num{500} \\
 The performance of GPU-accelerated applications depends on more than the GPU
 itself. Node topology matters: CPU placement, GPU placement, and memory
 connectivity. This subsection describes the JURECA-DC node architecture used in
-this thesis, representative of modern multi-GPU HPC nodes.
+this work, representative of modern multi-GPU HPC nodes.
 
 \subsubsection{CPU and NUMA Topology}
 
@@ -822,151 +795,10 @@ different host-device topology assumptions and are therefore outside the scope
 of this node-level model.
 
 \paragraph{Host-device path cost model.}
-For a transfer of size $V$ bytes, we use a first-order latency+bandwidth model
-in the standard Hockney form~\cite{hockney1988parallel}:
-\[
-  T_{\mathrm{H2D}}(\pi, V)
-  \approx
-  T_0(\pi) + \frac{V}{B_{\mathrm{eff}}(\pi)},
-\]
-where $\pi$ is the path class (local, same-socket remote, or cross-socket
-remote), $T_0$ is the fixed setup/latency term, and $B_{\mathrm{eff}}$ is the
-effective end-to-end bandwidth.
-
-To make the topology penalty explicit, we can write
-\[
-  T_0(\pi) = T_0^{\mathrm{local}} + n_{\mathrm{IF}}(\pi)\,\tau_{\mathrm{IF}},
-\]
-with $n_{\mathrm{IF}}$ the number of additional Infinity Fabric segments and
-$\tau_{\mathrm{IF}}$ an average per-segment latency penalty. In practice, this
-gives the expected ordering
-\[
-  T_{\mathrm{local}} < T_{\mathrm{same\ socket\ remote}} < T_{\mathrm{cross\ socket}}.
-\]
-The model is simple but sufficient for placement policy decisions: thread
-pinning and host-buffer NUMA placement should minimise $n_{\mathrm{IF}}$ and
-maximise $B_{\mathrm{eff}}$. This is consistent with CUDA placement
-recommendations for multi-socket hosts~\cite{nvidia-cuda-guide,nvidia-cuda-best-practices}.
-
-\paragraph{Concrete mapping for this node.}
-Using the measured affinity in \cref{tab:gpu-numa-affinity}, the path classes
-can be made explicit. For example, for GPU\,1 (local NUMA\,1):
-\begin{itemize}
-  \item \textbf{Local path} ($\pi=\pi_{\mathrm{local}}$):
-    thread and pinned host buffer on NUMA\,1 (cores 16--31),
-    modeled with $n_{\mathrm{IF}}=0$.
-  \item \textbf{Same-socket remote path} ($\pi=\pi_{\mathrm{ss}}$):
-    thread/buffer on NUMA\,3 (same socket, cores 48--63),
-    modeled with one additional fabric segment ($n_{\mathrm{IF}}\approx 1$).
-  \item \textbf{Cross-socket path} ($\pi=\pi_{\mathrm{xs}}$):
-    thread/buffer on NUMA\,5 or NUMA\,7 (other socket),
-    modeled with inter-socket traversal plus local fabric
-    ($n_{\mathrm{IF}}\approx 2$ in this simplified model).
-\end{itemize}
-The same local/same-socket/cross-socket classification applies to GPU\,0, GPU\,2,
-and GPU\,3 by replacing NUMA IDs with their entries from
-\cref{tab:gpu-numa-affinity}. The practical expectation is
-\[
-  B_{\mathrm{eff}}(\pi_{\mathrm{local}})
-  >
-  B_{\mathrm{eff}}(\pi_{\mathrm{ss}})
-  >
-  B_{\mathrm{eff}}(\pi_{\mathrm{xs}}),
-\]
-and correspondingly higher transfer time for the same $V$.
-
-\paragraph{Cost instantiation for this architecture.}
-For topology-aware staging costs, we model a sequence of $N$ host-device
-transfers with total volume $V_{\mathrm{tot}}=\sum_{i=1}^{N}V_i$ as
-\[
-  T_{\mathrm{stage}}(\pi)
-  =
-  \sum_{i=1}^{N} T_{\mathrm{H2D}}(\pi,V_i)
-  \approx
-  N\,T_0(\pi)+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi)}.
-\]
-With the path classes used in this node model
-($n_{\mathrm{IF}}(\pi_{\mathrm{local}})=0$,
- $n_{\mathrm{IF}}(\pi_{\mathrm{ss}})=1$,
- $n_{\mathrm{IF}}(\pi_{\mathrm{xs}})=2$), this becomes
-\begin{align*}
-  T_{\mathrm{stage}}(\pi_{\mathrm{local}})
-  &\approx
-  N\,T_0^{\mathrm{local}}+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})},\\
-  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
-  &\approx
-  N\!\left(T_0^{\mathrm{local}}+\tau_{\mathrm{IF}}\right)
-  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})},\\
-  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
-  &\approx
-  N\!\left(T_0^{\mathrm{local}}+2\tau_{\mathrm{IF}}\right)
-  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}.
-\end{align*}
-
-Relative to local placement, the predicted penalties are therefore
-\begin{align*}
-  \Delta T_{\mathrm{ss}}
-  &=
-  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
-  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
-  \approx
-  N\,\tau_{\mathrm{IF}}
-  +V_{\mathrm{tot}}
-   \!\left(
-     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})}
-     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
-   \right),\\
-  \Delta T_{\mathrm{xs}}
-  &=
-  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
-  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
-  \approx
-  2N\,\tau_{\mathrm{IF}}
-  +V_{\mathrm{tot}}
-   \!\left(
-     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}
-     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
-   \right).
-\end{align*}
-This turns placement into a computable policy decision: for each staging phase,
-evaluate $\Delta T_{\mathrm{ss}}$ and $\Delta T_{\mathrm{xs}}$ from measured
-$T_0$/$B_{\mathrm{eff}}$ and choose local NUMA placement whenever possible.
-
-\paragraph{How parameters are obtained in practice.}
-For each path class $\pi$, measure transfer times for multiple sizes
-$V\in[V_{\min},V_{\max}]$ and fit
-\[
-  T(V)=a_\pi + b_\pi V,
-  \qquad
-  T_0(\pi)=a_\pi,\quad B_{\mathrm{eff}}(\pi)=\frac{1}{b_\pi}.
-\]
-This linear fit is the standard way to instantiate latency+bandwidth models in
-system-performance analysis~\cite{hockney1988parallel,jain1991art}.
-Once fitted, the above expressions directly provide predicted staging overhead
-for any $(N,V_{\mathrm{tot}})$ in the workload.
-
-\paragraph{Per-GPU path classes.}
-The local and same-socket ``remote'' NUMA domains used for orchestration are:
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{l l l l}
-    \toprule
-    GPU & $\pi_{\mathrm{local}}$ & $\pi_{\mathrm{ss}}$ (used) & $\pi_{\mathrm{xs}}$ (used) \\
-    \midrule
-    GPU\,0 & NUMA\,3 & NUMA\,1 & NUMA\,5 or NUMA\,7 \\
-    GPU\,1 & NUMA\,1 & NUMA\,3 & NUMA\,5 or NUMA\,7 \\
-    GPU\,2 & NUMA\,7 & NUMA\,5 & NUMA\,1 or NUMA\,3 \\
-    GPU\,3 & NUMA\,5 & NUMA\,7 & NUMA\,1 or NUMA\,3 \\
-    \bottomrule
-  \end{tabular}
-  \caption{Path-class mapping used for topology-aware cost evaluation.}
-  \label{tab:gpu-path-class-mapping}
-\end{table}
-
-For each row in \cref{tab:gpu-path-class-mapping}, the same
-$n_{\mathrm{IF}}=\{0,1,2\}$ model applies, so the transfer-cost expressions
-above are directly reusable across all four GPUs.
+The full parametric latency+bandwidth model, per-GPU path-class mapping, and
+closed-form penalty expressions are moved to \cref{app:hardware-context} to keep
+this chapter focused on the execution concepts needed for reading the benchmark
+results.
 
 In practice, this topology has two implications for the workload:
 

@@ -1,0 +1,209 @@
+\chapter{Supplementary Hardware Context}\label{app:hardware-context}
+
+This appendix collects hardware/economic background and extended node-path
+modeling details that support interpretation but are not required for reading
+the main optimisation narrative.
+
+\section{GA100 Yield Sensitivity (TSMC N7, Approximate)}
+\label{sec:ga100-yield-appendix}
+
+GA100 is a very large monolithic die (about \SI{826}{\milli\meter\squared})
+with 128 physical SM partitions in the full design. Shipping A100 SXM4-40GB
+parts expose 108 active SMs (20 disabled)~\cite{nvidia2020a100,nvidia-ampere-in-depth}.
+This section gives a first-order yield sensitivity estimate to provide economic
+context for why large dies are commonly harvested/binned.
+
+Using the standard first-order Poisson defect model for full-die yield,
+\[
+  Y_{\mathrm{full}}(A,D_0)\approx e^{-A D_0},
+\]
+where $A$ is die area in cm$^2$ and $D_0$ is defect density in
+defects/cm$^2$. For GA100, $A=8.26$.
+
+Absolute TSMC N7 defect-density time series are not publicly released in full.
+However, industry-reported anchor values from public disclosures place
+$D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
+$D_0\approx 0.09$ defects/cm$^2$ for N7 around three quarters after high-volume
+manufacturing ramp~\cite{tomshardware2024tsmc-defect-density,anandtech2020tsmc-n5}.
+These two regimes are retained as the marker points in
+\cref{fig:ga100-n7-yield-curve}.
+
+\begin{figure}[H]
+  \centering
+  \IfFileExists{images/ga100_n7_yield_curve.pdf}{
+    \includegraphics[width=0.9\textwidth]{ga100_n7_yield_curve}
+  }{
+    \fbox{
+      \parbox{0.86\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/generate\_ga100\_n7\_yield\_curve.py}.
+      }
+    }
+  }
+  \caption{First-order defect-limited yield sensitivity under
+  $Y_{\mathrm{full}}\approx e^{-A D_0}$ for GA100 area
+  (\SI{826}{\milli\meter\squared}). Marker points use industry-reported N7
+  anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
+  \label{fig:ga100-n7-yield-curve}
+\end{figure}
+
+At those two anchor points, the model gives
+\[
+  Y_{\mathrm{full}}(D_0=0.33)\approx 6.6\%,\qquad
+  Y_{\mathrm{full}}(D_0=0.09)\approx 47.5\%.
+\]
+This should not be interpreted as NVIDIA's product yield: shipping yield is
+higher due to redundancy, harvesting (disabled units), and performance binning.
+The model is used here only to quantify the sensitivity of large-die economics
+to defect density.
+
+\paragraph{Area increment sanity check.}
+For a die-area increase $\Delta A$, Poisson yield scales as
+\[
+  \frac{Y(A+\Delta A,D_0)}{Y(A,D_0)}=e^{-D_0\Delta A}.
+\]
+With $\Delta A=0.1$\,cm$^2$, this multiplier is about $0.968$ at
+$D_0=0.33$ and $0.991$ at $D_0=0.09$, i.e.\ a \SI{3.2}{\percent} and
+\SI{0.9}{\percent} relative yield drop, respectively.
+
+\section{Extended Host--Device Path Cost Model}
+\label{sec:host-device-path-model}
+
+For a transfer of size $V$ bytes, we use a first-order latency+bandwidth model
+in the standard Hockney form~\cite{hockney1988parallel}:
+\[
+  T_{\mathrm{H2D}}(\pi, V)
+  \approx
+  T_0(\pi) + \frac{V}{B_{\mathrm{eff}}(\pi)},
+\]
+where $\pi$ is the path class (local, same-socket remote, or cross-socket
+remote), $T_0$ is the fixed setup/latency term, and $B_{\mathrm{eff}}$ is the
+effective end-to-end bandwidth.
+
+To make the topology penalty explicit, we write
+\[
+  T_0(\pi) = T_0^{\mathrm{local}} + n_{\mathrm{IF}}(\pi)\,\tau_{\mathrm{IF}},
+\]
+with $n_{\mathrm{IF}}$ the number of additional Infinity Fabric segments and
+$\tau_{\mathrm{IF}}$ an average per-segment latency penalty. This gives the
+expected ordering
+\[
+  T_{\mathrm{local}} < T_{\mathrm{same\ socket\ remote}} < T_{\mathrm{cross\ socket}}.
+\]
+
+\paragraph{Concrete mapping for this node.}
+Using the measured affinity in \cref{tab:gpu-numa-affinity}, the path classes
+can be made explicit. For example, for GPU\,1 (local NUMA\,1):
+\begin{itemize}
+  \item \textbf{Local path} ($\pi=\pi_{\mathrm{local}}$):
+    thread and pinned host buffer on NUMA\,1 (cores 16--31),
+    modeled with $n_{\mathrm{IF}}=0$.
+  \item \textbf{Same-socket remote path} ($\pi=\pi_{\mathrm{ss}}$):
+    thread/buffer on NUMA\,3 (same socket, cores 48--63),
+    modeled with one additional fabric segment ($n_{\mathrm{IF}}\approx 1$).
+  \item \textbf{Cross-socket path} ($\pi=\pi_{\mathrm{xs}}$):
+    thread/buffer on NUMA\,5 or NUMA\,7 (other socket),
+    modeled with inter-socket traversal plus local fabric
+    ($n_{\mathrm{IF}}\approx 2$ in this simplified model).
+\end{itemize}
+The same local/same-socket/cross-socket classification applies to GPU\,0, GPU\,2,
+and GPU\,3 by replacing NUMA IDs with their entries from
+\cref{tab:gpu-numa-affinity}. The practical expectation is
+\[
+  B_{\mathrm{eff}}(\pi_{\mathrm{local}})
+  >
+  B_{\mathrm{eff}}(\pi_{\mathrm{ss}})
+  >
+  B_{\mathrm{eff}}(\pi_{\mathrm{xs}}),
+\]
+and correspondingly higher transfer time for the same $V$.
+
+\paragraph{Cost instantiation for this architecture.}
+For topology-aware staging costs, we model a sequence of $N$ host-device
+transfers with total volume $V_{\mathrm{tot}}=\sum_{i=1}^{N}V_i$ as
+\[
+  T_{\mathrm{stage}}(\pi)
+  =
+  \sum_{i=1}^{N} T_{\mathrm{H2D}}(\pi,V_i)
+  \approx
+  N\,T_0(\pi)+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi)}.
+\]
+With the path classes used in this node model
+($n_{\mathrm{IF}}(\pi_{\mathrm{local}})=0$,
+ $n_{\mathrm{IF}}(\pi_{\mathrm{ss}})=1$,
+ $n_{\mathrm{IF}}(\pi_{\mathrm{xs}})=2$), this becomes
+\begin{align*}
+  T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  &\approx
+  N\,T_0^{\mathrm{local}}+\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})},\\
+  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
+  &\approx
+  N\!\left(T_0^{\mathrm{local}}+\tau_{\mathrm{IF}}\right)
+  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})},\\
+  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
+  &\approx
+  N\!\left(T_0^{\mathrm{local}}+2\tau_{\mathrm{IF}}\right)
+  +\frac{V_{\mathrm{tot}}}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}.
+\end{align*}
+
+Relative to local placement, the predicted penalties are therefore
+\begin{align*}
+  \Delta T_{\mathrm{ss}}
+  &=
+  T_{\mathrm{stage}}(\pi_{\mathrm{ss}})
+  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  \approx
+  N\,\tau_{\mathrm{IF}}
+  +V_{\mathrm{tot}}
+   \!\left(
+     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{ss}})}
+     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
+   \right),\\
+  \Delta T_{\mathrm{xs}}
+  &=
+  T_{\mathrm{stage}}(\pi_{\mathrm{xs}})
+  -T_{\mathrm{stage}}(\pi_{\mathrm{local}})
+  \approx
+  2N\,\tau_{\mathrm{IF}}
+  +V_{\mathrm{tot}}
+   \!\left(
+     \frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{xs}})}
+     -\frac{1}{B_{\mathrm{eff}}(\pi_{\mathrm{local}})}
+   \right).
+\end{align*}
+
+\paragraph{How parameters are obtained in practice.}
+For each path class $\pi$, measure transfer times for multiple sizes
+$V\in[V_{\min},V_{\max}]$ and fit
+\[
+  T(V)=a_\pi + b_\pi V,
+  \qquad
+  T_0(\pi)=a_\pi,\quad B_{\mathrm{eff}}(\pi)=\frac{1}{b_\pi}.
+\]
+This linear fit is the standard way to instantiate latency+bandwidth models in
+system-performance analysis~\cite{hockney1988parallel,jain1991art}.
+Once fitted, the above expressions directly provide predicted staging overhead
+for any $(N,V_{\mathrm{tot}})$ in the workload.
+
+\paragraph{Per-GPU path classes.}
+The local and same-socket ``remote'' NUMA domains used for orchestration are:
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{l l l l}
+    \toprule
+    GPU & $\pi_{\mathrm{local}}$ & $\pi_{\mathrm{ss}}$ (used) & $\pi_{\mathrm{xs}}$ (used) \\
+    \midrule
+    GPU\,0 & NUMA\,3 & NUMA\,1 & NUMA\,5 or NUMA\,7 \\
+    GPU\,1 & NUMA\,1 & NUMA\,3 & NUMA\,5 or NUMA\,7 \\
+    GPU\,2 & NUMA\,7 & NUMA\,5 & NUMA\,1 or NUMA\,3 \\
+    GPU\,3 & NUMA\,5 & NUMA\,7 & NUMA\,1 or NUMA\,3 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Path-class mapping used for topology-aware cost evaluation.}
+  \label{tab:gpu-path-class-mapping}
+\end{table}
+
+For each row in \cref{tab:gpu-path-class-mapping}, the same
+$n_{\mathrm{IF}}=\{0,1,2\}$ model applies, so the transfer-cost expressions
+above are directly reusable across all four GPUs.

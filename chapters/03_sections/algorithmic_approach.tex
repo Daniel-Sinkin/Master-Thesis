@@ -44,64 +44,29 @@ An optimisation is considered successful only if:
 
 \subsection{Analytical Performance Models}\label{sec:analytical-models}
 
-Before implementation-level tuning, this thesis uses two compact analytical
+Before implementation-level tuning, we use two compact analytical
 models to classify bottlenecks and to set realistic speedup expectations:
 roofline analysis for single-kernel limits and Amdahl's law for global
 parallel-scaling limits.
 
-\subsubsection{Roofline Model}\label{sec:roofline-model}
+\subsubsection{Roofline Reference Model}\label{sec:roofline-model}
 
-Let
+The canonical roofline definitions and bounds are given in
+\cref{sec:math-foundations}. This chapter uses that model directly and only
+instantiates hardware-specific FP32 ridge points for the platforms in scope:
 \[
-  I = \frac{\text{FLOPs}}{\text{bytes moved to/from main memory}}
+  I^\star_{\mathrm{A100\mbox{-}40}} \approx 12.5,\quad
+  I^\star_{\mathrm{A100\mbox{-}80}} \approx 9.6,\quad
+  I^\star_{\mathrm{H100\mbox{-}80}} \approx 20.0
+  \ \text{FLOPs/byte}.
 \]
-denote operational intensity (FLOP/byte). For a device with peak compute
-throughput $P_{\max}$ and peak memory bandwidth $B$, the roofline bound is
-\[
-  P(I) = \min\left(P_{\max},\; B \cdot I\right).
-\]
-This separates the two regimes:
-\begin{itemize}
-  \item \textbf{memory-bound:} $I < I^\star$ and $P(I) \approx B\cdot I$,
-  \item \textbf{compute-bound:} $I \ge I^\star$ and $P(I) \approx P_{\max}$,
-\end{itemize}
-where the crossover intensity is
-\[
-  I^\star = \frac{P_{\max}}{B}.
-\]
-
-Using the A100-SXM4-40GB values from \cref{tab:a100-specs,tab:a100-peak-performance},
-we take $B=\SI{1555}{\giga\byte\per\second}=\SI{1.555}{\tera\byte\per\second}$.
-The resulting crossover points are:
-\[
-  I^\star_{\mathrm{FP64}} \approx \frac{9.7}{1.555}=6.2,\quad
-  I^\star_{\mathrm{FP32}} \approx \frac{19.5}{1.555}=12.5.
-\]
-
-To quantify hardware sensitivity, two additional roofline references are used.
-For A100-SXM4-80GB, the compute ceilings stay unchanged while bandwidth rises to
-$B=\SI{2.039}{\tera\byte\per\second}$~\cite{nvidia2020a100}, which shifts the
-crossover points to
-\[
-  I^\star_{\mathrm{FP64}} \approx 4.8,\quad
-  I^\star_{\mathrm{FP32}} \approx 9.6.
-\]
-For H100-SXM5-80GB, using representative peak values
-$B=\SI{3.35}{\tera\byte\per\second}$, $P_{\mathrm{FP64}}=\SI{33.5}{\tera\flops}$,
-$P_{\mathrm{FP32}}=\SI{67.0}{\tera\flops}$~\cite{nvidia2022h100}, the
-crossover points become
-\[
-  I^\star_{\mathrm{FP64}} \approx 10.0,\quad
-  I^\star_{\mathrm{FP32}} \approx 20.0.
-\]
-
 Small and medium contractions with low reuse remain memory-bound unless
 layout/tiling increases operational intensity.
 
 \subsubsection{Roofline in Practice}\label{sec:roofline-in-practice}
 
-For this project, roofline is used as a measurement workflow, not just an
-analytical plot. The practical loop is:
+In this project, roofline is used as an analysis tool, not just as a plot.
+The procedure is:
 \begin{enumerate}
   \item estimate FLOPs and bytes from kernel geometry (static model),
   \item collect measured FLOPs, memory traffic, and runtime from Nsight
@@ -165,8 +130,6 @@ is consistent with an area-to-perimeter argument: larger and more balanced
 rectangles increase intensity, while slender shapes and heavy padding reduce
 it. Under the same traffic model, moving from FP32 to FP64 doubles bytes per
 value and therefore halves arithmetic intensity at every point of the map.
-\Cref{fig:ai-surface-fp32-padded} shows the padded FP32 landscape as a 3D
-surface.
 
 \begin{table}[H]
 \centering
@@ -203,24 +166,6 @@ $(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
   Right: effective intensity with $16$-element padding on $M,N,K$ (useful FLOPs
   over padded traffic).}
   \label{fig:ai-heatmap-fp32}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \IfFileExists{images/arithmetic_intensity_surface_padded_fp32.pdf}{
-    \includegraphics[width=0.82\textwidth]{arithmetic_intensity_surface_padded_fp32}
-  }{
-    \fbox{
-      \parbox{0.8\textwidth}{
-        Generate this figure with
-        \texttt{python3 scripts/generate_arithmetic_intensity_heatmap.py}.
-      }
-    }
-  }
-  \caption{3D surface of effective arithmetic intensity
-  $I_{\mathrm{eff}}(M,N,K;t)$ for FP32 at fixed $K=64$ with
-  $t=16$ padding.}
-  \label{fig:ai-surface-fp32-padded}
 \end{figure}
 
 \subsubsection{GEMM Storage Footprint vs A100 Capacity}
@@ -271,40 +216,12 @@ A100 shared memory per SM (164 KiB) & \num{118} & \num{84} \\
   \label{fig:gemm-memory-capacity-a100}
 \end{figure}
 
-\subsubsection{Amdahl's Law}\label{sec:amdahl-model}
+\subsubsection{Scaling-Bound Interpretation}\label{sec:amdahl-model}
 
-Let $f$ be the parallelisable fraction of a workload and $p$ the number of
-parallel workers. Amdahl's law gives the idealised speedup bound
-\[
-  S(p)=\frac{1}{(1-f)+\frac{f}{p}}.
-\]
-The asymptotic limit as $p\to\infty$ is
-\[
-  S_{\infty}=\frac{1}{1-f}.
-\]
-Even efficient kernels are capped by serial orchestration overhead outside the
-parallel kernel body, including launches, synchronisation points, and staging
-traffic
-~\cite{amdahl1967validity}.
-
-\begin{table}[H]
-\centering
-\caption{Amdahl speedup bounds for representative parallel fractions.}
-\label{tab:amdahl-examples}
-\begin{tabularx}{0.8\textwidth}{l r r}
-\toprule
-Parallel fraction $f$ & $S(4)$ & $S_{\infty}$ \\
-\midrule
-0.90 & 3.08 & 10.0 \\
-0.95 & 3.48 & 20.0 \\
-0.99 & 3.88 & 100.0 \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-These bounds are used as planning constraints: kernel-local optimisation is
-necessary, but end-to-end scaling also requires reducing serial fractions in
-launch and orchestration paths.
+The canonical Amdahl and Gustafson scaling relations are defined in
+\cref{sec:math-foundations}. Here they are used only as interpretation bounds:
+if kernel-local efficiency improves while end-to-end scaling saturates, residual
+serial orchestration and communication terms dominate.
 
 \begin{figure}[H]
   \centering
@@ -314,12 +231,4 @@ launch and orchestration paths.
   to higher operational intensity due to higher compute throughput and memory
   bandwidth.}
   \label{fig:roofline-a100-h100-combined}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.98\textwidth]{amdahl_speedup}
-  \caption{Amdahl speedup bounds for representative parallel fractions
-  ($f\in\{0.90,0.95,0.99\}$).}
-  \label{fig:amdahl-speedup}
 \end{figure}

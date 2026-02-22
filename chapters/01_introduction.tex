@@ -8,16 +8,16 @@ short, and memory-layout transforms are frequent. In this regime, launch
 overhead and data movement can dominate the total runtime, with occupancy limits
 amplifying the effect.
 
-This thesis is conducted in collaboration with the J\"ulich Supercomputing
+This work is conducted in collaboration with the J\"ulich Supercomputing
 Centre (JSC), where partner teams in computational physics require reliable
 performance gains on production HPC systems. The immediate
 hardware target is Ampere-class GPUs, in particular A100 nodes, with a
 conservative baseline of one node (four A100-SXM4-40GB GPUs connected via
 NVLink).
 
-The goal is practical: build a profiling-driven kernel-optimisation workflow
-that produces measurable speedups for tensor-network contraction workloads on
-current JSC hardware and can be carried over to next-generation accelerators.
+The goal is practical: build a profiling-driven optimisation process that
+produces measurable speedups for tensor-network contraction workloads on current
+JSC hardware and remains transferable to next-generation accelerators.
 
 \section{Problem Statement}\label{sec:problem-statement}
 
@@ -38,13 +38,13 @@ The work is organised around the following technical questions:
     bandwidth and throughput models, and where do residual stalls remain?
 \end{enumerate}
 
-The thesis addresses these questions with a measurement-first workflow based on
-reproducible benchmarks and Nsight profiling. Custom kernels are compared
-against established vendor baselines (cuBLAS/cuTENSOR).
+These questions are addressed with reproducible benchmarks and Nsight
+profiling. Custom kernels are compared against vendor baselines
+(cuBLAS/cuTENSOR).
 
 \section{Contributions}\label{sec:contributions}
 
-The contributions of this thesis are:
+Main contributions are:
 
 \begin{enumerate}
   \item A hardware-aware characterisation of tensor-network-relevant kernel

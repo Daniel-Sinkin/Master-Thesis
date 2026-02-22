@@ -6,7 +6,7 @@ incurs a fixed overhead of several microseconds regardless of the kernel's
 computational workload. For the small GEMM operations typical of tensor network
 contractions, this overhead can dominate total runtime. The following benchmark
 quantifies the effect and validates the kernel fusion strategy adopted in this
-thesis.
+work.
 
 \subsection{Setup}
 
@@ -82,8 +82,8 @@ matrix size increases and the per-GEMM computation grows, the relative benefit
 of fusion decreases---but even at $n = 32$, the fused kernel remains
 $7.1\times$ faster.
 
-These results directly motivate the kernel fusion strategy employed throughout
-this thesis. Tensor network algorithms typically require many contractions of
+These results directly motivate the kernel fusion strategy used throughout this
+work. Tensor network algorithms typically require many contractions of
 modest size, which places them in the regime where launch overhead dominates. By
 fusing these contractions into a single kernel using cuBLASDx's
 device-side GEMM API, the launch cost is paid once rather than once per
