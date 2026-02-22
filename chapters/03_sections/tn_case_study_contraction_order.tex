@@ -102,45 +102,61 @@ and maps directly to two strided-batched GEMMs. The implementation is
 
 \begin{figure}[H]
   \centering
-  \resizebox{\textwidth}{!}{%
-  \begin{tikzpicture}[
-    >=Latex,
-    every node/.style={font=\small, align=center},
-    tensor/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=1.8cm, minimum height=0.9cm},
-    opbad/.style={draw, rounded corners=2pt, fill=diagRed, minimum width=2.5cm, minimum height=1.0cm},
-    opgood/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=2.5cm, minimum height=1.0cm},
-    cost/.style={draw, rounded corners=2pt, fill=diagYellow, inner sep=3pt},
-    arrow/.style={->, very thick}
-  ]
-    \node[font=\bfseries] at (3.2,2.1) {Direct baseline (single fused loop nest)};
-    \node[tensor] (xb) at (0.8,1.2) {$X$};
-    \node[tensor] (gb) at (2.4,1.2) {$G$};
-    \node[tensor] (mb) at (4.0,1.2) {$M$};
-    \node[opbad] (db) at (2.4,0.0) {Direct\\contraction};
-    \node[tensor] (yb) at (2.4,-1.2) {$Y$};
-    \draw[arrow] (xb) -- (db);
-    \draw[arrow] (gb) -- (db);
-    \draw[arrow] (mb) -- (db);
-    \draw[arrow] (db) -- (yb);
-    \node[cost] at (2.4,-2.05) {$\BigO(B\,d_p^2\chi^2)$};
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      >=Latex,
+      every node/.style={font=\small, align=center},
+      tensor/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=1.5cm, minimum height=0.8cm},
+      opbad/.style={draw, rounded corners=2pt, fill=diagRed, minimum width=2.6cm, minimum height=1.0cm},
+      cost/.style={draw, rounded corners=2pt, fill=diagYellow, inner sep=2.5pt},
+      arrow/.style={->, very thick}
+    ]
+      \node[tensor] (xb) at (0.6,1.2) {$X$};
+      \node[tensor] (gb) at (2.2,1.2) {$G$};
+      \node[tensor] (mb) at (3.8,1.2) {$M$};
+      \node[opbad] (db) at (2.2,0.0) {Direct\\contraction};
+      \node[tensor] (yb) at (2.2,-1.25) {$Y$};
+      \node[cost] (cb) at (2.2,-2.2) {$\BigO(B\,d_p^2\chi^2)$};
 
-    \node[font=\bfseries] at (11.2,2.1) {Ordered contraction (two GEMM stages)};
-    \node[tensor] (xg) at (8.8,1.2) {$X$};
-    \node[tensor] (gg) at (10.4,1.2) {$G$};
-    \node[opgood] (g1) at (9.6,0.0) {Stage 1\\$T=G\cdot X$};
-    \node[tensor] (tg) at (11.2,0.0) {$T$};
-    \node[tensor] (mg) at (12.8,0.0) {$M$};
-    \node[opgood] (g2) at (12.0,-1.2) {Stage 2\\$Y=T\cdot M$};
-    \node[tensor] (yg) at (12.0,-2.3) {$Y$};
-    \draw[arrow] (xg) -- (g1);
-    \draw[arrow] (gg) -- (g1);
-    \draw[arrow] (g1) -- (tg);
-    \draw[arrow] (tg) -- (g2);
-    \draw[arrow] (mg) -- (g2);
-    \draw[arrow] (g2) -- (yg);
-    \node[cost] at (12.0,-3.15) {$\BigO(B(d_p^2\chi + d_p\chi^2))$};
-  \end{tikzpicture}%
-  }
+      \draw[arrow] (xb) -- (db);
+      \draw[arrow] (gb) -- (db);
+      \draw[arrow] (mb) -- (db);
+      \draw[arrow] (db) -- (yb);
+    \end{tikzpicture}
+    \caption{Direct baseline (single fused loop nest).}
+    \label{fig:tn-case-contraction-order-direct}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      >=Latex,
+      every node/.style={font=\small, align=center},
+      tensor/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=1.5cm, minimum height=0.8cm},
+      opgood/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=2.7cm, minimum height=1.0cm},
+      cost/.style={draw, rounded corners=2pt, fill=diagYellow, inner sep=2.5pt},
+      arrow/.style={->, very thick}
+    ]
+      \node[tensor] (xg) at (0.7,1.2) {$X$};
+      \node[tensor] (gg) at (2.3,1.2) {$G$};
+      \node[opgood] (g1) at (1.5,0.0) {Stage 1\\$T=G\cdot X$};
+      \node[tensor] (tg) at (3.6,0.0) {$T$};
+      \node[tensor] (mg) at (5.2,0.0) {$M$};
+      \node[opgood] (g2) at (4.4,-1.2) {Stage 2\\$Y=T\cdot M$};
+      \node[tensor] (yg) at (4.4,-2.3) {$Y$};
+      \node[cost, text width=4.9cm] (cg) at (4.4,-3.2) {$\BigO(B(d_p^2\chi + d_p\chi^2))$};
+
+      \draw[arrow] (xg) -- (g1);
+      \draw[arrow] (gg) -- (g1);
+      \draw[arrow] (g1) -- (tg);
+      \draw[arrow] (tg) -- (g2);
+      \draw[arrow] (mg) -- (g2);
+      \draw[arrow] (g2) -- (yg);
+    \end{tikzpicture}
+    \caption{Ordered contraction (two GEMM stages).}
+    \label{fig:tn-case-contraction-order-ordered}
+  \end{subfigure}
   \caption{Algorithmic structure of the two-site case study: direct contraction
   (left) versus contraction-order decomposition into two GEMM-like stages
   (right).}

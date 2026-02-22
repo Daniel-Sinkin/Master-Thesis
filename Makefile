@@ -9,6 +9,7 @@ BUILDDIR = build
 all: $(MAIN).pdf
 
 $(MAIN).pdf: $(MAIN).tex tex/*.tex chapters/*.tex references.bib
+	mkdir -p $(BUILDDIR)
 	$(TEX) -output-directory=$(BUILDDIR) $(MAIN).tex
 	$(BIB) $(BUILDDIR)/$(MAIN)
 	$(TEX) -output-directory=$(BUILDDIR) $(MAIN).tex
@@ -17,6 +18,10 @@ $(MAIN).pdf: $(MAIN).tex tex/*.tex chapters/*.tex references.bib
 clean:
 	rm -rf $(BUILDDIR)
 	rm -f $(MAIN).pdf
+	rm -f $(MAIN).aux $(MAIN).fdb_latexmk $(MAIN).fls $(MAIN).log \
+		$(MAIN).bbl $(MAIN).blg $(MAIN).out $(MAIN).run.xml \
+		$(MAIN).toc $(MAIN).lof $(MAIN).lot $(MAIN).lol \
+		$(MAIN).synctex.gz
 
 # Requires: pip install watchdog
 watch:
