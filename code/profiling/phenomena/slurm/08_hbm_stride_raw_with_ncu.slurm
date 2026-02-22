@@ -26,8 +26,8 @@ BUILD_DIR="${SCRIPT_DIR}/build"
 RESULT_DIR="${SCRIPT_DIR}/phenomena/results"
 mkdir -p "${RESULT_DIR}"
 
-RAW_CSV="${RESULT_DIR}/08_hbm_stride_raw.${SLURM_JOB_ID}.csv"
-NCU_SUMMARY_CSV="${RESULT_DIR}/08_hbm_stride_ncu_summary.${SLURM_JOB_ID}.csv"
+RAW_CSV="${RESULT_DIR}/08_hbm_stride_raw.csv"
+NCU_SUMMARY_CSV="${RESULT_DIR}/08_hbm_stride_ncu_summary.csv"
 
 # Tunables via environment variables.
 RAW_RUNS="${RAW_RUNS:-20}"
@@ -96,8 +96,8 @@ echo "stride_bytes,dram_metric,dram_throughput_pct,dram_bandwidth_gbps,ncu_log_c
 
 echo "=== Nsight Compute per-stride DRAM throughput ==="
 for STRIDE in "${STRIDES[@]}"; do
-  NCU_LOG="${RESULT_DIR}/08_hbm_stride_ncu_stride_${STRIDE}.${SLURM_JOB_ID}.csv"
-  DUMMY_CSV="${RESULT_DIR}/08_hbm_stride_ncu_dummy_${STRIDE}.${SLURM_JOB_ID}.csv"
+  NCU_LOG="${RESULT_DIR}/08_hbm_stride_ncu_stride_${STRIDE}.csv"
+  DUMMY_CSV="${RESULT_DIR}/08_hbm_stride_ncu_dummy_${STRIDE}.csv"
 
   ncu --metrics "${DRAM_METRIC}" \
     -k hbm_stride_single_read_kernel \
@@ -123,4 +123,4 @@ echo "Generated:"
 echo "  ${RAW_CSV}"
 echo "  ${NCU_SUMMARY_CSV}"
 echo "Suggested plot command:"
-echo "  python3 ${REPO_ROOT}/scripts/plot_hbm_stride_interval_raw.py --input ${RAW_CSV} --ncu-summary ${NCU_SUMMARY_CSV} --output ${REPO_ROOT}/images/hbm_stride_interval_raw.${SLURM_JOB_ID}.pdf"
+echo "  python3 ${REPO_ROOT}/scripts/plot_hbm_stride_interval_raw.py --input ${RAW_CSV} --ncu-summary ${NCU_SUMMARY_CSV} --output-median ${REPO_ROOT}/images/hbm_stride_interval_requested_median.pdf --output-ncu ${REPO_ROOT}/images/hbm_stride_interval_ncu_dram.pdf"
