@@ -1,2 +1,2 @@
 device,sm_count,threads_per_block,blocks,total_threads,warmup_runs,target_launches_per_run,launches_per_run_used,stride_bytes,stride_elements,run_idx,kernel_ms,read_bytes,achieved_bandwidth_gbps
-"NVIDIA A100-SXM4-40GB",108,128,3456,442368,5,1,1,512,64,0,654.346,3538944,0.00540837
+"NVIDIA A100-SXM4-40GB",108,128,3456,442368,5,1,1,512,64,0,607.435,3538944,0.00582605

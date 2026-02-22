@@ -1,4 +1,4 @@
-==PROF== Connected to process 4141991 (/p/home/jusers/sinkin1/jureca/Master-Thesis/code/profiling/build/phenomenon_hbm_stride_interval_raw)
-==PROF== Disconnected from process 4141991
+==PROF== Connected to process 4151035 (/p/home/jusers/sinkin1/jureca/Master-Thesis/code/profiling/build/phenomenon_hbm_stride_interval_raw)
+==PROF== Disconnected from process 4151035
 "ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
-"0","4141991","phenomenon_hbm_stride_interval_raw","127.0.0.1","hbm_stride_single_read_kernel(const unsigned long *, unsigned long *, unsigned long, int, unsigned long)","1","7","(128, 1, 1)","(3456, 1, 1)","0","8.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","46.02"
+"0","4151035","phenomenon_hbm_stride_interval_raw","127.0.0.1","hbm_stride_single_read_kernel(const unsigned long *, unsigned long *, unsigned long, int, unsigned long)","1","7","(128, 1, 1)","(3456, 1, 1)","0","8.0","Command line profiler metrics","dram__throughput.avg.pct_of_peak_sustained_elapsed","%","46.57"
