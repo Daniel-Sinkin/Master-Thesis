@@ -30,10 +30,10 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     std::fprintf(stderr,
                  "Usage: %s output_csv [runs warmup launches_per_run threads_per_block "
-                 "blocks_per_sm n_pow2]\n",
+                 "blocks_per_sm n_pow2 single_stride_bytes]\n",
                  argv[0]);
     std::fprintf(stderr,
-                 "Example: %s results/hbm_stride_raw.csv 10 5 64 256 4 30\n",
+                 "Example: %s results/hbm_stride_raw.csv 10 5 64 256 4 30 0\n",
                  argv[0]);
     return EXIT_FAILURE;
   }
@@ -45,9 +45,11 @@ int main(int argc, char** argv) {
   int threads_per_block = (argc > 5) ? std::atoi(argv[5]) : 256;
   int blocks_per_sm = (argc > 6) ? std::atoi(argv[6]) : 4;
   int n_pow2 = (argc > 7) ? std::atoi(argv[7]) : 30;
+  int single_stride_bytes = (argc > 8) ? std::atoi(argv[8]) : 0;
 
   if (runs <= 0 || warmup < 0 || target_launches_per_run <= 0 || threads_per_block <= 0 ||
-      blocks_per_sm <= 0 || n_pow2 <= 0 || n_pow2 >= 62) {
+      blocks_per_sm <= 0 || n_pow2 <= 0 || n_pow2 >= 62 ||
+      single_stride_bytes < 0) {
     std::fprintf(stderr, "Invalid arguments.\n");
     return EXIT_FAILURE;
   }
@@ -82,6 +84,28 @@ int main(int argc, char** argv) {
 
   constexpr std::array<int, 11> kStrideBytes{
       8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
+  std::array<int, 11> active_strides{};
+  int active_stride_count = 0;
+  if (single_stride_bytes == 0) {
+    for (int s : kStrideBytes) {
+      active_strides[active_stride_count++] = s;
+    }
+  } else {
+    bool found = false;
+    for (int s : kStrideBytes) {
+      if (s == single_stride_bytes) {
+        active_strides[active_stride_count++] = s;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      std::fprintf(stderr, "single_stride_bytes must be 0 or one of {8..8192 powers of two}.\n");
+      CHECK_CUDA(cudaFree(d_out));
+      CHECK_CUDA(cudaFree(d_in));
+      return EXIT_FAILURE;
+    }
+  }
 
   std::ofstream csv(output_csv);
   if (!csv.is_open()) {
@@ -108,15 +132,31 @@ int main(int argc, char** argv) {
               target_launches_per_run,
               (n_elems * sizeof(std::uint64_t)) >> 20);
 
-  for (int stride_bytes : kStrideBytes) {
+  // Use one fixed launch count for every stride to avoid launch-overhead bias
+  // between strides while still preventing in-run address reuse.
+  std::size_t global_max_no_reuse = static_cast<std::size_t>(-1);
+  for (int idx = 0; idx < active_stride_count; ++idx) {
+    int stride_bytes = active_strides[idx];
     const int stride_elems = stride_bytes / 8;
     const std::size_t access_space = n_elems / static_cast<std::size_t>(stride_elems);
     std::size_t max_launches_no_reuse = access_space / total_threads;
     if (max_launches_no_reuse == 0) {
       max_launches_no_reuse = 1;
     }
-    const std::size_t launches_per_run = std::min<std::size_t>(
-        static_cast<std::size_t>(target_launches_per_run), max_launches_no_reuse);
+    if (max_launches_no_reuse < global_max_no_reuse) {
+      global_max_no_reuse = max_launches_no_reuse;
+    }
+  }
+
+  const std::size_t launches_per_run_fixed = std::min<std::size_t>(
+      static_cast<std::size_t>(target_launches_per_run), global_max_no_reuse);
+  std::printf("launches_per_run_used=%zu (fixed across all strides)\n", launches_per_run_fixed);
+
+  for (int idx = 0; idx < active_stride_count; ++idx) {
+    int stride_bytes = active_strides[idx];
+    const int stride_elems = stride_bytes / 8;
+    const std::size_t access_space = n_elems / static_cast<std::size_t>(stride_elems);
+    const std::size_t launches_per_run = launches_per_run_fixed;
     const std::size_t accesses_per_run = launches_per_run * total_threads;
     const std::size_t start_mod = (access_space > accesses_per_run)
                                       ? (access_space - accesses_per_run + 1)

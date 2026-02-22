@@ -51,7 +51,23 @@ def load_rows(path: Path) -> list[dict[str, str]]:
     return rows
 
 
-def plot(rows: list[dict[str, str]], output: Path, title: str, show_peak: bool) -> None:
+def load_ncu_rows(path: Path) -> list[dict[str, str]]:
+    with path.open("r", encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        out: list[dict[str, str]] = []
+        for row in reader:
+            if row:
+                out.append({k.strip(): (v.strip() if v is not None else "") for k, v in row.items()})
+    return out
+
+
+def plot(
+    rows: list[dict[str, str]],
+    output: Path,
+    title: str,
+    show_peak: bool,
+    ncu_rows: list[dict[str, str]] | None = None,
+) -> None:
     grouped: dict[int, list[float]] = defaultdict(list)
     for row in rows:
         stride = int(float(row["stride_bytes"]))
@@ -83,6 +99,26 @@ def plot(rows: list[dict[str, str]], output: Path, title: str, show_peak: bool) 
         ax.plot(x_med, y_med, color="#1B7F3A", linewidth=2.4, marker="o", label="Median per stride", zorder=3)
         ax.fill_between(x_med, y_p10, y_p90, color="#1B7F3A", alpha=0.14, label="P10-P90 band", zorder=1)
 
+    if ncu_rows:
+        ncu_map: dict[int, float] = {}
+        for row in ncu_rows:
+            stride = int(float(row["stride_bytes"]))
+            gbps = float(row["dram_bandwidth_gbps"])
+            ncu_map[stride] = gbps
+        ncu_x = [s for s in STRIDES if s in ncu_map]
+        ncu_y = [ncu_map[s] for s in ncu_x]
+        if ncu_x:
+            ax.plot(
+                ncu_x,
+                ncu_y,
+                color="#D95F02",
+                linewidth=2.2,
+                marker="s",
+                markersize=5.5,
+                label="NCU DRAM throughput (GB/s)",
+                zorder=4,
+            )
+
     if show_peak:
         ax.axhline(1555.0, color="#B22222", linestyle="--", linewidth=1.8, label="A100 peak HBM: 1555 GB/s")
 
@@ -108,6 +144,12 @@ def main() -> int:
     parser.add_argument("--prefix", type=str, default="08_hbm_stride_raw", help="Filename prefix for auto-discovery.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output PDF path.")
     parser.add_argument("--title", type=str, default="HBM Throughput vs Stride (8-byte reads, raw runs)")
+    parser.add_argument(
+        "--ncu-summary",
+        type=Path,
+        default=None,
+        help="Optional NCU summary CSV (stride_bytes, dram_bandwidth_gbps).",
+    )
     parser.add_argument("--no-peak-line", action="store_true", help="Hide 1555 GB/s peak line.")
     args = parser.parse_args()
 
@@ -123,7 +165,13 @@ def main() -> int:
     if not rows:
         raise SystemExit(f"No data rows in {input_csv}")
 
-    plot(rows, args.output, args.title, show_peak=not args.no_peak_line)
+    ncu_rows: list[dict[str, str]] | None = None
+    if args.ncu_summary is not None:
+        ncu_rows = load_ncu_rows(args.ncu_summary)
+        if not ncu_rows:
+            raise SystemExit(f"No rows in NCU summary CSV: {args.ncu_summary}")
+
+    plot(rows, args.output, args.title, show_peak=not args.no_peak_line, ncu_rows=ncu_rows)
     print(f"Wrote plot: {args.output}")
     return 0
 

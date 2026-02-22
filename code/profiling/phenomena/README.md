@@ -63,6 +63,23 @@ Expected CSV files:
 - `05_ilp_dependency.<jobid>.csv`
 - `06_register_pressure.<jobid>.csv`
 - `07_arithmetic_intensity.<jobid>.csv`
+- `08_hbm_stride_raw.<jobid>.csv`
+- `08_hbm_stride_ncu_summary.<jobid>.csv`
+
+For the stride-vs-bandwidth experiment with Nsight Compute overlay, submit:
+
+```bash
+sbatch code/profiling/phenomena/slurm/08_hbm_stride_raw_with_ncu.slurm
+```
+
+After the job completes:
+
+```bash
+python3 scripts/plot_hbm_stride_interval_raw.py \
+  --input code/profiling/phenomena/results/08_hbm_stride_raw.<jobid>.csv \
+  --ncu-summary code/profiling/phenomena/results/08_hbm_stride_ncu_summary.<jobid>.csv \
+  --output images/hbm_stride_interval_raw.<jobid>.pdf
+```
 
 ## Generate thesis figures
 
