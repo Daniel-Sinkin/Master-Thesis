@@ -22,9 +22,89 @@ If memory stalls dominate, higher occupancy is often preferred. If execution is
 compute-bound with low dependency stalls, lower occupancy with higher
 per-thread work can be superior.
 
+\subsection{Worked Occupancy Example on A100}
+\label{sec:occupancy-worked-example}
+
+The two occupancy schematics in \cref{fig:occupancy-visual-example} use one SM
+with the following capacity model:
+\num{2048} threads, \num{65536} registers, and \SI{160}{\kilo\byte} shared
+memory. This is the same setup used in the diagrams for visual clarity.
+
+Initial kernel setup:
+\begin{align}
+  b &= 256 \text{ threads per block}, \\
+  r_t &= 64 \text{ registers per thread}, \\
+  s_b &= \SI{48}{\kilo\byte} \text{ shared memory per block}.
+\end{align}
+
+Per-block resource use:
+\begin{align}
+  r_b &= b \cdot r_t = 256 \cdot 64 = 16384 \text{ registers}.
+\end{align}
+
+This corresponds to:
+\begin{itemize}
+  \item thread share per block: $256/2048 = 12.5\%$,
+  \item register share per block: $16384/65536 = 25\%$,
+  \item shared-memory share per block: $48/160 = 30\%$.
+\end{itemize}
+
+The block residency limits are:
+\begin{align}
+  N_{\text{threads}} &= \left\lfloor \frac{2048}{256} \right\rfloor = 8, \\
+  N_{\text{regs}} &= \left\lfloor \frac{65536}{16384} \right\rfloor = 4, \\
+  N_{\text{shm}} &= \left\lfloor \frac{160}{48} \right\rfloor = 3.
+\end{align}
+Therefore
+\begin{align}
+  N_{\text{res}} = \min(8,4,3)=3,
+\end{align}
+so this case is \textbf{shared-memory occupancy limited}
+(\cref{fig:occupancy-sm-limited}).
+
+After reducing shared memory to
+\begin{align}
+  s_b = \SI{32}{\kilo\byte},
+\end{align}
+the shared-memory limit becomes
+\begin{align}
+  N_{\text{shm}} = \left\lfloor \frac{160}{32} \right\rfloor = 5.
+\end{align}
+Now
+\begin{align}
+  N_{\text{res}} = \min(8,4,5)=4,
+\end{align}
+so the limiting resource changes to \textbf{registers}
+(\cref{fig:occupancy-reg-limited}).
+
+In this transition, resident threads increase from
+$3\cdot256=768$ to $4\cdot256=1024$, i.e.\ from \SI{37.5}{\percent} to
+\SI{50}{\percent} of the SM thread capacity.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{SMOccupancyLimited}
+    \caption{Initial setup with \SI{48}{\kilo\byte} shared memory per block.
+    Shared memory is the binding occupancy limit.}
+    \label{fig:occupancy-sm-limited}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{RegisterOccupancyLimited}
+    \caption{After reducing to \SI{32}{\kilo\byte} shared memory per block.
+    One additional block fits; registers become the binding limit.}
+    \label{fig:occupancy-reg-limited}
+  \end{subfigure}
+  \caption{Occupancy transition example on one A100 SM: shared-memory-limited
+  to register-limited residency.}
+  \label{fig:occupancy-visual-example}
+\end{figure}
+
 \subsection{Launch Overhead Considerations}
 
 For small kernels, launch latency can dominate irrespective of occupancy.
 Therefore occupancy tuning is combined with launch reduction techniques (kernel
 fusion or persistent execution) rather than treated in isolation.
-
