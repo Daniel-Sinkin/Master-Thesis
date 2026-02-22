@@ -13,3 +13,4 @@ Each source note must include:
 
 ## Entries
 - [[2026-02-22_stephen-jones-cuda-mental-model]]
+- [[2026-02-22_stephen-jones-gtc2025-getting-started-cuda]]

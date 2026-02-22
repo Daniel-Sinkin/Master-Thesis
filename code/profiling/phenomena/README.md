@@ -1,6 +1,6 @@
 # GPU Phenomena Microbenchmark Suite
 
-This folder contains seven CUDA microbenchmarks for thesis-ready plots, plus
+This folder contains CUDA microbenchmarks for thesis-ready plots, plus
 SLURM scripts and a dependency-based submitter.
 
 ## Benchmarks
@@ -19,6 +19,8 @@ SLURM scripts and a dependency-based submitter.
    compares low vs high register pressure and reports theoretical occupancy.
 7. `phenomenon_arithmetic_intensity_sweep`:
    sweeps compute-per-byte to create roofline-style curves.
+8. `phenomenon_hbm_stride_interval_raw`:
+   raw-run HBM stride benchmark (8-byte reads, fixed stride-byte list).
 
 ## Build once
 

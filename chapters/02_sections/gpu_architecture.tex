@@ -59,6 +59,12 @@ independently, an SM can have four instructions from four different warps in fli
 simultaneously, which is the primary mechanism for hiding memory and instruction 
 latency.
 
+For capacity accounting in this thesis, the A100 limit of \num{64} resident warps
+(\num{2048} threads) per SM implies up to \num{16} resident warps
+(\num{512} threads) per processing block under an even split across the four
+sub-partitions. Across \num{108} active SMs, this gives a device-level maximum
+of \num{6912} resident warps and \num{221184} resident threads.
+
 \subsection{What Is New in A100 for This Thesis}\label{sec:a100-whats-new}
 
 Relative to the previous Volta generation, the A100 changes several hardware
@@ -390,16 +396,26 @@ register pressure, shared-memory footprint, and scheduler efficiency.
 
 \begin{table}[H]
 \centering
-\caption{Key hardware specifications of the NVIDIA A100 (SXM4-40GB baseline).}
+\caption{A100 KPI card (SXM4-40GB baseline) for performance modeling.}
 \label{tab:a100-specs}
 \begin{tabularx}{\textwidth}{X r}
 \toprule
 Property & Value \\
 \midrule
 Streaming Multiprocessors (SMs) & \num{108} \\
-CUDA cores per SM & \num{64} \\
+Processing blocks (sub-partitions) per SM & \num{4} \\
+Warp schedulers per processing block & \num{1} \\
+Warp dispatch units per processing block & \num{1} \\
+FP32 CUDA cores per processing block & \num{16} \\
+FP64 CUDA cores per processing block & \num{8} \\
+Tensor cores per processing block & \num{1} \\
+FP32 CUDA cores per SM & \num{64} \\
+FP64 CUDA cores per SM & \num{32} \\
 Tensor cores per SM & \num{4} \\
 Warp schedulers per SM & \num{4} \\
+Warp dispatch units per SM & \num{4} \\
+Maximum warps per processing block (derived) & \num{16} \\
+Maximum threads per processing block (derived) & \num{512} \\
 Maximum threads per SM & \num{2048} \\
 Maximum warps per SM & \num{64} \\
 Maximum blocks per SM & \num{32} \\
@@ -409,11 +425,15 @@ L2 cache size (MB) & \num{40} \\
 HBM memory capacity (GB) & \num{40} \\
 Peak memory bandwidth (GB/s) & \num{1555} \\
 Base clock frequency (GHz) & \num{1.41} \\
+Total processing blocks on full GPU & \num{432} \\
+Maximum resident warps on full GPU & \num{6912} \\
+Maximum resident threads on full GPU & \num{221184} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The A100 employs high-bandwidth memory as its main device memory, providing the throughput required to sustain dense linear algebra kernels.
+The A100 employs high-bandwidth memory as its main device memory, providing the
+throughput required to sustain dense linear algebra kernels.
 
 \subsubsection{Large-Die Yield Context (TSMC N7, Approximate)}
 \label{sec:ga100-yield-context}
@@ -564,19 +584,49 @@ kernels should not see comparable speedups.
 
 \subsubsection{Theoretical Peak Performance}
 
+\noindent\textbf{TPP definition used in this thesis.}
+Here, TPP denotes theoretical peak performance.
+For CUDA-core arithmetic on A100, using fused multiply-add (2 FLOPs/cycle):
+\[
+  P_{\mathrm{FP32}}^{\mathrm{TPP}}
+  = N_{\mathrm{SM}} \cdot N_{\mathrm{FP32/SM}} \cdot 2f
+  = 108 \cdot 64 \cdot 2 \cdot 1.41\ \text{GHz}
+  \approx 19.5\ \text{TFLOP/s},
+\]
+\[
+  P_{\mathrm{FP64}}^{\mathrm{TPP}}
+  = N_{\mathrm{SM}} \cdot N_{\mathrm{FP64/SM}} \cdot 2f
+  = 108 \cdot 32 \cdot 2 \cdot 1.41\ \text{GHz}
+  \approx 9.7\ \text{TFLOP/s}.
+\]
+Using the sustained peak HBM bandwidth
+$B_{\max}=\SI{1555}{\giga\byte\per\second}$, a bandwidth-only streaming bound
+for one FLOP per fetched value is
+\[
+  P_{\mathrm{BW,FP64}}^{(1\ \mathrm{FLOP/value})}
+  = \frac{1555}{8}
+  \approx 194.4\ \text{GFLOP/s},
+  \qquad
+  P_{\mathrm{BW,FP32}}^{(1\ \mathrm{FLOP/value})}
+  = \frac{1555}{4}
+  \approx 388.8\ \text{GFLOP/s}.
+\]
+
 \begin{table}[H]
 \centering
-\caption{Theoretical peak floating-point throughput of the A100 GPU.}
+\caption{A100 throughput ceilings used in the thesis performance model.}
 \label{tab:a100-peak-performance}
-\begin{tabularx}{\textwidth}{X r r}
+\begin{tabularx}{\textwidth}{X X r}
 \toprule
-Precision & Peak TFLOPS & Relative speed \\
+Metric & Expression & Value \\
 \midrule
-FP64 (CUDA cores) & \num{9.7} & 1.0$\times$ \\
-FP64 (Tensor cores) & \num{19.5} & 2.0$\times$ \\
-FP32 & \num{19.5} & 2.0$\times$ \\
-TF32 (Tensor cores) & \num{156.0} & 16.1$\times$ \\
-FP16 (Tensor cores) & \num{312.0} & 32.2$\times$ \\
+FP64 TPP (CUDA cores) & $108\cdot 32\cdot 2\cdot 1.41$ GHz & \num{9.7} TFLOP/s \\
+FP64 TPP (tensor cores) & NVIDIA peak specification & \num{19.5} TFLOP/s \\
+FP32 TPP (CUDA cores) & $108\cdot 64\cdot 2\cdot 1.41$ GHz & \num{19.5} TFLOP/s \\
+TF32 TPP (tensor cores) & NVIDIA peak specification & \num{156.0} TFLOP/s \\
+FP16 TPP (tensor cores) & NVIDIA peak specification & \num{312.0} TFLOP/s \\
+Bandwidth-based FP64 ceiling (1 FLOP/value) & $1555/8$ & \num{194.4} GFLOP/s \\
+Bandwidth-based FP32 ceiling (1 FLOP/value) & $1555/4$ & \num{388.8} GFLOP/s \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -586,20 +636,27 @@ FP16 (Tensor cores) & \num{312.0} & 32.2$\times$ \\
 
 \begin{table}[H]
 \centering
-\caption{Derived theoretical limits of the A100 architecture.}
+\caption{Derived A100 limits and capacity counts used throughout this thesis.}
 \label{tab:a100-derived}
 \begin{tabularx}{\textwidth}{X r}
 \toprule
 Metric & Value \\
 \midrule
-Peak FP32 performance per SM (TFLOPS) & \num{0.18} \\
-Peak FP64 performance per SM (TFLOPS) & \num{0.09} \\
-Tensor core FP16 performance per SM (TFLOPS) & \num{2.89} \\
+Peak FP32 performance per processing block (GFLOP/s) & \num{45.12} \\
+Peak FP64 performance per processing block (GFLOP/s) & \num{22.56} \\
+Peak FP32 performance per SM (GFLOP/s) & \num{180.48} \\
+Peak FP64 performance per SM (GFLOP/s) & \num{90.24} \\
+Tensor-core FP16 performance per SM (TFLOP/s) & \num{2.89} \\
 Memory bandwidth per SM (GB/s) & \num{14.40} \\
-Total CUDA cores & \num{6912} \\
+Bandwidth-based FP64 ceiling (1 FLOP/value) (GFLOP/s) & \num{194.4} \\
+Bandwidth-based FP32 ceiling (1 FLOP/value) (GFLOP/s) & \num{388.8} \\
+Total FP32 CUDA cores & \num{6912} \\
 Total FP64 cores & \num{3456} \\
-Maximum resident warps & \num{6912} \\
-Maximum resident threads & \num{221184} \\
+Total processing blocks (sub-partitions) & \num{432} \\
+Maximum resident warps per processing block (derived) & \num{16} \\
+Maximum resident threads per processing block (derived) & \num{512} \\
+Maximum resident warps on full GPU & \num{6912} \\
+Maximum resident threads on full GPU & \num{221184} \\
 Arithmetic intensity threshold FP32 (FLOPs/byte) & \num{12.5} \\
 Arithmetic intensity threshold FP64 (FLOPs/byte) & \num{6.2} \\
 \bottomrule
