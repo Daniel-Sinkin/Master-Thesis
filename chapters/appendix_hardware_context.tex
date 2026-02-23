@@ -20,6 +20,20 @@ Using the standard first-order Poisson defect model for full-die yield,
 where $A$ is die area in cm$^2$ and $D_0$ is defect density in
 defects/cm$^2$. For GA100, $A=8.26$.
 
+To approximate harvesting allowances, we also model the 128 physical SM
+partitions as equal critical regions with area $a_{\mathrm{SM}}=A/128$.
+Under the same Poisson assumption, one partition survives with probability
+\[
+  q(D_0)=e^{-a_{\mathrm{SM}}D_0},
+\]
+so the number of broken partitions $K$ is approximated as
+$K\sim\mathrm{Binomial}(128,\,1-q)$. The corresponding harvested-yield curves are
+\[
+  Y_{\le k}(D_0)=\Pr[K\le k]
+  =\sum_{i=0}^{k}\binom{128}{i}\,(1-q)^i\,q^{128-i},
+\]
+for $k\in\{1,2\}$. The case $k=0$ recovers $Y_{\mathrm{full}}$.
+
 Absolute TSMC N7 defect-density time series are not publicly released in full.
 However, industry-reported anchor values from public disclosures place
 $D_0\approx 0.33$ defects/cm$^2$ in a pre-MP reference regime and
@@ -40,18 +54,23 @@ These two regimes are retained as the marker points in
       }
     }
   }
-  \caption{First-order defect-limited yield sensitivity under
-  $Y_{\mathrm{full}}\approx e^{-A D_0}$ for GA100 area
-  (\SI{826}{\milli\meter\squared}). Marker points use industry-reported N7
-  anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
+  \caption{First-order defect-limited yield sensitivity for GA100 area
+  (\SI{826}{\milli\meter\squared}) using three simple models: full-die
+  ($0$ broken partitions), at most $1$ broken partition out of $128$, and at
+  most $2$ broken partitions out of $128$. Marker points use industry-reported
+  N7 anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
   \label{fig:ga100-n7-yield-curve}
 \end{figure}
 
-At those two anchor points, the model gives
+At those two anchor points, the full-die model gives
 \[
   Y_{\mathrm{full}}(D_0=0.33)\approx 6.6\%,\qquad
   Y_{\mathrm{full}}(D_0=0.09)\approx 47.5\%.
 \]
+Under the same simplified partition model, allowing at most one broken
+partition raises the predicted values to about $24.6\%$ and $83.0\%$,
+respectively; allowing at most two broken partitions gives about $49.3\%$ and
+$96.1\%$.
 This should not be interpreted as NVIDIA's product yield: shipping yield is
 higher due to redundancy, harvesting (disabled units), and performance binning.
 The model is used here only to quantify the sensitivity of large-die economics

@@ -152,3 +152,66 @@ With these constraints, \texttt{nvidia-smi}-based integration is appropriate
 for \emph{relative} algorithmic comparisons in this work. Absolute board
 energy values should still be interpreted conservatively, and whole-node/facility
 energy remains out of scope.
+
+\subsection{TODO: Fill in --- GEMM Data-Pattern Switching Experiment}\label{sec:energy-gemm-switching-todo}
+
+To test whether data values alone can measurably change GPU board power at
+fixed kernel structure, a controlled SGEMM sweep is added in
+\texttt{code/profiling/phenomena/phenomenon\_gemm\_value\_switching.cu}.
+The kernel shape $(M,N,K)$, launch configuration, and software stack are kept
+constant; only the matrix initialization changes:
+\begin{enumerate}
+  \item all zeros,
+  \item periodic zeros (every 2nd/3rd/4th/5th element),
+  \item normal-distributed values,
+  \item uniform-distributed values.
+\end{enumerate}
+
+The associated SLURM runner
+\texttt{code/profiling/phenomena/slurm/09\_gemm\_value\_switching\_energy.slurm}
+captures per-mode runtime CSV files and per-mode \texttt{nvidia-smi}
+power traces, so energy can be integrated mode-by-mode with the protocol above.
+Industry talks regularly motivate this with switching-activity arguments
+($\alpha C V^2 f$ intuition), but this experiment is structured to check the
+effect empirically for the specific kernels and node setup used in this thesis
+~\cite{jones2022cuda-how-works}.
+
+\begin{table}[t]
+  \centering
+  \caption{Placeholder summary for the SGEMM data-pattern sweep on A100
+  (illustrative values only; TODO: replace with measured data).}
+  \label{tab:gemm-switching-placeholder}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Initialisation mode & Runtime (s) & Median power (W) & Energy (J) & Relative energy \\
+    \midrule
+    all\_zero      & 6.80 & 221 & 1503 & 0.90 \\
+    zero\_every\_2 & 6.82 & 228 & 1555 & 0.93 \\
+    zero\_every\_3 & 6.81 & 232 & 1580 & 0.95 \\
+    zero\_every\_4 & 6.83 & 235 & 1605 & 0.97 \\
+    zero\_every\_5 & 6.82 & 237 & 1617 & 0.98 \\
+    normal         & 6.84 & 241 & 1648 & 1.00 \\
+    uniform        & 6.84 & 240 & 1642 & 1.00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Expected outcome from prior work:
+\begin{itemize}
+  \item Data-dependent board-power variation has already been reported on recent
+  NVIDIA GPUs; measured spreads depend on kernel type and intensity, with larger
+  effects for low-intensity and memory-sensitive kernels (reported average
+  variation around 6\% with worst cases near 38\%)
+  ~\cite{hammouda2024input-dependent-gpu-power}.
+  \item GPU-memory power also depends on value patterns due to I/O signaling
+  effects (including bus-inversion behavior), so identical access counts can
+  still yield different memory energy~\cite{song2019mempower}.
+  \item In this SGEMM setup, the arithmetic path is dense and regular, so the
+  conservative expectation is a smaller but still measurable separation between
+  highly sparse-value patterns and fully random-value patterns; runtime should
+  stay close while energy shifts primarily through average board power.
+\end{itemize}
+
+The intent of this experiment is comparative, not absolute: if the measured
+spread is small, it still defines a practical upper bound on value-pattern
+effects for the contraction kernels studied here.

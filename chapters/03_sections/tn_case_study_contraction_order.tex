@@ -43,30 +43,29 @@ memory traffic.
 
 \begin{figure}[H]
   \centering
-  \resizebox{\textwidth}{!}{%
   \begin{tikzpicture}[
     >=Latex,
     every node/.style={font=\small, align=center},
-    mat/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=2.8cm, minimum height=1.0cm},
-    stagebox/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=2.4cm, minimum height=1.0cm},
+    mat/.style={draw, rounded corners=2pt, fill=diagBlue, minimum width=3.1cm, minimum height=1.1cm},
+    stagebox/.style={draw, rounded corners=2pt, fill=diagGreen, minimum width=3.6cm, minimum height=1.2cm},
     arrow/.style={->, very thick}
   ]
-    \node[mat] (g) at (1.6,0) {$G$\\$(d_p\times d_p)$};
-    \node[mat] (x) at (5.4,0) {$X_b$\\$(d_p\times \chi)$};
-    \node[stagebox] (s1) at (8.8,0) {Stage 1};
-    \node[mat] (t) at (12.2,0) {$T_b$\\$(d_p\times \chi)$};
-    \node[mat] (m) at (15.6,0) {$M$\\$(\chi\times \chi)$};
-    \node[stagebox] (s2) at (19.0,0) {Stage 2};
-    \node[mat] (y) at (22.4,0) {$Y_b$\\$(d_p\times \chi)$};
+    \node[mat] (g) at (-2.0,1.2) {$G$\\$(d_p\times d_p)$};
+    \node[mat] (x) at ( 2.0,1.2) {$X_b$\\$(d_p\times \chi)$};
+    \node[stagebox] (s1) at (0.0,-0.4) {Stage 1\\$T_b = G\,X_b$};
 
-    \draw[arrow] (g) -- node[above]{GEMM $(m,n,k)=(d_p,\chi,d_p)$} (s1);
-    \draw[arrow] (x) -- (s1);
-    \draw[arrow] (s1) -- (t);
-    \draw[arrow] (t) -- node[above]{GEMM $(m,n,k)=(d_p,\chi,\chi)$} (s2);
-    \draw[arrow] (m) -- (s2);
-    \draw[arrow] (s2) -- (y);
-  \end{tikzpicture}%
-  }
+    \node[mat] (t) at (0.0,-2.4) {$T_b$\\$(d_p\times \chi)$};
+    \node[mat] (m) at (4.0,-2.4) {$M$\\$(\chi\times \chi)$};
+    \node[stagebox] (s2) at (2.0,-4.0) {Stage 2\\$Y_b = T_b\,M$};
+    \node[mat] (y) at (2.0,-5.9) {$Y_b$\\$(d_p\times \chi)$};
+
+    \draw[arrow] (g.south) -- ++(0,-0.35) -| node[pos=0.25, above left, font=\scriptsize]{GEMM\\$(d_p,\chi,d_p)$} (s1.west);
+    \draw[arrow] (x.south) -- ++(0,-0.35) -| (s1.east);
+    \draw[arrow] (s1.south) -- (t.north);
+    \draw[arrow] (t.east) -- node[above, font=\scriptsize]{GEMM\\$(d_p,\chi,\chi)$} (s2.west);
+    \draw[arrow] (m.south) -- ++(0,-0.45) -| (s2.east);
+    \draw[arrow] (s2.south) -- (y.north);
+  \end{tikzpicture}
   \caption{Per-batch matrix view of the two-site update. The tensor expression
   is equivalent to a two-stage GEMM chain with a shared $G$ and $M$ across
   batches.}
@@ -219,8 +218,8 @@ which matches the asymptotic ratio above.
 
 \subsection{Design Decisions Behind the Better Variant}
 
-The implementation sequence follows the staged optimisation style from
-Simon B\"ohm's SGEMM worklog~\cite{boehm2022cuda-mmm}:
+The implementation sequence follows the staged optimisation progression commonly
+used in incremental GEMM tuning studies~\cite{boehm2022cuda-mmm}:
 start with algorithmic structure, then improve memory behavior, then improve
 execution mapping.
 
@@ -247,12 +246,12 @@ execution mapping.
   \label{tab:tn-case-design-decisions}
 \end{table}
 
-\subsection{Optimisation Ladder (Structured After SGEMM Worklogs)}
+\subsection{Optimisation Stages}
 
 Beyond the single direct-vs-ordered comparison, this case follows a staged
-optimisation structure similar to the SGEMM worklog style in
-\cite{boehm2022cuda-mmm}: fix algorithmic work first, then remove memory
-inefficiencies. After that, improve scheduling/occupancy and tune.
+optimisation sequence: fix algorithmic work first, then remove memory
+inefficiencies, then improve scheduler feed and occupancy, and finally tune
+shape-dependent parameters.
 
 \begin{enumerate}
   \item \textbf{Stage 0 (correct baseline).} Start from a slow but clearly

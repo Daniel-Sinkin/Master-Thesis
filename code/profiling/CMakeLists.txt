@@ -106,3 +106,8 @@ add_executable(phenomenon_hbm_stride_interval_raw phenomena/phenomenon_hbm_strid
 target_include_directories(phenomenon_hbm_stride_interval_raw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/phenomena)
 target_link_libraries(phenomenon_hbm_stride_interval_raw PRIVATE CUDA::cudart)
 apply_common_cuda_flags(phenomenon_hbm_stride_interval_raw)
+
+add_executable(phenomenon_gemm_value_switching phenomena/phenomenon_gemm_value_switching.cu)
+target_include_directories(phenomenon_gemm_value_switching PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/phenomena)
+target_link_libraries(phenomenon_gemm_value_switching PRIVATE CUDA::cudart CUDA::cublas)
+apply_common_cuda_flags(phenomenon_gemm_value_switching)

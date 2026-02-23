@@ -21,6 +21,8 @@ SLURM scripts and a dependency-based submitter.
    sweeps compute-per-byte to create roofline-style curves.
 8. `phenomenon_hbm_stride_interval_raw`:
    raw-run HBM stride benchmark (8-byte reads, fixed stride-byte list).
+9. `phenomenon_gemm_value_switching`:
+   SGEMM sweep over data-initialization patterns for value-dependent power tests.
 
 ## Build once
 
@@ -65,11 +67,18 @@ Expected CSV files:
 - `07_arithmetic_intensity.<jobid>.csv`
 - `08_hbm_stride_raw.csv`
 - `08_hbm_stride_ncu_summary.csv`
+- `09_gemm_value_switching_raw.csv`
 
 For the stride-vs-bandwidth experiment with Nsight Compute overlay, submit:
 
 ```bash
 sbatch code/profiling/phenomena/slurm/08_hbm_stride_raw_with_ncu.slurm
+```
+
+For the GEMM value-pattern energy experiment, submit:
+
+```bash
+sbatch code/profiling/phenomena/slurm/09_gemm_value_switching_energy.slurm
 ```
 
 After the job completes:

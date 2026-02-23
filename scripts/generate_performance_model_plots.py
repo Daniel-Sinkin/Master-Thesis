@@ -59,24 +59,15 @@ def roofline_value(intensity: float, peak_tflops: float, bandwidth_tbps: float) 
     return min(peak_tflops, bandwidth_tbps * intensity)
 
 
-def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 350.0) -> None:
+def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 20.0) -> None:
     x_points = [xmax * i / 1400.0 for i in range(1401)]
 
-    y_mem = [cfg.bandwidth_tbps * x for x in x_points]
     y_fp64 = [roofline_value(x, cfg.fp64_tflops, cfg.bandwidth_tbps) for x in x_points]
     y_fp32 = [roofline_value(x, cfg.fp32_tflops, cfg.bandwidth_tbps) for x in x_points]
 
     i64 = cfg.fp64_tflops / cfg.bandwidth_tbps
     i32 = cfg.fp32_tflops / cfg.bandwidth_tbps
 
-    ax.plot(
-        x_points,
-        y_mem,
-        color="#2C7FB8",
-        linestyle=(0, (6, 5)),
-        linewidth=2.8,
-        label=f"Memory slope (B={cfg.bandwidth_tbps:.3f} TB/s)",
-    )
     ax.plot(x_points, y_fp64, color="#D62728", linewidth=3.0, label=f"FP64 roof ({cfg.fp64_tflops:.1f})")
     ax.plot(x_points, y_fp32, color="#FF7F0E", linewidth=3.0, label=f"FP32 roof ({cfg.fp32_tflops:.1f})")
 
@@ -86,8 +77,9 @@ def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 350.
     ]
     for ix, ypeak, color, label in guides:
         ax.axvline(ix, color="#8A8A8A", linestyle=(0, (2, 3)), linewidth=1.3, zorder=0)
+        x_text = min(ix + 0.35, xmax - 3.0)
         ax.text(
-            ix + 2.5,
+            x_text,
             ypeak + 0.035 * cfg.ymax,
             f"I*_{label}={ix:.1f}",
             color=color,
@@ -103,7 +95,7 @@ def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 350.
     ax.legend(loc="upper left")
 
 
-def generate_combined_roofline_plot(configs: list[RooflineConfig], output_name: str, xmax: float = 350.0) -> None:
+def generate_combined_roofline_plot(configs: list[RooflineConfig], output_name: str, xmax: float = 20.0) -> None:
     fig, axes = plt.subplots(1, len(configs), figsize=(15.6, 6.8), sharex=True)
     if len(configs) == 1:
         axes = [axes]
@@ -170,7 +162,7 @@ def main() -> None:
     generate_combined_roofline_plot(
         roofline_configs,
         output_name="roofline_a100_h100_combined.pdf",
-        xmax=350.0,
+        xmax=20.0,
     )
     generate_amdahl_plot()
 
