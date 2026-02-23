@@ -75,65 +75,57 @@ def main() -> None:
     IMAGES.mkdir(exist_ok=True)
 
     d0_values = [0.02 + i * 0.001 for i in range(381)]  # [0.02, 0.40]
-    y_full = [100.0 * poisson_yield(GA100_AREA_CM2, d0) for d0 in d0_values]
-    y_le1 = [
-        100.0
-        * yield_at_most_k_broken_partitions(
-            GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, 1
-        )
-        for d0 in d0_values
-    ]
-    y_le2 = [
-        100.0
-        * yield_at_most_k_broken_partitions(
-            GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, 2
-        )
-        for d0 in d0_values
+    curves = [
+        ("0 broken (full die)", 0, "#1f77b4", 2.8),
+        (r"$\leq$1 broken partition (out of 128)", 1, "#ff7f0e", 2.2),
+        (r"$\leq$2 broken partitions (out of 128)", 2, "#2ca02c", 2.2),
+        (r"$\leq$3 broken partitions (out of 128)", 3, "#d62728", 2.2),
+        (r"$\leq$4 broken partitions (out of 128)", 4, "#9467bd", 2.2),
+        (r"$\leq$20 broken partitions (A100 108/128 case)", 20, "#8c564b", 2.6),
     ]
 
     # Reported N7 anchor points from industry coverage of TSMC/Intel disclosures.
     anchors = [0.33, 0.09]
 
     fig, ax = plt.subplots()
-    ax.plot(d0_values, y_full, color="#1f77b4", linewidth=2.8, label="0 broken (full die)")
-    ax.plot(
-        d0_values,
-        y_le1,
-        color="#ff7f0e",
-        linewidth=2.4,
-        label=r"$\leq$1 broken partition (out of 128)",
-    )
-    ax.plot(
-        d0_values,
-        y_le2,
-        color="#2ca02c",
-        linewidth=2.4,
-        label=r"$\leq$2 broken partitions (out of 128)",
-    )
-    for d0 in anchors:
-        y0 = 100.0 * poisson_yield(GA100_AREA_CM2, d0)
-        y1 = (
-            100.0
-            * yield_at_most_k_broken_partitions(
-                GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, 1
+    for label, k, color, lw in curves:
+        if k == 0:
+            y = [100.0 * poisson_yield(GA100_AREA_CM2, d0) for d0 in d0_values]
+        else:
+            y = [
+                100.0
+                * yield_at_most_k_broken_partitions(
+                    GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, k
+                )
+                for d0 in d0_values
+            ]
+        ax.plot(d0_values, y, color=color, linewidth=lw, label=label)
+        for d0 in anchors:
+            if k == 0:
+                y_anchor = 100.0 * poisson_yield(GA100_AREA_CM2, d0)
+            else:
+                y_anchor = (
+                    100.0
+                    * yield_at_most_k_broken_partitions(
+                        GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, k
+                    )
+                )
+            ax.scatter(
+                [d0],
+                [y_anchor],
+                color=color,
+                edgecolors="#0f172a",
+                linewidths=0.55,
+                s=28,
+                zorder=5,
             )
-        )
-        y2 = (
-            100.0
-            * yield_at_most_k_broken_partitions(
-                GA100_AREA_CM2, d0, GA100_SM_PARTITIONS, 2
-            )
-        )
-        ax.scatter([d0], [y0], color="#1f77b4", edgecolors="#0f172a", linewidths=0.6, s=34, zorder=5)
-        ax.scatter([d0], [y1], color="#ff7f0e", edgecolors="#0f172a", linewidths=0.6, s=34, zorder=5)
-        ax.scatter([d0], [y2], color="#2ca02c", edgecolors="#0f172a", linewidths=0.6, s=34, zorder=5)
 
     ax.set_xlim(0.02, 0.40)
     ax.set_ylim(0.0, 100.0)
     ax.set_xlabel("Defect density $D_0$ [defects/cm$^2$]")
     ax.set_ylabel("Predicted yield [%]")
-    ax.set_title("GA100 Yield Sensitivity with Simple Harvest Allowance")
-    ax.legend(loc="upper right", fontsize=10)
+    ax.set_title("GA100 Yield Sensitivity with Harvest Allowance (k=0..4 and k=20)")
+    ax.legend(loc="center right", fontsize=9.3)
 
     fig.tight_layout()
     output = IMAGES / "ga100_n7_yield_curve.pdf"

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -109,11 +110,12 @@ void fill_matrix(std::vector<float>& x, const InitMode& mode, std::uint64_t seed
 
 void usage(const char* prog) {
   std::fprintf(stderr,
-               "Usage: %s output_csv [m n k warmup iters repeats mode]\n"
+               "Usage: %s output_csv [m n k warmup iters repeats mode target_timed_seconds]\n"
                "  mode: all | all_zero | zero_every_2 | zero_every_3 | zero_every_4 | "
                "zero_every_5 | normal | uniform\n"
+               "  target_timed_seconds: if >0, auto-calibrate iters per mode/repeat to hit this timed window\n"
                "Example:\n"
-               "  %s results/09_gemm_value_switching.csv 4096 4096 4096 50 1000 3 all\n",
+               "  %s results/09_gemm_value_switching.csv 4096 4096 4096 50 1000 3 all 120\n",
                prog,
                prog);
 }
@@ -132,8 +134,10 @@ int main(int argc, char** argv) {
   const int iters = (argc > 6) ? std::atoi(argv[6]) : 1000;
   const int repeats = (argc > 7) ? std::atoi(argv[7]) : 3;
   const std::string mode_arg = (argc > 8) ? to_lower(argv[8]) : "all";
+  const double target_timed_seconds = (argc > 9) ? std::atof(argv[9]) : 0.0;
 
-  if (m <= 0 || n <= 0 || k <= 0 || warmup < 0 || iters <= 0 || repeats <= 0) {
+  if (m <= 0 || n <= 0 || k <= 0 || warmup < 0 || iters <= 0 || repeats <= 0 ||
+      target_timed_seconds < 0.0) {
     std::fprintf(stderr, "Invalid numeric arguments.\n");
     return EXIT_FAILURE;
   }
@@ -184,11 +188,12 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  csv << "device,mode,repeat,m,n,k,warmup,iters,zero_fraction_estimate,total_ms,avg_gemm_ms,"
-         "throughput_tflops,c_sample\n";
+  csv << "device,mode,repeat,m,n,k,warmup,iters_requested,iters_effective,target_timed_seconds,"
+         "zero_fraction_estimate,total_ms,avg_gemm_ms,throughput_tflops,c_sample\n";
 
   std::printf("Writing CSV to: %s\n", output_csv.c_str());
-  std::printf("device=%s m=%d n=%d k=%d warmup=%d iters=%d repeats=%d active_modes=%zu\n",
+  std::printf("device=%s m=%d n=%d k=%d warmup=%d iters_requested=%d repeats=%d "
+              "target_timed_seconds=%.1f active_modes=%zu\n",
               prop.name,
               m,
               n,
@@ -196,6 +201,7 @@ int main(int argc, char** argv) {
               warmup,
               iters,
               repeats,
+              target_timed_seconds,
               active_modes.size());
 
   const float alpha = 1.0f;
@@ -224,25 +230,51 @@ int main(int argc, char** argv) {
       }
       CHECK_CUDA(cudaDeviceSynchronize());
 
-      CHECK_CUDA(cudaEventRecord(ev_start));
-      for (int it = 0; it < iters; ++it) {
-        CHECK_CUBLAS(cublasSgemm(
-            handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, d_a, m, d_b, k, &beta, d_c, m));
-      }
-      CHECK_CUDA(cudaEventRecord(ev_stop));
-      CHECK_CUDA(cudaEventSynchronize(ev_stop));
+      auto time_sgemm_iters_ms = [&](int run_iters) -> float {
+        CHECK_CUDA(cudaEventRecord(ev_start));
+        for (int it = 0; it < run_iters; ++it) {
+          CHECK_CUBLAS(cublasSgemm(handle,
+                                   CUBLAS_OP_N,
+                                   CUBLAS_OP_N,
+                                   m,
+                                   n,
+                                   k,
+                                   &alpha,
+                                   d_a,
+                                   m,
+                                   d_b,
+                                   k,
+                                   &beta,
+                                   d_c,
+                                   m));
+        }
+        CHECK_CUDA(cudaEventRecord(ev_stop));
+        CHECK_CUDA(cudaEventSynchronize(ev_stop));
+        float ms = 0.0f;
+        CHECK_CUDA(cudaEventElapsedTime(&ms, ev_start, ev_stop));
+        return ms;
+      };
 
-      float total_ms = 0.0f;
-      CHECK_CUDA(cudaEventElapsedTime(&total_ms, ev_start, ev_stop));
+      int effective_iters = iters;
+      if (target_timed_seconds > 0.0) {
+        const int calib_iters = std::max(20, std::min(200, iters));
+        const float calib_ms = time_sgemm_iters_ms(calib_iters);
+        const double per_iter_ms = static_cast<double>(calib_ms) / static_cast<double>(calib_iters);
+        effective_iters = std::max(
+            1, static_cast<int>(std::ceil((target_timed_seconds * 1000.0) / per_iter_ms)));
+      }
+
+      const float total_ms = time_sgemm_iters_ms(effective_iters);
 
       float c_sample = 0.0f;
       CHECK_CUDA(cudaMemcpy(&c_sample, d_c, sizeof(float), cudaMemcpyDeviceToHost));
 
       const double total_flops =
           2.0 * static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k) *
-          static_cast<double>(iters);
+          static_cast<double>(effective_iters);
       const double throughput_tflops = total_flops / (static_cast<double>(total_ms) * 1.0e9);
-      const double avg_gemm_ms = static_cast<double>(total_ms) / static_cast<double>(iters);
+      const double avg_gemm_ms =
+          static_cast<double>(total_ms) / static_cast<double>(effective_iters);
       const double zero_fraction = estimate_zero_fraction(*mode);
 
       csv << '"' << prop.name << '"' << ','
@@ -253,15 +285,19 @@ int main(int argc, char** argv) {
           << k << ','
           << warmup << ','
           << iters << ','
+          << effective_iters << ','
+          << target_timed_seconds << ','
           << zero_fraction << ','
           << total_ms << ','
           << avg_gemm_ms << ','
           << throughput_tflops << ','
           << c_sample << '\n';
 
-      std::printf("mode=%s rep=%d total_ms=%.3f avg_ms=%.6f tflops=%.3f sample=%.6f\n",
+      std::printf("mode=%s rep=%d iters_effective=%d total_ms=%.3f avg_ms=%.6f "
+                  "tflops=%.3f sample=%.6f\n",
                   mode->name,
                   rep,
+                  effective_iters,
                   total_ms,
                   avg_gemm_ms,
                   throughput_tflops,

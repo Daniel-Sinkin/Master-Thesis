@@ -34,7 +34,8 @@ K="${K:-4096}"
 WARMUP="${WARMUP:-50}"
 ITERS="${ITERS:-1000}"
 REPEATS="${REPEATS:-1}"
-POWER_SAMPLE_MS="${POWER_SAMPLE_MS:-100}"
+TARGET_TIMED_SECONDS="${TARGET_TIMED_SECONDS:-120}"
+POWER_SAMPLE_MS="${POWER_SAMPLE_MS:-50}"
 
 module load Stages/2025 CUDA/12 GCC/13.3.0
 
@@ -62,6 +63,8 @@ cmake --build "${BUILD_DIR}" -j --target phenomenon_gemm_value_switching
 
 MODES=(all_zero zero_every_2 zero_every_3 zero_every_4 zero_every_5 normal uniform)
 
+echo "Config: M=${M} N=${N} K=${K} WARMUP=${WARMUP} ITERS_REQUESTED=${ITERS} REPEATS=${REPEATS} TARGET_TIMED_SECONDS=${TARGET_TIMED_SECONDS} POWER_SAMPLE_MS=${POWER_SAMPLE_MS}"
+
 rm -f "${MERGED_CSV}"
 first_mode=1
 power_logger_pid=""
@@ -83,10 +86,11 @@ for mode in "${MODES[@]}"; do
   echo "=== Mode: ${mode} ==="
   rm -f "${MODE_CSV}" "${POWER_CSV}"
 
+  echo "timestamp,index,power_draw_w,utilization_gpu_pct,clocks_sm_mhz,clocks_mem_mhz" > "${POWER_CSV}"
   nvidia-smi \
     --query-gpu=timestamp,index,power.draw,utilization.gpu,clocks.sm,clocks.mem \
     --format=csv,noheader,nounits \
-    -lms "${POWER_SAMPLE_MS}" > "${POWER_CSV}" &
+    -lms "${POWER_SAMPLE_MS}" >> "${POWER_CSV}" &
   power_logger_pid="$!"
 
   sleep 1
@@ -94,7 +98,7 @@ for mode in "${MODES[@]}"; do
     "${MODE_CSV}" \
     "${M}" "${N}" "${K}" \
     "${WARMUP}" "${ITERS}" "${REPEATS}" \
-    "${mode}"
+    "${mode}" "${TARGET_TIMED_SECONDS}"
   sleep 1
   stop_power_logger
 
@@ -112,4 +116,3 @@ for mode in "${MODES[@]}"; do
   echo "  ${RESULT_DIR}/09_gemm_value_switching_${mode}.csv"
   echo "  ${RESULT_DIR}/09_gemm_value_switching_power_${mode}.csv"
 done
-

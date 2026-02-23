@@ -81,6 +81,15 @@ For the GEMM value-pattern energy experiment, submit:
 sbatch code/profiling/phenomena/slurm/09_gemm_value_switching_energy.slurm
 ```
 
+Default run controls for this job:
+
+- `M=4096 N=4096 K=4096`
+- `WARMUP=50`
+- `ITERS=1000` (used as calibration seed)
+- `TARGET_TIMED_SECONDS=120` (effective timed window per mode)
+- `REPEATS=1`
+- `POWER_SAMPLE_MS=50`
+
 After the job completes:
 
 ```bash

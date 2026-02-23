@@ -32,7 +32,9 @@ $K\sim\mathrm{Binomial}(128,\,1-q)$. The corresponding harvested-yield curves ar
   Y_{\le k}(D_0)=\Pr[K\le k]
   =\sum_{i=0}^{k}\binom{128}{i}\,(1-q)^i\,q^{128-i},
 \]
-for $k\in\{1,2\}$. The case $k=0$ recovers $Y_{\mathrm{full}}$.
+for selected allowances $k\in\{0,1,2,3,4,20\}$. The case $k=0$ recovers
+$Y_{\mathrm{full}}$. The $k=20$ curve corresponds to the common A100 shipping
+configuration with 108 active SM partitions out of 128.
 
 Absolute TSMC N7 defect-density time series are not publicly released in full.
 However, industry-reported anchor values from public disclosures place
@@ -55,10 +57,10 @@ These two regimes are retained as the marker points in
     }
   }
   \caption{First-order defect-limited yield sensitivity for GA100 area
-  (\SI{826}{\milli\meter\squared}) using three simple models: full-die
-  ($0$ broken partitions), at most $1$ broken partition out of $128$, and at
-  most $2$ broken partitions out of $128$. Marker points use industry-reported
-  N7 anchor values ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
+  (\SI{826}{\milli\meter\squared}) using harvest allowances
+  $k\in\{0,1,2,3,4,20\}$ broken partitions out of 128.
+  Marker points use industry-reported N7 anchor values
+  ($D_0\approx 0.33$ and $D_0\approx 0.09$).}
   \label{fig:ga100-n7-yield-curve}
 \end{figure}
 
@@ -67,10 +69,10 @@ At those two anchor points, the full-die model gives
   Y_{\mathrm{full}}(D_0=0.33)\approx 6.6\%,\qquad
   Y_{\mathrm{full}}(D_0=0.09)\approx 47.5\%.
 \]
-Under the same simplified partition model, allowing at most one broken
-partition raises the predicted values to about $24.6\%$ and $83.0\%$,
-respectively; allowing at most two broken partitions gives about $49.3\%$ and
-$96.1\%$.
+Under the same simplified partition model, allowing at most four broken
+partitions raises the predicted values to about $86.5\%$ and $99.9\%$,
+respectively. Allowing at most twenty broken partitions (the
+108/128-SM case) saturates the model near $100\%$ at both anchor points.
 This should not be interpreted as NVIDIA's product yield: shipping yield is
 higher due to redundancy, harvesting (disabled units), and performance binning.
 The model is used here only to quantify the sensitivity of large-die economics

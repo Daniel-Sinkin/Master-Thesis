@@ -29,11 +29,12 @@ IMAGES = ROOT / "images"
 
 @dataclass(frozen=True)
 class RooflineConfig:
-    title: str
+    device_label: str
     bandwidth_tbps: float
     fp64_tflops: float
     fp32_tflops: float
-    ymax: float
+    line_style: str
+    marker_style: str
 
 
 def setup_style() -> None:
@@ -59,7 +60,13 @@ def roofline_value(intensity: float, peak_tflops: float, bandwidth_tbps: float) 
     return min(peak_tflops, bandwidth_tbps * intensity)
 
 
-def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 20.0) -> None:
+def _plot_roofline_on_axis(
+    ax: plt.Axes,
+    cfg: RooflineConfig,
+    xmax: float = 25.0,
+    *,
+    include_precision_legend: bool,
+) -> None:
     x_points = [xmax * i / 1400.0 for i in range(1401)]
 
     y_fp64 = [roofline_value(x, cfg.fp64_tflops, cfg.bandwidth_tbps) for x in x_points]
@@ -68,39 +75,96 @@ def _plot_roofline_on_axis(ax: plt.Axes, cfg: RooflineConfig, xmax: float = 20.0
     i64 = cfg.fp64_tflops / cfg.bandwidth_tbps
     i32 = cfg.fp32_tflops / cfg.bandwidth_tbps
 
-    ax.plot(x_points, y_fp64, color="#D62728", linewidth=3.0, label=f"FP64 roof ({cfg.fp64_tflops:.1f})")
-    ax.plot(x_points, y_fp32, color="#FF7F0E", linewidth=3.0, label=f"FP32 roof ({cfg.fp32_tflops:.1f})")
+    fp64_label = "FP64" if include_precision_legend else None
+    fp32_label = "FP32" if include_precision_legend else None
+    ax.plot(
+        x_points,
+        y_fp64,
+        color="#D62728",
+        linestyle=cfg.line_style,
+        linewidth=2.8,
+        label=fp64_label,
+    )
+    ax.plot(
+        x_points,
+        y_fp32,
+        color="#FF7F0E",
+        linestyle=cfg.line_style,
+        linewidth=2.8,
+        label=fp32_label,
+    )
 
     guides = [
         (i64, cfg.fp64_tflops, "#D62728", "FP64"),
         (i32, cfg.fp32_tflops, "#FF7F0E", "FP32"),
     ]
     for ix, ypeak, color, label in guides:
-        ax.axvline(ix, color="#8A8A8A", linestyle=(0, (2, 3)), linewidth=1.3, zorder=0)
-        x_text = min(ix + 0.35, xmax - 3.0)
-        ax.text(
-            x_text,
-            ypeak + 0.035 * cfg.ymax,
-            f"I*_{label}={ix:.1f}",
+        ax.scatter(
+            [ix],
+            [ypeak],
             color=color,
-            fontsize=12,
-            weight="bold",
+            s=34,
+            marker=cfg.marker_style,
+            zorder=5,
         )
+        if label == "FP64":
+            # Anchor text box at top-left so it sits to the right and below the ridge point.
+            ax.annotate(
+                f"{cfg.device_label} I*_{label}={ix:.1f}",
+                xy=(ix, ypeak),
+                xytext=(ix + 0.45, ypeak - 1.4),
+                textcoords="data",
+                ha="left",
+                va="top",
+                fontsize=10.5,
+                color=color,
+                weight="bold",
+            )
+        else:
+            ax.annotate(
+                f"{cfg.device_label} I*_{label}={ix:.1f}",
+                xy=(ix, ypeak),
+                xytext=(ix + 0.45, ypeak + 1.4),
+                textcoords="data",
+                ha="left",
+                va="bottom",
+                fontsize=10.5,
+                color=color,
+                weight="bold",
+            )
 
     ax.set_xlim(0.0, xmax)
-    ax.set_ylim(0.0, cfg.ymax)
     ax.set_xlabel("Operational intensity I [FLOP/byte]")
+
+
+def generate_combined_roofline_plot(configs: list[RooflineConfig], output_name: str, xmax: float = 25.0) -> None:
+    fig, ax = plt.subplots(figsize=(12.8, 6.9))
+    ymax = max(cfg.fp32_tflops for cfg in configs) * 1.08
+    for idx, cfg in enumerate(configs):
+        _plot_roofline_on_axis(
+            ax,
+            cfg,
+            xmax=xmax,
+            include_precision_legend=(idx == 0),
+        )
+
+    ax.set_ylim(0.0, ymax)
     ax.set_ylabel("Performance [TFLOP/s]")
-    ax.set_title(cfg.title)
+    ax.set_title("Roofline Model - NVIDIA A100-SXM4 40GB vs NVIDIA H100-SXM5 80GB")
     ax.legend(loc="upper left")
 
+    # Device style note without adding extra legend entries.
+    ax.text(
+        0.995,
+        0.02,
+        "A100: solid, marker o    H100: dashed, marker ^",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=10.5,
+        color="#444444",
+    )
 
-def generate_combined_roofline_plot(configs: list[RooflineConfig], output_name: str, xmax: float = 20.0) -> None:
-    fig, axes = plt.subplots(1, len(configs), figsize=(15.6, 6.8), sharex=True)
-    if len(configs) == 1:
-        axes = [axes]
-    for ax, cfg in zip(axes, configs):
-        _plot_roofline_on_axis(ax, cfg, xmax=xmax)
     fig.tight_layout()
     fig.savefig(IMAGES / output_name, format="pdf", bbox_inches="tight")
     plt.close(fig)
@@ -144,25 +208,27 @@ def main() -> None:
 
     roofline_configs = [
         RooflineConfig(
-            title="Roofline Model - NVIDIA A100-SXM4 80GB",
-            bandwidth_tbps=2.039,
+            device_label="A100-40GB",
+            bandwidth_tbps=1.555,
             fp64_tflops=9.7,
             fp32_tflops=19.5,
-            ymax=30.0,
+            line_style="-",
+            marker_style="o",
         ),
         RooflineConfig(
-            title="Roofline Model - NVIDIA H100-SXM5 80GB",
+            device_label="H100",
             bandwidth_tbps=3.350,
             fp64_tflops=33.5,
             fp32_tflops=67.0,
-            ymax=80.0,
+            line_style="--",
+            marker_style="^",
         ),
     ]
 
     generate_combined_roofline_plot(
         roofline_configs,
         output_name="roofline_a100_h100_combined.pdf",
-        xmax=20.0,
+        xmax=25.0,
     )
     generate_amdahl_plot()
 

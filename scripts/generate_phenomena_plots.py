@@ -303,12 +303,19 @@ def plot_ilp_dependency(rows: list[dict[str, str]], out_path: Path) -> None:
 
 
 def plot_register_pressure(rows: list[dict[str, str]], out_path: Path) -> None:
-    variants = [r["variant"] for r in rows]
+    def _pretty_variant(name: str) -> str:
+        mapping = {
+            "low_register_pressure": "Low Register Pressure",
+            "high_register_pressure": "High Register Pressure",
+        }
+        return mapping.get(name, name.replace("_", " ").title())
+
+    variants = [_pretty_variant(r["variant"]) for r in rows]
     tflops = [_parse_float(r["core_effective_tflops"]) for r in rows]
     occ = [_parse_float(r["theoretical_occupancy_pct"]) for r in rows]
     x = range(len(variants))
 
-    fig, ax1 = plt.subplots(figsize=(8.6, 5.2))
+    fig, ax1 = plt.subplots(figsize=(11.2, 6.6))
     ax1.bar([i - 0.18 for i in x], tflops, width=0.36, color="#1f77b4", label="Core effective TFLOP/s")
     ax1.set_ylabel("Core effective throughput [TFLOP/s]")
     ax1.set_xticks(list(x))
@@ -317,7 +324,7 @@ def plot_register_pressure(rows: list[dict[str, str]], out_path: Path) -> None:
 
     ax2 = ax1.twinx()
     ax2.bar([i + 0.18 for i in x], occ, width=0.36, color="#ff7f0e", label="Theoretical occupancy (%)", alpha=0.9)
-    ax2.set_ylabel("Theoretical occupancy [%]")
+    ax2.set_ylabel("")
     ax2.set_ylim(0, 110)
     ax1.grid(False)
     ax2.grid(False)
