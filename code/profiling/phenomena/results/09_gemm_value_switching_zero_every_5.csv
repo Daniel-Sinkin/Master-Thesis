@@ -1,2 +1,0 @@
-device,mode,repeat,m,n,k,warmup,iters,zero_fraction_estimate,total_ms,avg_gemm_ms,throughput_tflops,c_sample
-"NVIDIA A100-SXM4-40GB",zero_every_5,0,4096,4096,4096,50,1000,0.2,7222.86,7.22286,19.0283,-15.9553

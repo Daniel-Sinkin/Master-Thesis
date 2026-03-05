@@ -176,25 +176,52 @@ Industry talks regularly motivate this with switching-activity arguments
 effect empirically for the specific kernels and node setup used in this thesis
 ~\cite{jones2022cuda-how-works}.
 
+\begin{figure}[t]
+  \centering
+  \IfFileExists{images/gemm_value_switching_energy.pdf}{
+    \includegraphics[width=0.98\textwidth]{gemm_value_switching_energy}
+  }{
+    \fbox{
+      \parbox{0.92\textwidth}{
+        Generate this figure with
+        \texttt{python3 scripts/plot\_gemm\_value\_switching\_energy.py}.
+      }
+    }
+  }
+  \caption{Measured SGEMM value-pattern sweep on A100 (active GPU only, currently
+  imported subset of modes). Left: mean active board power.
+  Right: energy normalized to a 120\,s active window.}
+  \label{fig:gemm-switching-energy}
+\end{figure}
+
 \begin{table}[t]
   \centering
-  \caption{Placeholder summary for the SGEMM data-pattern sweep on A100
-  (illustrative values only; TODO: replace with measured data).}
+  \small
+  \caption{Current measured subset from the SGEMM value-pattern sweep on A100
+  (active GPU, normalized to 120\,s for comparability across runs).}
   \label{tab:gemm-switching-placeholder}
+  \setlength{\tabcolsep}{4pt}
   \begin{tabular}{lrrrr}
     \toprule
-    Initialisation mode & Runtime (s) & Median power (W) & Energy (J) & Relative energy \\
+    Metric & all-zero & zero/2 & zero/3 & zero/4 \\
     \midrule
-    all\_zero      & 6.80 & 221 & 1503 & 0.90 \\
-    zero\_every\_2 & 6.82 & 228 & 1555 & 0.93 \\
-    zero\_every\_3 & 6.81 & 232 & 1580 & 0.95 \\
-    zero\_every\_4 & 6.83 & 235 & 1605 & 0.97 \\
-    zero\_every\_5 & 6.82 & 237 & 1617 & 0.98 \\
-    normal         & 6.84 & 241 & 1648 & 1.00 \\
-    uniform        & 6.84 & 240 & 1642 & 1.00 \\
+    Active window (s) & 109.3 & 122.8 & 123.2 & 123.0 \\
+    Mean power (W) & 223.9 & 308.4 & 365.0 & 337.6 \\
+    Norm.\ energy at 120\,s (kJ) & 26.86 & 37.00 & 43.80 & 40.51 \\
+    Relative energy & 1.00 & 1.38 & 1.63 & 1.51 \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+Mode labels \texttt{zero/$n$} denote periodic-zero initialization where every
+$n$-th element is set to zero.
+
+With the currently imported modes, throughput remains near FP32 peak while
+board power separates strongly by input pattern. Relative to \texttt{all\_zero},
+\texttt{zero\_every\_2} increases normalized energy by about $38\%$,
+\texttt{zero\_every\_4} by about $51\%$, and \texttt{zero\_every\_3} by about
+$63\%$. This indicates a clear value-pattern energy effect without a comparable
+throughput shift in the same runs.
 
 Expected outcome from prior work:
 \begin{itemize}
