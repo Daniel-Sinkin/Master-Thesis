@@ -1,0 +1,259 @@
+% chapters/02_sections/dram_and_hbm.tex
+\subsection{DRAM Fundamentals and High Bandwidth Memory}\label{sec:dram-hbm}
+
+Understanding the physical memory technology that backs GPU global memory is
+important for reasoning about bandwidth limits, access latency, and power
+behavior. This subsection summarizes the relevant DRAM fundamentals and then
+describes the High Bandwidth Memory (HBM) family used in modern GPU
+accelerators, with emphasis on the HBM2e variant deployed in the
+A100-SXM4-80GB.
+
+\subsubsection{The DRAM Cell}\label{sec:dram-cell}
+
+Dynamic Random Access Memory stores each bit as charge on a single capacitor,
+gated by a single access transistor. This \emph{1T1C} (one-transistor,
+one-capacitor) design is the dominant commodity DRAM cell and has been since
+the early 1970s~\cite{li2018highspeed-dram}. In steady state, a charged
+capacitor represents a logical~1 and a discharged capacitor a logical~0 (or
+vice versa, depending on convention). The access transistor connects the
+capacitor to a shared \emph{bitline} (column wire) when the transistor's gate
+is driven high by the \emph{wordline} (row wire).
+
+Because the capacitor is small (on the order of femtofarads), two consequences
+follow. First, the stored charge leaks over time, so every cell must be
+periodically \emph{refreshed}---read and rewritten---to preserve its content;
+this is the ``dynamic'' in DRAM. Typical refresh intervals are
+\SI{32}{\milli\second} to \SI{64}{\milli\second} for the entire
+array~\cite{li2018highspeed-dram}. Second, reading a cell is
+\emph{destructive}: the act of sharing charge between the cell capacitor and
+the bitline disturbs the stored voltage, so the sense amplifier must both
+detect the charge and immediately restore it.
+
+\paragraph{Connection to energy and data-dependent power.}
+Switching a bit between 0 and 1 requires charging or discharging the cell
+capacitor and toggling the I/O drivers on the data bus. The classical
+switching-energy model gives a per-transition energy proportional to
+$\tfrac{1}{2}CV^2$ (charging/discharging a capacitance $C$ through a voltage
+swing $V$). When many bits toggle simultaneously---as happens when writing
+data with high Hamming distance from the previous content---aggregate
+switching energy increases. Conversely, data patterns with low bit-toggle
+rates (e.g.\ writing a matrix of zeros, or repeated values) cause fewer
+transitions and consume less I/O power.
+
+This data-dependent power behavior is not merely theoretical. HBM2e devices
+implement \emph{Data Bus Inversion} (DBI), a per-byte encoding that inverts
+the data on the bus whenever more than half the bits would toggle, thereby
+capping the worst-case toggle rate at 50\%~\cite{micron2021hbm2e}. The
+mechanism is a direct hardware response to switching-energy concerns.
+On the GPU side, the same physics underlies the data-pattern sensitivity
+explored experimentally in \cref{sec:energy-gemm-switching-todo}: if the
+memory subsystem throttles power under sustained high-toggle workloads, the
+effect can propagate into observable performance variation.
+
+\subsubsection{Row, Column, and Bank Organization}\label{sec:dram-organization}
+
+Internally, DRAM cells are organized in a two-dimensional array of rows and
+columns, as illustrated schematically in Figure~2
+of Li et al.~\cite{li2018highspeed-dram}. A read proceeds in three phases:
+
+\begin{enumerate}
+  \item \textbf{Row activation} (\emph{activate}, timing parameter
+    $t_\text{RCD}$): the wordline for the target row is raised, connecting
+    all capacitors in that row to their respective bitlines. The sense
+    amplifiers detect and amplify the charge, effectively copying the entire
+    row into the \emph{row buffer} (sense-amplifier latch array). This is the
+    most time-consuming step and also restores the cells that were
+    destructively read.
+  \item \textbf{Column access} (timing parameter $t_\text{CL}$): a column
+    address selects a subset of the row buffer and drives it onto the I/O
+    pins. Because the full row is already latched, subsequent reads to
+    different columns in the same row (``row-buffer hits'') require only this
+    shorter column-access latency.
+  \item \textbf{Precharge} (timing parameter $t_\text{RP}$): before a
+    different row in the same bank can be activated, the bitlines must be
+    precharged to a reference voltage. This closes the current row.
+\end{enumerate}
+
+The distinction between a \emph{row-buffer hit} (column access only,
+cost $\approx t_\text{CL}$) and a \emph{row-buffer miss} requiring a full
+row switch (cost $\approx t_\text{RP} + t_\text{RCD} + t_\text{CL}$) is
+central to DRAM performance; the existing discussion in
+\cref{sec:hbm-row-column-path} develops the quantitative implications for
+kernel design.
+
+To increase parallelism, the array is partitioned into \emph{banks} that can
+be activated independently. Multiple outstanding requests to different banks
+can overlap, which is how high-bandwidth memory technologies sustain
+throughput despite individual access latencies in the tens of
+nanoseconds~\cite{li2018highspeed-dram}.
+
+\paragraph{Evolution of DRAM bandwidth.}
+Historically, increasing DRAM bandwidth has been far easier than decreasing
+latency. The core timing parameters ($t_\text{RCD}$, $t_\text{RP}$,
+$t_\text{CL}$) are constrained by physical properties of the storage
+capacitors and bitlines; they have decreased only modestly over two decades.
+Bandwidth improvements have instead come from widening the data path (the
+\emph{prefetch buffer} between core and I/O), increasing pin data rates, and
+adding more channels and banks. This observation---articulated clearly
+by Li et al.~\cite{li2018highspeed-dram}---explains why the HBM approach (massively
+wider buses rather than faster pins) is so effective.
+
+\subsubsection{High Bandwidth Memory}\label{sec:hbm-architecture}
+
+JEDEC's High Bandwidth Memory standard addresses the bandwidth gap by using
+3D integration to package a stack of DRAM dies together with a base logic
+die~\cite{jedec2013hbm,jedec2016hbm2,jedec2020hbm2e}. The stack communicates
+internally via \emph{through-silicon vias} (TSVs)---vertical conductors
+etched through the silicon substrate---which enable a very wide parallel bus
+within the stack (1024 data bits across 8 independent channels of 128 bits
+each).
+
+The entire HBM stack is mounted on a \emph{silicon interposer} alongside the
+GPU die, forming a \emph{system-in-package} (SiP). This 2.5D packaging
+approach avoids the signal-routing constraints of a conventional PCB, where
+trace count is limited to roughly 384 data lines per
+SoC~\cite{micron2021hbm2e}. Because the interposer traces are much shorter
+and denser than PCB traces, HBM achieves its bandwidth at comparatively low
+per-pin data rates (around \SI{1}{\giga bps} for HBM1, \SI{2}{\giga bps}
+for HBM2, and \SI{3.2}{\giga bps} for HBM2e), which in turn reduces I/O
+power substantially compared with high-speed serial interfaces like GDDR6
+that must drive pins at \SI{16}{\giga bps} or
+more~\cite{li2018highspeed-dram,micron2021hbm2e}.
+
+\paragraph{Memory dies and channels.}
+The DRAM layers in an HBM stack are called \emph{memory dies} (or
+\emph{core dies}). Each memory die is a complete DRAM chip in its own right,
+containing billions of 1T1C storage cells organized into banks, rows, and
+columns. The dies are manufactured and tested individually before being
+stacked; Micron ships them as \emph{Known Good Stacked Die}
+(KGSD)~\cite{micron2021hbm2e}.
+
+A \emph{channel} is a fully independent memory interface with its own clock,
+command/address bus, and 128-bit data path (204 signals in
+total)~\cite{micron2021hbm2e}. Because each channel has its own controller
+state, eight outstanding memory transactions---one per channel---can proceed
+in parallel. Each of the 8 channels is further subdivided into two
+\emph{pseudo channels} (PCs) that share clock and command inputs but have
+independent 64-bit data paths, effectively providing 16 semi-independent
+access points per device~\cite{micron2021hbm2e}. This high degree of
+internal parallelism is what allows HBM to sustain throughput even when
+individual DRAM timing parameters ($t_\text{RCD}$, $t_\text{RP}$,
+$t_\text{CL}$) are comparable to conventional GDDR.
+
+\paragraph{Banks.}
+Within each pseudo channel, the DRAM array is partitioned into 16
+independently-activatable \emph{banks} (B0--B15). A bank is the smallest
+unit that can hold an open row: each bank has its own row buffer (sense
+amplifier latch), so accesses to different banks can overlap without
+incurring row-switch penalties. In the 4-Hi configuration each channel has
+16 banks; in 8-Hi, two dies contribute to the same channel, yielding
+$2 \times 16 = 32$ banks per channel (distinguished by a \emph{stack ID}
+bit that selects the upper or lower memory die)~\cite{micron2021hbm2e}.
+
+\paragraph{Channel-to-die mapping.}
+Channels are distributed across the memory dies in pairs.
+In a 4-Hi stack, each of the four core dies carries two channels (e.g.\ the
+bottom die carries Channels~A and~C, the next die Channels~B and~D, and so
+on). In an 8-Hi stack the same channel pair is replicated across two dies,
+doubling the capacity per channel while preserving the same 8-channel
+topology. \Cref{fig:hbm2e-stack-side} illustrates this mapping for both
+configurations: blue layers are memory core dies, the yellow layer is the
+interface (base) die, and the red layer in the 8-Hi diagram marks a stack
+position that may be disabled for yield.
+\Cref{fig:hbm2e-die-topdown} shows the internal layout of a single memory
+die, where each pseudo channel's 16 banks are visible as individually
+addressable units.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{HBM2EStackSideView}
+  \caption{HBM2e stack side view: 4-Hi (left) vs.\ 8-Hi (right).
+  Channel pairs are labelled per die.
+  After~\cite{micron2021hbm2e}, Fig.~4.}
+  \label{fig:hbm2e-stack-side}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{HBM2EDieTopDown}
+  \caption{Top-down view of a single HBM2e memory die with two pseudo
+  channels (A, C) and their 16~banks each (B0--B15).
+  After~\cite{micron2021hbm2e}, Fig.~4.}
+  \label{fig:hbm2e-die-topdown}
+\end{figure}
+
+\subsubsection{HBM2e vs.\ GDDR6(X) and the A100 Memory Subsystem}
+\label{sec:hbm-generations}
+
+HBM2e is often positioned as an alternative to the well-established
+GDDR6 and GDDR6X SGRAM technologies, which also provide high memory
+bandwidth but through a fundamentally different
+trade-off~\cite{micron2021hbm2e}. Where HBM2e achieves bandwidth through a
+$32\times$ wider I/O bus at modest pin speeds (\SI{3.2}{Gbps}), GDDR6(X)
+compensates for its narrow 32-bit bus by driving pins at
+\SI{16}--\SI{24}{Gbps}, which demands power-hungry techniques such as
+on-die signal termination, delay-locked loops, and clock-data
+recovery~\cite{micron2021hbm2e}. \Cref{tab:hbm-vs-gddr} contrasts the
+key parameters.
+
+The V100 (Volta, 2017) was the first NVIDIA GPU accelerator to deploy HBM2
+at scale, establishing the pattern of in-package high-bandwidth memory that
+the A100 continues.
+
+\begin{table}[H]
+\centering
+\caption{HBM2e DRAM vs.\ GDDR6(X) SGRAM.
+  Data from~\cite{micron2021hbm2e}.}
+\label{tab:hbm-vs-gddr}
+\begin{tabularx}{\textwidth}{l r r}
+\toprule
+Parameter & HBM2e & GDDR6 / GDDR6X \\
+\midrule
+Capacity per device    & 8--\SI{16}{GB}       & 1--\SI{2}{GB} \\
+Channels per device    & 8                     & 2 \\
+Devices per system     & 4--6                  & up to 24 \\
+Max pin data rate      & \SI{3.2}{Gbps}        & 16 / \SI{24}{Gbps} \\
+I/O width (bits)       & 1024                  & 32 \\
+BW per device          & \SI{410}{GB/s}        & \SI{64}{GB/s} \\
+Total system BW        & up to \SI{2450}{GB/s} & up to 768 / \SI{1152}{GB/s} \\
+Package                & KGSD (stacked die)    & BGA-180 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Several observations from this comparison connect directly to the performance
+modeling in later chapters:
+
+\begin{enumerate}
+  \item \textbf{Latency is comparable.} The core DRAM timing parameters
+    ($t_\text{RCD}$, $t_\text{RP}$, $t_\text{CL}$) are in the same
+    $\sim$\SI{14}{\nano\second} range for both HBM2e and GDDR6. High
+    bandwidth does not imply low latency; latency hiding requires sufficient
+    parallelism (banks, channels, and outstanding
+    requests)~\cite{li2018highspeed-dram}.
+  \item \textbf{HBM2 to HBM2e is a pin-speed upgrade.} The physical
+    interface (interposer, TSV pitch, channel count) is unchanged between
+    HBM2 and HBM2e. The bandwidth increase from \SI{256}{GB/s} to
+    \SI{410}{GB/s} per stack comes from raising the per-pin data rate from
+    \SI{2}{Gbps} to \SI{3.2}{Gbps}~\cite{micron2021hbm2e}. HBM2e also
+    doubles the maximum stack capacity from \SI{8}{GB} to \SI{16}{GB}
+    (eight-high configuration with denser dies), which is why the
+    A100-SXM4-80GB can offer \SI{80}{GB} from five stacks.
+  \item \textbf{GPU deployment history.} The V100 (Volta, 2017) used four
+    stacks of HBM2 providing \SI{900}{GB/s} aggregate bandwidth and
+    \SI{16}{GB} or \SI{32}{GB} capacity. Both A100 variants use five active
+    HBM stacks out of six physical stacks on the package (one disabled for
+    yield), giving $5 \times 8 = 40$ independent channels in both cases.
+    The A100-SXM4-40GB uses HBM2 in a \emph{4-Hi} (four-high) stack
+    configuration: \SI{1}{GB} per die $\times$ 4~dies $=$ \SI{8}{GB} per
+    stack, for \SI{40}{GB} total at \SI{1555}{GB/s}. The A100-SXM4-80GB
+    upgrades to HBM2e in an \emph{8-Hi} (eight-high) configuration:
+    \SI{2}{GB} per die $\times$ 8~dies $=$ \SI{16}{GB} per stack, for
+    \SI{80}{GB} total at \SI{2039}{GB/s}~\cite{nvidia2020a100,micron2021hbm2e}.
+    The stacks are physically twice as tall but share the same channel
+    topology; the bandwidth increase comes from the higher per-pin data rate
+    of HBM2e (\SI{3.2}{Gbps} vs.\ $\sim$\SI{2.4}{Gbps} for the HBM2
+    configuration used in A100-40GB). The quantitative impact of this
+    bandwidth difference on roofline modeling is developed in
+    \cref{sec:a100-40-80}.
+\end{enumerate}

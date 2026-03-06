@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" width="960" height="580">
+  <defs>
+    <style>
+      text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+      .title { font-size: 15px; font-weight: bold; fill: #1a1a1a; }
+      .subtitle { font-size: 12px; fill: #555; }
+      .label { font-size: 11px; font-weight: 600; fill: #1a1a1a; }
+      .label-sm { font-size: 9.5px; fill: #333; }
+      .label-xs { font-size: 8.5px; fill: #555; }
+      .annot { font-size: 9px; fill: #777; font-style: italic; }
+      .ch-label { font-size: 8px; font-weight: 600; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="580" fill="#fafafa" rx="6"/>
+
+  <!-- Title -->
+  <text x="480" y="28" text-anchor="middle" class="title">HBM2E Stack Cross-Section: 4-High vs. 8-High Configuration</text>
+  <text x="480" y="46" text-anchor="middle" class="subtitle">Channel-to-die mapping shown; both configurations have 8 channels (A–H) and identical bandwidth per stack</text>
+
+  <!-- ============================================ -->
+  <!-- 4-HIGH STACK (left) -->
+  <!-- ============================================ -->
+  <text x="220" y="72" text-anchor="middle" class="label" style="font-size:13px;">4-High (e.g. A100-40GB HBM2)</text>
+  <text x="220" y="87" text-anchor="middle" class="label-xs">4 core dies + 1 base die = 8 GB/stack</text>
+
+  <!-- Package substrate -->
+  <rect x="70" y="430" width="300" height="28" rx="3" fill="#e0e0e0" stroke="#999" stroke-width="1"/>
+  <text x="220" y="448" text-anchor="middle" class="label-sm">Organic Substrate</text>
+
+  <!-- Package balls -->
+  <circle cx="95" cy="465" r="4" fill="#888"/>
+  <circle cx="115" cy="465" r="4" fill="#888"/>
+  <circle cx="135" cy="465" r="4" fill="#888"/>
+  <circle cx="155" cy="465" r="4" fill="#888"/>
+  <circle cx="175" cy="465" r="4" fill="#888"/>
+  <circle cx="195" cy="465" r="4" fill="#888"/>
+  <circle cx="215" cy="465" r="4" fill="#888"/>
+  <circle cx="235" cy="465" r="4" fill="#888"/>
+  <circle cx="255" cy="465" r="4" fill="#888"/>
+  <circle cx="275" cy="465" r="4" fill="#888"/>
+  <circle cx="295" cy="465" r="4" fill="#888"/>
+  <circle cx="315" cy="465" r="4" fill="#888"/>
+  <circle cx="335" cy="465" r="4" fill="#888"/>
+  <text x="220" y="480" text-anchor="middle" class="annot">Package balls (C4)</text>
+
+  <!-- Silicon interposer -->
+  <rect x="70" y="402" width="300" height="22" rx="2" fill="#b3e5fc" stroke="#0288d1" stroke-width="1"/>
+  <text x="220" y="417" text-anchor="middle" class="label-sm" style="fill:#01579b;">Silicon Interposer</text>
+
+  <!-- Microbumps between interposer and base die -->
+  <g>
+    <line x1="120" y1="395" x2="120" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="170" y1="395" x2="170" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="220" y1="395" x2="220" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="270" y1="395" x2="270" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="320" y1="395" x2="320" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+  </g>
+  <text x="375" y="400" class="annot">μbumps</text>
+
+  <!-- Base die (I/F die) -->
+  <rect x="100" y="368" width="240" height="26" rx="3" fill="#ffcc80" stroke="#ef6c00" stroke-width="1.2"/>
+  <text x="220" y="385" text-anchor="middle" class="label-sm" style="fill:#bf360c;">Base Die (I/F die) — logic, redrive</text>
+
+  <!-- TSV lines through the stack -->
+  <g stroke="#ff9800" stroke-width="1" stroke-dasharray="2,2" opacity="0.6">
+    <line x1="135" y1="170" x2="135" y2="368"/>
+    <line x1="180" y1="170" x2="180" y2="368"/>
+    <line x1="220" y1="170" x2="220" y2="368"/>
+    <line x1="260" y1="170" x2="260" y2="368"/>
+    <line x1="305" y1="170" x2="305" y2="368"/>
+  </g>
+  <text x="375" y="270" class="annot" style="fill:#ef6c00;">TSVs</text>
+
+  <!-- Core Die 3 (top) -->
+  <rect x="100" y="170" width="240" height="40" rx="3" fill="#c5cae9" stroke="#3f51b5" stroke-width="1.2"/>
+  <text x="160" y="190" text-anchor="middle" class="ch-label" style="fill:#1a237e;">Ch E+G</text>
+  <text x="280" y="190" text-anchor="middle" class="ch-label" style="fill:#1a237e;">Ch F+H</text>
+  <line x1="220" y1="175" x2="220" y2="205" stroke="#3f51b5" stroke-width="0.5" stroke-dasharray="2,1"/>
+  <text x="350" y="193" class="label-xs">Core Die 3</text>
+
+  <!-- Core Die 2 -->
+  <rect x="100" y="216" width="240" height="40" rx="3" fill="#c5cae9" stroke="#3f51b5" stroke-width="1.2"/>
+  <text x="160" y="236" text-anchor="middle" class="ch-label" style="fill:#1a237e;">Ch A+C</text>
+  <text x="280" y="236" text-anchor="middle" class="ch-label" style="fill:#1a237e;">Ch B+D</text>
+  <line x1="220" y1="221" x2="220" y2="251" stroke="#3f51b5" stroke-width="0.5" stroke-dasharray="2,1"/>
+  <text x="350" y="239" class="label-xs">Core Die 2</text>
+
+  <!-- Core Die 1 -->
+  <rect x="100" y="262" width="240" height="40" rx="3" fill="#bbdefb" stroke="#1976d2" stroke-width="1.2"/>
+  <text x="160" y="282" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">Ch E+G</text>
+  <text x="280" y="282" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">Ch F+H</text>
+  <line x1="220" y1="267" x2="220" y2="297" stroke="#1976d2" stroke-width="0.5" stroke-dasharray="2,1"/>
+  <text x="350" y="285" class="label-xs">Core Die 1</text>
+
+  <!-- Core Die 0 -->
+  <rect x="100" y="308" width="240" height="40" rx="3" fill="#bbdefb" stroke="#1976d2" stroke-width="1.2"/>
+  <text x="160" y="328" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">Ch A+C</text>
+  <text x="280" y="328" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">Ch B+D</text>
+  <line x1="220" y1="313" x2="220" y2="343" stroke="#1976d2" stroke-width="0.5" stroke-dasharray="2,1"/>
+  <text x="350" y="331" class="label-xs">Core Die 0</text>
+
+  <!-- Top die / mould -->
+  <rect x="100" y="152" width="240" height="14" rx="2" fill="#ccc" stroke="#999" stroke-width="0.8"/>
+  <text x="220" y="163" text-anchor="middle" class="label-xs" style="fill:#666;">Top Die (spacer)</text>
+
+  <!-- Capacity callout -->
+  <text x="220" y="500" text-anchor="middle" class="label-sm">4 dies × 2 GB/die = 8 GB per stack</text>
+  <text x="220" y="514" text-anchor="middle" class="label-xs">5 stacks on A100-40GB → 40 GB total</text>
+  <text x="220" y="528" text-anchor="middle" class="label-xs">Max ~2 Gbps/pin → 256 GB/s per stack (HBM2)</text>
+
+  <!-- ============================================ -->
+  <!-- 8-HIGH STACK (right) -->
+  <!-- ============================================ -->
+  <text x="700" y="72" text-anchor="middle" class="label" style="font-size:13px;">8-High (e.g. A100-80GB HBM2e)</text>
+  <text x="700" y="87" text-anchor="middle" class="label-xs">8 core dies + 1 base die = 16 GB/stack</text>
+
+  <!-- Package substrate -->
+  <rect x="550" y="430" width="300" height="28" rx="3" fill="#e0e0e0" stroke="#999" stroke-width="1"/>
+  <text x="700" y="448" text-anchor="middle" class="label-sm">Organic Substrate</text>
+
+  <!-- Package balls -->
+  <circle cx="575" cy="465" r="4" fill="#888"/>
+  <circle cx="595" cy="465" r="4" fill="#888"/>
+  <circle cx="615" cy="465" r="4" fill="#888"/>
+  <circle cx="635" cy="465" r="4" fill="#888"/>
+  <circle cx="655" cy="465" r="4" fill="#888"/>
+  <circle cx="675" cy="465" r="4" fill="#888"/>
+  <circle cx="695" cy="465" r="4" fill="#888"/>
+  <circle cx="715" cy="465" r="4" fill="#888"/>
+  <circle cx="735" cy="465" r="4" fill="#888"/>
+  <circle cx="755" cy="465" r="4" fill="#888"/>
+  <circle cx="775" cy="465" r="4" fill="#888"/>
+  <circle cx="795" cy="465" r="4" fill="#888"/>
+  <circle cx="815" cy="465" r="4" fill="#888"/>
+  <text x="700" y="480" text-anchor="middle" class="annot">Package balls (C4)</text>
+
+  <!-- Silicon interposer -->
+  <rect x="550" y="402" width="300" height="22" rx="2" fill="#b3e5fc" stroke="#0288d1" stroke-width="1"/>
+  <text x="700" y="417" text-anchor="middle" class="label-sm" style="fill:#01579b;">Silicon Interposer</text>
+
+  <!-- Microbumps -->
+  <g>
+    <line x1="600" y1="395" x2="600" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="650" y1="395" x2="650" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="700" y1="395" x2="700" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="750" y1="395" x2="750" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+    <line x1="800" y1="395" x2="800" y2="402" stroke="#ff9800" stroke-width="1.5"/>
+  </g>
+
+  <!-- Base die -->
+  <rect x="580" y="368" width="240" height="26" rx="3" fill="#ffcc80" stroke="#ef6c00" stroke-width="1.2"/>
+  <text x="700" y="385" text-anchor="middle" class="label-sm" style="fill:#bf360c;">Base Die (I/F die) — logic, redrive</text>
+
+  <!-- TSVs -->
+  <g stroke="#ff9800" stroke-width="1" stroke-dasharray="2,2" opacity="0.6">
+    <line x1="615" y1="105" x2="615" y2="368"/>
+    <line x1="660" y1="105" x2="660" y2="368"/>
+    <line x1="700" y1="105" x2="700" y2="368"/>
+    <line x1="740" y1="105" x2="740" y2="368"/>
+    <line x1="785" y1="105" x2="785" y2="368"/>
+  </g>
+  <text x="855" y="240" class="annot" style="fill:#ef6c00;">TSVs</text>
+
+  <!-- Core Die 7 (top) -->
+  <rect x="580" y="105" width="240" height="28" rx="2" fill="#d1c4e9" stroke="#7e57c2" stroke-width="1"/>
+  <text x="640" y="122" text-anchor="middle" class="ch-label" style="fill:#4a148c;">E+G</text>
+  <text x="760" y="122" text-anchor="middle" class="ch-label" style="fill:#4a148c;">F+H</text>
+  <text x="830" y="122" class="label-xs">Die 7</text>
+
+  <!-- Core Die 6 -->
+  <rect x="580" y="137" width="240" height="28" rx="2" fill="#d1c4e9" stroke="#7e57c2" stroke-width="1"/>
+  <text x="640" y="154" text-anchor="middle" class="ch-label" style="fill:#4a148c;">A+C</text>
+  <text x="760" y="154" text-anchor="middle" class="ch-label" style="fill:#4a148c;">B+D</text>
+  <text x="830" y="154" class="label-xs">Die 6</text>
+
+  <!-- Core Die 5 -->
+  <rect x="580" y="169" width="240" height="28" rx="2" fill="#d1c4e9" stroke="#7e57c2" stroke-width="1"/>
+  <text x="640" y="186" text-anchor="middle" class="ch-label" style="fill:#4a148c;">E+G</text>
+  <text x="760" y="186" text-anchor="middle" class="ch-label" style="fill:#4a148c;">F+H</text>
+  <text x="830" y="186" class="label-xs">Die 5</text>
+
+  <!-- Core Die 4 -->
+  <rect x="580" y="201" width="240" height="28" rx="2" fill="#d1c4e9" stroke="#7e57c2" stroke-width="1"/>
+  <text x="640" y="218" text-anchor="middle" class="ch-label" style="fill:#4a148c;">A+C</text>
+  <text x="760" y="218" text-anchor="middle" class="ch-label" style="fill:#4a148c;">B+D</text>
+  <text x="830" y="218" class="label-xs">Die 4</text>
+
+  <!-- Core Die 3 -->
+  <rect x="580" y="240" width="240" height="28" rx="2" fill="#c5cae9" stroke="#3f51b5" stroke-width="1"/>
+  <text x="640" y="257" text-anchor="middle" class="ch-label" style="fill:#1a237e;">E+G</text>
+  <text x="760" y="257" text-anchor="middle" class="ch-label" style="fill:#1a237e;">F+H</text>
+  <text x="830" y="257" class="label-xs">Die 3</text>
+
+  <!-- Core Die 2 -->
+  <rect x="580" y="272" width="240" height="28" rx="2" fill="#c5cae9" stroke="#3f51b5" stroke-width="1"/>
+  <text x="640" y="289" text-anchor="middle" class="ch-label" style="fill:#1a237e;">A+C</text>
+  <text x="760" y="289" text-anchor="middle" class="ch-label" style="fill:#1a237e;">B+D</text>
+  <text x="830" y="289" class="label-xs">Die 2</text>
+
+  <!-- Core Die 1 -->
+  <rect x="580" y="304" width="240" height="28" rx="2" fill="#bbdefb" stroke="#1976d2" stroke-width="1"/>
+  <text x="640" y="321" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">E+G</text>
+  <text x="760" y="321" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">F+H</text>
+  <text x="830" y="321" class="label-xs">Die 1</text>
+
+  <!-- Core Die 0 -->
+  <rect x="580" y="336" width="240" height="28" rx="2" fill="#bbdefb" stroke="#1976d2" stroke-width="1"/>
+  <text x="640" y="353" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">A+C</text>
+  <text x="760" y="353" text-anchor="middle" class="ch-label" style="fill:#0d47a1;">B+D</text>
+  <text x="830" y="353" class="label-xs">Die 0</text>
+
+  <!-- Top die / mould -->
+  <rect x="580" y="90" width="240" height="12" rx="2" fill="#ccc" stroke="#999" stroke-width="0.8"/>
+  <text x="700" y="100" text-anchor="middle" class="label-xs" style="fill:#666;">Top Die</text>
+
+  <!-- SID bit annotation -->
+  <line x1="570" y1="233" x2="570" y2="233" stroke="none"/>
+  <rect x="555" y="228" width="8" height="136" rx="1" fill="none" stroke="#e91e63" stroke-width="1.2" stroke-dasharray="3,2"/>
+  <text x="548" y="296" text-anchor="end" class="label-xs" style="fill:#e91e63; font-size:8px;" transform="rotate(-90, 548, 296)">SID bit selects upper/lower</text>
+
+  <!-- Capacity callout -->
+  <text x="700" y="500" text-anchor="middle" class="label-sm">8 dies × 2 GB/die = 16 GB per stack</text>
+  <text x="700" y="514" text-anchor="middle" class="label-xs">5 stacks on A100-80GB → 80 GB total</text>
+  <text x="700" y="528" text-anchor="middle" class="label-xs">Max 3.2 Gbps/pin → 410 GB/s per stack (HBM2e)</text>
+
+  <!-- Connecting annotation -->
+  <text x="480" y="560" text-anchor="middle" class="annot" style="font-size:10px;">
+    Both configurations: 8 channels × 2 pseudo channels = 16 independent access points per stack.
+  </text>
+  <text x="480" y="574" text-anchor="middle" class="annot" style="font-size:10px;">
+    8-High doubles capacity via SID (stack ID) addressing bit; bandwidth increase is from higher pin rate, not more channels.
+  </text>
+</svg>
