@@ -82,7 +82,7 @@ cost
 \]
 with weak reuse of $X$ and $M$ across threads and heavy global-memory traffic.
 This baseline is implemented in
-\path{code/profiling/experiments/tn_two_site_bad_direct.cu}.
+\path{tn_two_site_bad_direct.cu}.
 
 \subsection{Ordered Contraction Formulation}
 
@@ -97,7 +97,7 @@ This reduces asymptotic work to
   \BigO\!\left(B\,(d_p^2\chi + d_p\chi^2)\right),
 \]
 and maps directly to two strided-batched GEMMs. The implementation is
-\path{code/profiling/experiments/tn_two_site_good_batched_gemm.cu}.
+\path{tn_two_site_good_batched_gemm.cu}.
 
 \begin{figure}[H]
   \centering
@@ -275,6 +275,6 @@ shape-dependent parameters.
 \subsection{Profiling Reproducibility}
 
 The complete compile-and-profile job is provided as
-\path{code/profiling/ncu_tn_contraction_profile.slurm}.
+\path{ncu_tn_contraction_profile.slurm}.
 It collects the same KPI pack used in the other profiling sections and writes
 separate CSV files for both variants.

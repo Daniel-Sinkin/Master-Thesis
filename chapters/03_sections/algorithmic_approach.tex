@@ -216,6 +216,34 @@ A100 shared memory per SM (164 KiB) & \num{118} & \num{84} \\
   \label{fig:gemm-memory-capacity-a100}
 \end{figure}
 
+\paragraph{Precision choice amplifies all three advantages.}
+The numbers in \cref{tab:gemm-capacity-thresholds} make the compound effect of
+choosing FP32 over FP64 concrete for the A100. First, the maximum square tile
+that fits into a single SM's shared memory grows from $84 \times 84$ to
+$118 \times 118$---a $\sim$\!40\% increase in each dimension and roughly a
+$2\times$ increase in element count---which allows a thread block to cover a
+larger output region per launch and improves data reuse within the tile.
+Second, halving the element width from 8 to 4 bytes doubles the effective
+bandwidth of every level of the memory hierarchy (HBM, L2, shared memory),
+shifting the roofline ridge point to lower arithmetic intensities and
+widening the compute-bound regime where tensor cores are fully utilised.
+Third, the A100 provides $2\times$ the FP32 CUDA-core throughput and
+$8\times$ the effective FP32 tensor-core throughput (TF32) compared with
+FP64 (\cref{sec:a100-fp-throughput}). These three effects---larger tiles,
+doubled bandwidth, and higher compute ceilings---compound multiplicatively,
+which is why the FP32 roofline envelope in
+\cref{fig:roofline-a100-h100-combined} sits dramatically above the FP64
+envelope despite the same physical hardware.
+
+As argued in \cref{sec:fp32-argument}, the physics modelling in tensor
+network computations does not require FP64: bond-dimension truncation errors
+($10^{-4}$ to $10^{-6}$) dominate FP32 rounding ($\sim 10^{-7}$ per
+operation), iterative algorithms self-correct accumulated rounding, and the
+reduction lengths in typical contractions ($K$ in the low hundreds) keep FP32
+well within its reliable range (\cref{sec:floating-point-error}). Choosing
+FP32 is therefore not a precision compromise but an informed trade-off that
+unlocks substantially more of the hardware's capability.
+
 \subsubsection{Scaling-Bound Interpretation}\label{sec:amdahl-model}
 
 The canonical Amdahl and Gustafson scaling relations are defined in

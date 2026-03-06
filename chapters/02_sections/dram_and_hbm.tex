@@ -141,11 +141,11 @@ individual DRAM timing parameters ($t_\text{RCD}$, $t_\text{RP}$,
 $t_\text{CL}$) are comparable to conventional GDDR.
 
 \paragraph{Banks.}
-Within each pseudo channel, the DRAM array is partitioned into 16
-independently-activatable \emph{banks} (B0--B15). A bank is the smallest
-unit that can hold an open row: each bank has its own row buffer (sense
-amplifier latch), so accesses to different banks can overlap without
-incurring row-switch penalties. In the 4-Hi configuration each channel has
+Within each pseudo channel the DRAM array is partitioned into 16
+\emph{banks} (B0--B15) that can be activated independently.
+A bank is the smallest unit that can hold an open row: each bank has its
+own row buffer (sense-amplifier latch), so accesses to different banks
+can overlap without incurring row-switch penalties. In the 4-Hi configuration each channel has
 16 banks; in 8-Hi, two dies contribute to the same channel, yielding
 $2 \times 16 = 32$ banks per channel (distinguished by a \emph{stack ID}
 bit that selects the upper or lower memory die)~\cite{micron2021hbm2e}.

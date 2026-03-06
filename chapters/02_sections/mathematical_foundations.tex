@@ -54,7 +54,7 @@ For weak scaling with scaled problem size, Gustafson's relation is
 These bounds are used to interpret node-level scaling results in
 \cref{sec:scaling}~\cite{amdahl1967validity,gustafson1988reevaluating}.
 
-\subsection{Floating-Point Error Model}
+\subsection{Floating-Point Error Model}\label{sec:floating-point-error}
 
 For one floating-point operation, we use the standard model
 \[
@@ -116,6 +116,36 @@ paths: IEEE-754 FMA semantics avoid intermediate rounding between multiply and
 add~\cite{ieee754-2019}, and Ampere TF32 tensor-core execution keeps
 accumulation in FP32~\cite{nvidia2020a100}, reducing the impact of repeated
 low-precision reduction steps.
+
+\paragraph{How far can FP32 be pushed?}
+Two failure modes bound the useful range of single precision.
+
+\emph{Complete absorption.}
+Absorption occurs when a small addend falls below the unit in the last place
+(ULP) of the larger operand and is rounded away entirely.
+In FP16 this happens easily: \cref{sec:fp-formats} shows that
+$\mathrm{fl}_{16}(1024 + 0.5) = 1024$ because the exponent gap of 11 exceeds
+the 10 fraction bits. In FP32 the 23 fraction bits provide far more headroom:
+absorption requires an exponent difference of at least 24, so
+$\mathrm{fl}_{32}(2^{24} + 1) = 2^{24}$ (the addend~1 is exactly one ULP
+below the representable granularity at magnitude $2^{24} = 16\,777\,216$).
+In practice, absorption in FP32 only becomes a concern when accumulating
+values whose magnitudes span roughly seven orders of magnitude or more.
+
+\emph{Accumulated rounding in long reductions.}
+For a length-$k$ summation of positive values, the $\gamma_k$ bound above
+gives a worst-case relative error of $ku/(1-ku)$ with $u = 2^{-24} \approx
+5.96 \times 10^{-8}$ for FP32. At $k = 1000$
+this evaluates to $\gamma_{1000} \approx 6 \times 10^{-5}$, meaning roughly
+4 out of 7--8 decimal digits remain reliable. At $k = 10\,000$ the bound
+grows to $\gamma_{10000} \approx 6 \times 10^{-4}$, leaving only 3 reliable
+digits. For comparison, FP64 ($u = 2^{-53}$) at $k = 1000$ gives
+$\gamma_{1000} \approx 10^{-13}$, keeping 13 digits intact.
+In the tensor contractions studied here, reduction lengths are typically in
+the low hundreds (set by the contraction dimension $K$), so FP32 retains
+5--6 reliable digits per contraction---well above the $10^{-4}$ to
+$10^{-6}$ truncation error inherent in finite bond-dimension
+approximations (\cref{sec:fp32-argument}).
 
 \subsection{Timing Statistics}
 

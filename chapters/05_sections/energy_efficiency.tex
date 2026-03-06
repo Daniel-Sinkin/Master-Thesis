@@ -157,9 +157,9 @@ energy remains out of scope.
 
 To test whether data values alone can measurably change GPU board power at
 fixed kernel structure, a controlled SGEMM sweep is added in
-\texttt{code/profiling/phenomena/phenomenon\_gemm\_value\_switching.cu}.
-The kernel shape $(M,N,K)$, launch configuration, and software stack are kept
-constant; only the matrix initialization changes:
+\path{phenomenon_gemm_value_switching.cu}.
+The kernel shape $(M,N,K)$, launch configuration, and software stack are
+kept constant; only the matrix initialization changes:
 \begin{enumerate}
   \item all zeros,
   \item periodic zeros (every 2nd/3rd/4th/5th element),
@@ -168,7 +168,7 @@ constant; only the matrix initialization changes:
 \end{enumerate}
 
 The associated SLURM runner
-\texttt{code/profiling/phenomena/slurm/09\_gemm\_value\_switching\_energy.slurm}
+\texttt{09\_gemm\_value\_switching\_energy.slurm}
 captures per-mode runtime CSV files and per-mode \texttt{nvidia-smi}
 power traces, so energy can be integrated mode-by-mode with the protocol above.
 Industry talks regularly motivate this with switching-activity arguments
@@ -217,10 +217,10 @@ Mode labels \texttt{zero/$n$} denote periodic-zero initialization where every
 $n$-th element is set to zero.
 
 With the currently imported modes, throughput remains near FP32 peak while
-board power separates strongly by input pattern. Relative to \texttt{all\_zero},
-\texttt{zero\_every\_2} increases normalized energy by about $38\%$,
-\texttt{zero\_every\_4} by about $51\%$, and \texttt{zero\_every\_3} by about
-$63\%$. This indicates a clear value-pattern energy effect without a comparable
+board power separates strongly by input pattern.  Relative to
+\texttt{all\_zero}, \texttt{zero\_every\_2} increases normalized energy by
+about $38\%$, \texttt{zero\_every\_4} by about $51\%$, and
+\texttt{zero\_every\_3} by about $63\%$. This indicates a clear value-pattern energy effect without a comparable
 throughput shift in the same runs.
 
 Expected outcome from prior work:
