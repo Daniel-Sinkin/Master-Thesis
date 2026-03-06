@@ -4,6 +4,24 @@ This appendix collects hardware/economic background and extended node-path
 modeling details that support interpretation but are not required for reading
 the main optimisation narrative.
 
+\section{GA100 Full Die Floorplan}\label{sec:ga100-floorplan-appendix}
+
+\Cref{fig:ga100-full-landscape} reproduces the GA100 floorplan from the main
+text (\cref{fig:ga100-full}) at full page width for legibility. All GPC,
+memory-controller, L2, and NVLink/PCIe labels are readable at this scale.
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth]{GA100Full}
+  \caption{Full GA100 floorplan schematic (landscape view). Graphics processing
+  clusters (GPCs), L2 cache fabric, memory controllers, and NVLink/PCIe
+  interfaces are shown. Compare with \cref{fig:ga100-full} in the main text
+  and the per-SM detail in \cref{fig:sm-breakdown}.}
+  \label{fig:ga100-full-landscape}
+\end{figure}
+\end{landscape}
+
 \section{GA100 Yield Sensitivity (TSMC N7, Approximate)}
 \label{sec:ga100-yield-appendix}
 
