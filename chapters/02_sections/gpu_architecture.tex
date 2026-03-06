@@ -395,10 +395,9 @@ Hence, the switch penalty relative to a hit is
 $T_{\text{switch}}/T_{\text{hit}}$. Representative HBM/HBM2 timing values
 reported in the memory-systems literature are near-symmetric
 ($t_{\mathrm{RP}} \approx t_{\mathrm{RCD}} \approx t_{\mathrm{CL}} \approx
-\SI{14}{\nano\second}$), which gives a $\approx 3\times$ row-switch cost in the
-same way as the \num{16}/\num{16}/\num{16}-cycle example used in
-the NVIDIA GTC explanation (\num{48} cycles for switch versus \num{16} for a
-column read)~\cite{li2018highspeed-dram,jones2022cuda-how-works}.
+\SI{14}{\nano\second}$), which gives a $\approx 3\times$ row-switch cost (\num{48} cycles for a full
+switch versus \num{16} for a column
+read)~\cite{li2018highspeed-dram,jones2022cuda-how-works}.
 
 For kernel design, this matters because row-buffer hits are cheaper than
 repeated row switches in the same bank. Coalesced accesses and shape-bucketed

@@ -48,23 +48,33 @@ The scaling factor makes $\hat\sigma_{\mathrm{rob}}$ comparable to a standard
 deviation under a normal reference model, while retaining robustness under
 heavy-tailed noise~\cite{huber2009robust}.
 
-Uncertainty of the median is reported with a nonparametric bootstrap confidence
-interval. With $B$ resamples (typically $B=1000$), let
-$\tilde t^{(b)}$ be the median of bootstrap replicate $b$. The percentile
-interval is
-\[
-  \mathrm{CI}_{95\%} =
-  \Bigl[q_{0.025}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right),
-        q_{0.975}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right)\Bigr],
-\]
-which avoids normality assumptions on runtime samples~\cite{efron1994bootstrap}.
+Uncertainty of the median is reported with a nonparametric bootstrap
+confidence interval~\cite{efron1994bootstrap}. The procedure is:
+
+\begin{enumerate}
+  \item Draw $B$ resamples (typically $B = 1000$) from the original
+    $n$ timing samples, each resample obtained by sampling $n$ values
+    uniformly at random \emph{with replacement}.
+  \item Compute the median of each resample, producing $B$ bootstrap
+    medians $\tilde t_1^{*},\,\tilde t_2^{*},\,\dots,\,\tilde t_B^{*}$.
+  \item Sort the bootstrap medians and take the 2.5th and 97.5th
+    percentiles as the lower and upper bounds of the 95\% confidence
+    interval.
+\end{enumerate}
+
+\noindent
+This avoids any normality assumption on the runtime distribution, which is
+important because GPU timing samples are frequently skewed by OS jitter and
+scheduling noise.
 
 For stability reporting, we also track the robust relative spread
 \[
   \mathrm{RRS} = \frac{\hat\sigma_{\mathrm{rob}}}{\tilde t},
 \]
-and increase repetition count when RRS is high. This keeps timing conclusions
-stable in short benchmark campaigns.
+which expresses dispersion as a fraction of the central estimate. When RRS
+exceeds a threshold (typically 1--2\%), we increase the repetition count
+before drawing conclusions. This keeps timing results stable even in short
+benchmark campaigns.
 
 \section{Floating-Point Worked Examples}\label{app:fp-worked-examples}
 
