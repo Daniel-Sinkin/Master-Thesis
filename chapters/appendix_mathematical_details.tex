@@ -1,0 +1,150 @@
+\chapter{Mathematical and Numerical Details}\label{app:math-details}
+
+This appendix collects derivations, worked examples, and statistical
+definitions that support the main text but are not required for the core
+optimisation narrative. They are gathered here so that the background
+chapter can focus on concepts and key results.
+
+\section{Parallel Scaling Formulas}\label{app:scaling-formulas}
+
+Given runtime $T_p$ on $p$ processing units, speedup and parallel efficiency are
+\[
+  S_p=\frac{T_1}{T_p},
+  \qquad
+  E_p=\frac{S_p}{p}.
+\]
+For strong scaling with serial fraction $f_s$, Amdahl's bound is
+\[
+  S_p \le \frac{1}{f_s + \frac{1-f_s}{p}}.
+\]
+For weak scaling with scaled problem size, Gustafson's relation is
+\[
+  S_p \approx p - f_s(p-1).
+\]
+These bounds are used to interpret node-level scaling results in
+\cref{sec:scaling}~\cite{amdahl1967validity,gustafson1988reevaluating}.
+
+\section{Timing Statistics}\label{app:timing-stats}
+
+For repeated runtime samples $\{t_i\}_{i=1}^n$, the sample median is the
+primary point estimate
+\[
+  \tilde t = \operatorname{median}(t_i)
+\]
+because it is robust to occasional outliers from
+scheduler and system noise. This is preferable to the arithmetic mean when
+runtime distributions are skewed or contain sporadic long-tail events from OS,
+driver, or queue interference~\cite{jain1991art,kalibera2013rigorous}.
+
+Dispersion is tracked with the median absolute deviation (MAD):
+\[
+  \operatorname{MAD} = \operatorname{median}\!\left(|t_i-\tilde t|\right),
+\]
+and a robust spread estimate
+\[
+  \hat\sigma_{\mathrm{rob}} \approx 1.4826 \cdot \operatorname{MAD}.
+\]
+The scaling factor makes $\hat\sigma_{\mathrm{rob}}$ comparable to a standard
+deviation under a normal reference model, while retaining robustness under
+heavy-tailed noise~\cite{huber2009robust}.
+
+Uncertainty of the median is reported with a nonparametric bootstrap confidence
+interval. With $B$ resamples (typically $B=1000$), let
+$\tilde t^{(b)}$ be the median of bootstrap replicate $b$. The percentile
+interval is
+\[
+  \mathrm{CI}_{95\%} =
+  \Bigl[q_{0.025}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right),
+        q_{0.975}\!\left(\{\tilde t^{(b)}\}_{b=1}^B\right)\Bigr],
+\]
+which avoids normality assumptions on runtime samples~\cite{efron1994bootstrap}.
+
+For stability reporting, we also track the robust relative spread
+\[
+  \mathrm{RRS} = \frac{\hat\sigma_{\mathrm{rob}}}{\tilde t},
+\]
+and increase repetition count when RRS is high. This keeps timing conclusions
+stable in short benchmark campaigns.
+
+\section{Floating-Point Worked Examples}\label{app:fp-worked-examples}
+
+The following step-by-step examples illustrate the encoding rules,
+absorption, and truncation effects described in
+\cref{sec:fp-formats}. They are included for reference and can be
+skipped by readers familiar with IEEE~754 arithmetic.
+
+\subsection{Encoding a Decimal Number in FP16}\label{app:fp16-encoding}
+
+The decimal number $0.15625_{10}$ has the binary representation $0.00101_2$ because
+\[
+  0.15625 = \frac{1}{8} + \frac{1}{32} = 0 \times 2^{-1} + 0 \times 2^{-2} + 1 \times 2^{-3} + 0 \times 2^{-4} + 1 \times 2^{-5}
+\]
+holds. To express this as an FP16 number we write it in normalised form,
+\[
+0.00101_2 = 1.01_2 \times 2^{-3},
+\]
+and match it against \cref{eq:ieee754}: the sign is $s = 0$ (positive), the true exponent is $-3$, and the stored exponent is $e = -3 + 15 = 12 = 01100_2$. The fraction field stores the bits after the implicit leading~1, i.e.\ $01$ padded with zeros to 10~bits. The complete bit representation is therefore
+\[
+  \underbrace{0}_{\text{sign}} \;|\; \underbrace{01100}_{\text{exp}} \;|\; \underbrace{0100000000}_{\text{mantissa}}.
+\]
+
+\subsection{Absorption in FP16 Addition}\label{app:fp16-absorption}
+
+Consider adding $1024.0$ and $0.5$ in half precision.
+The value $1024.0 = 1.0 \times 2^{10}$ is stored as
+\[
+    \underbrace{0}_{\text{sign}} \;|\; \underbrace{11001}_{\text{exp}=25} \;|\; \underbrace{0000000000}_{\text{mantissa}},
+\]
+while $0.5 = 1.0 \times 2^{-1}$ is stored as
+\[
+    \underbrace{0}_{\text{sign}} \;|\; \underbrace{01110}_{\text{exp}=14} \;|\; \underbrace{0000000000}_{\text{mantissa}}.
+\]
+To perform the addition, the hardware aligns the exponents by shifting the smaller operand's significand to the right by $10 - (-1) = 11$ positions:
+\[
+    0.5 = \underbrace{0.00000000001}_{\text{11 places after the radix point}} \times 2^{10}.
+\]
+Since FP16 retains only 10 fraction bits after the implicit leading~1, the shifted significand falls entirely outside the representable precision and is rounded to zero. The result is $1024.0$---the smaller operand has been \emph{absorbed}.
+
+Had the same computation been carried out in FP32 (23 fraction bits), the shift of 11~places is well within the available precision and the result is correctly obtained as $1024.5$. This example illustrates why mixed-precision strategies---performing arithmetic at higher precision than the storage format---can recover accuracy at modest cost.
+
+\subsection{TF32 Truncation in a Matrix Multiply}\label{app:tf32-example}
+
+The A100 tensor cores accept FP32 inputs but internally truncate the significand from 23 to 10 fraction bits before performing the multiply, while the accumulation remains in full FP32. To see the effect, consider two $2 \times 2$ matrices with entries drawn from familiar constants:
+\[
+    A = \begin{pmatrix} 3.1415927 & 1.2345679 \\ 2.7182817 & 0.9876543 \end{pmatrix}, \qquad
+    B = \begin{pmatrix} 0.9876543 & 2.7182817 \\ 1.2345679 & 3.1415927 \end{pmatrix}.
+\]
+After TF32 truncation, the entries lose their lower 13 significand bits:
+\[
+    \tilde{A} = \begin{pmatrix} 3.1406250 & 1.2343750 \\ 2.7167969 & 0.9873047 \end{pmatrix}, \qquad
+    \tilde{B} = \begin{pmatrix} 0.9873047 & 2.7167969 \\ 1.2343750 & 3.1406250 \end{pmatrix}.
+\]
+The tensor core computes $C_{\text{TF32}} = \tilde{A}\,\tilde{B}$ with the multiplies at TF32 precision and the accumulation in FP32, giving
+\[
+    C_{\text{TF32}} =
+    \begin{pmatrix} 4.6244 & 12.4091 \\ 3.9010 & 10.4817 \end{pmatrix},
+\]
+whereas exact FP32 arithmetic yields
+\[
+    C_{\text{FP32}} = A\,B =
+    \begin{pmatrix} 4.6270 & 12.4182 \\ 3.9040 & 10.4919 \end{pmatrix}.
+\]
+The relative error in each entry is on the order of $5 \times 10^{-4}$ to $10^{-3}$, consistent with TF32's machine epsilon of $\varepsilon \approx 9.8 \times 10^{-4}$.
+
+\subsection{Fused Multiply-Add: Single vs.\ Double Rounding}\label{app:fma-example}
+
+Modern GPU floating-point units implement the \emph{fused multiply-add} (FMA) operation
+\[
+    \operatorname{fma}(a, b, c) = \operatorname{round}(a \times b + c),
+\]
+where the product $a \times b$ is computed to \emph{full} (unrounded) precision before the addition and only a single rounding step is applied to the final result. By contrast, the non-fused sequence
+\[
+    t = \operatorname{round}(a \times b), \qquad r = \operatorname{round}(t + c)
+\]
+incurs two rounding errors. The difference is most visible when $a \times b$ and $c$ are of similar magnitude but opposite sign, so that their sum is much smaller than either operand.
+
+As a concrete example, let $a = b = 1 + 2^{-12}$ and $c = -(1 + 2^{-11})$, all exactly representable in FP32. The exact product is
+\[
+    a \times b = (1 + 2^{-12})^2 = 1 + 2^{-11} + 2^{-24},
+\]
+so the exact result is $a \times b + c = 2^{-24} \approx 5.96 \times 10^{-8}$. In the non-fused path, the intermediate rounding of $a \times b$ to FP32 discards the $2^{-24}$ term (which is below one unit in the last place at magnitude ${\approx}\,1$), yielding $t = 1 + 2^{-11}$, and consequently $r = t + c = 0$---a complete loss of the true result. The FMA, retaining the full product before the addition, returns $2^{-24}$ correctly.

@@ -98,6 +98,30 @@ adding more channels and banks. This observation---articulated clearly
 by Li et al.~\cite{li2018highspeed-dram}---explains why the HBM approach (massively
 wider buses rather than faster pins) is so effective.
 
+\paragraph{Where bandwidth is lost in practice.}
+Even with wide buses and many banks, achieved DRAM bandwidth is always
+below the theoretical peak. Eyerman et al.~\cite{eyerman2022dram-stacks}
+introduce \emph{bandwidth stacks} and \emph{latency stacks} as a
+decomposition methodology: for each memory-controller cycle that does
+\emph{not} transfer useful data, the lost bandwidth is attributed to a
+specific cause---row-buffer misses (precharge + activate overhead), DRAM
+refresh, bus turnaround between reads and writes, or queuing delays from
+timing constraints. Their analysis shows that row conflicts and refresh
+overhead are often the dominant bandwidth losses, while write-to-read bus
+turnaround becomes significant in mixed read/write traffic.
+
+This decomposition connects directly to GPU kernel design. Coalesced
+warp accesses maximise row-buffer hit rates, reducing the
+precharge/activate fraction. Tiled algorithms that operate on contiguous
+blocks of memory reduce the frequency of row switches within a bank.
+And because HBM refresh is non-negotiable (the 1T1C cell requires it),
+the refresh overhead sets a hard floor on bandwidth loss that no access
+pattern can avoid. The practical implication is that an HBM channel
+delivering 90--95\% of its peak bandwidth under a perfectly sequential
+stream is already close to optimal; the kernel optimiser's job is to
+keep real workloads as close to that ceiling as
+possible~\cite{eyerman2022dram-stacks,li2018highspeed-dram}.
+
 \subsubsection{High Bandwidth Memory}\label{sec:hbm-architecture}
 
 JEDEC's High Bandwidth Memory standard addresses the bandwidth gap by using
@@ -106,7 +130,11 @@ die~\cite{jedec2013hbm,jedec2016hbm2,jedec2020hbm2e}. The stack communicates
 internally via \emph{through-silicon vias} (TSVs)---vertical conductors
 etched through the silicon substrate---which enable a very wide parallel bus
 within the stack (1024 data bits across 8 independent channels of 128 bits
-each).
+each). Jun et al.~\cite{jun2017hbm} describe the core engineering
+challenges of this stacking approach---TSV reliability, thermal dissipation
+through the stack, and high-throughput testing of individual dies before
+assembly---and provide a generational comparison of the HBM family from the
+manufacturer's perspective.
 
 The entire HBM stack is mounted on a \emph{silicon interposer} alongside the
 GPU die, forming a \emph{system-in-package} (SiP). This 2.5D packaging
@@ -182,6 +210,37 @@ addressable units.
   \label{fig:hbm2e-die-topdown}
 \end{figure}
 
+\paragraph{HBM generation roadmap.}
+\Cref{tab:hbm-generations} summarises the key parameters across HBM
+generations relevant to datacenter GPUs. Through HBM2e the 1024-bit bus
+and 8-channel topology are preserved; bandwidth scaling comes almost
+entirely from increasing the per-pin data rate, while capacity scaling
+comes from stacking more dies (4-Hi $\to$ 8-Hi $\to$ 12-Hi) and from
+denser per-die DRAM arrays. HBM3/3e doubles the channel count to~16
+(each now 64-bit) while retaining the 1024-bit aggregate
+width~\cite{jun2017hbm,jedec2020hbm2e}.
+
+\begin{table}[H]
+\centering
+\caption{HBM generation comparison for datacenter-relevant configurations.
+  Data compiled from JEDEC standards~\cite{jedec2013hbm,jedec2016hbm2,jedec2020hbm2e}
+  and Jun et al.~\cite{jun2017hbm}.}
+\label{tab:hbm-generations}
+\begin{tabular}{l c c c c c}
+\toprule
+& HBM & HBM2 & HBM2e & HBM3 & HBM3e \\
+\midrule
+JEDEC adoption         & 2013    & 2016    & 2018     & 2022    & 2023 \\
+Pin data rate          & 1 Gbps  & 2 Gbps  & 3.2 Gbps & 6.4 Gbps & 9.6 Gbps \\
+Bus width (bits)       & 1024    & 1024    & 1024     & 1024    & 1024 \\
+Channels per stack     & 8       & 8       & 8        & 16      & 16 \\
+Max stack height       & 4-Hi    & 8-Hi    & 8-Hi     & 8/12-Hi & 12-Hi \\
+Max capacity / stack   & 4 GB    & 8 GB    & 16 GB    & 24 GB   & 36 GB \\
+BW per stack           & 128 GB/s & 256 GB/s & 410 GB/s & 819 GB/s & 1229 GB/s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsubsection{HBM2e vs.\ GDDR6(X) and the A100 Memory Subsystem}
 \label{sec:hbm-generations}
 
@@ -256,4 +315,12 @@ modeling in later chapters:
     configuration used in A100-40GB). The quantitative impact of this
     bandwidth difference on roofline modeling is developed in
     \cref{sec:a100-40-80}.
+  \item \textbf{Hopper generation.} The H100-SXM5-80GB (2022) moved to
+    HBM3 with six stacks of \SI{13.3}{GB} each, providing \SI{80}{GB} at
+    \SI{3350}{GB/s}~\cite{nvidia2022h100}. The H200 (2024) shares the
+    same GH100 die but upgrades to HBM3e: six stacks totalling
+    \SI{141}{GB} at \SI{4800}{GB/s}. This pattern---same compute die,
+    upgraded memory---mirrors the A100-40GB$\to$80GB transition and
+    illustrates that memory technology often advances faster than a
+    GPU generation cycle.
 \end{enumerate}

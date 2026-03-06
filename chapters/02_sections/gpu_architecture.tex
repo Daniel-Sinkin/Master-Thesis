@@ -44,8 +44,13 @@ contains:
   \item \textbf{Execution units:} 16 INT32 cores, 16 FP32 cores, 8 FP64 
     cores, and one third-generation tensor core.
   \item \textbf{8 LD/ST units} for issuing memory load and store operations.
-  \item \textbf{4 SFUs} (Special Function Units) for transcendental operations 
-    such as \texttt{sin}, \texttt{exp}, and reciprocal square root.
+  \item \textbf{4 SFUs} (Special Function Units) that execute reciprocal
+    ($1/x$), reciprocal square root ($1/\sqrt{x}$), and transcendental
+    instructions (\texttt{sin}, \texttt{cos}, \texttt{exp}, \texttt{log}).
+    Each SFU produces one result per cycle per thread, so a full warp of 32
+    threads requires 8 cycles on 4 SFUs. Because SFU throughput is much
+    lower than the main FP32 pipeline, heavy use of transcendentals can
+    become a bottleneck in kernels that otherwise appear compute-light.
   \item A \textbf{read-only/texture path} for cached read-mostly memory access.
   \item An \textbf{L0 instruction cache} private to the processing block.
 \end{itemize}
@@ -64,6 +69,25 @@ For capacity accounting, the A100 limit of \num{64} resident warps
 (\num{512} threads) per processing block under an even split across the four
 sub-partitions. Across \num{108} active SMs, this gives a device-level maximum
 of \num{6912} resident warps and \num{221184} resident threads.
+
+\paragraph{The memory wall on GPUs.}
+Despite the abundance of arithmetic units listed above, memory access
+patterns---not compute efficiency---are the dominant determinant of GPU
+kernel performance. This asymmetry has been understood since at least
+Wulf and McKee's observation that processor speed outpaces memory speed
+by a widening margin~\cite{wulf1995memory-wall}, and it has only
+intensified on GPUs: on the A100, peak FP32 throughput is
+\SI{19.5}{\tera\flops} while peak HBM bandwidth is
+\SI{1555}{\giga\byte\per\second}, giving a ratio of roughly
+$12.5$~FP32 FLOPs per byte---any kernel whose arithmetic intensity
+falls below this ridge point is entirely bandwidth-limited and gains
+nothing from faster arithmetic. In practice, the majority of
+tensor-network contractions encountered in this work fall into or near
+the memory-bound regime, which means that optimising data layout,
+access coalescing, and on-chip reuse through shared-memory tiling
+yields far larger speedups than micro-optimising the compute
+pipeline. This observation guides the entire optimisation strategy
+developed in \cref{ch:design,ch:implementation}.
 
 \subsection{What Matters in A100 for This Work}\label{sec:a100-whats-new}
 
@@ -88,6 +112,56 @@ For performance modeling, we use the canonical roofline framework
 defined in \cref{sec:math-foundations}. For A100-SXM4-40GB, the FP32 ridge
 point is approximately $I^\star\approx 12.5$ FLOPs/byte, used as the practical
 memory-vs-compute regime threshold in later optimisation chapters.
+
+\paragraph{Compute capability and cross-generation compatibility.}
+NVIDIA identifies each GPU architecture by a \emph{compute capability} (CC)
+version that determines the available instruction set, hardware limits, and
+features. The A100 is CC~8.0 (Ampere); its predecessor V100 is CC~7.0
+(Volta), and the successor H100 is CC~9.0 (Hopper).
+
+Each CC increment can introduce instructions that are unavailable on older
+hardware. For example, CC~8.0 added hardware-accelerated asynchronous
+global-to-shared memory copies (\texttt{cp.async}) that do not exist on
+CC~7.0, while CC~9.0 introduced the Thread Block Cluster abstraction and
+the Tensor Memory Accelerator (TMA) for bulk asynchronous data movement
+that has no CC~8.0 equivalent. Conversely, higher-CC devices can usually
+run code compiled for a lower CC through forward compatibility, but
+without benefiting from new features.
+
+\Cref{tab:cc-functional-units} summarises the per-SM functional-unit
+counts across the three datacenter generations relevant to this work.
+The FP64:FP32 ratio is 1:2 on all three (full-rate FP64 is a datacenter
+feature; consumer parts such as CC~8.6 reduce it dramatically). Hopper
+doubles every major unit count relative to Ampere, but also doubles SM
+area, so per-SM efficiency remains similar; the aggregate gain comes from
+the higher SM count and faster clock.
+
+\begin{table}[H]
+\centering
+\caption{Per-SM functional-unit counts for the three datacenter compute
+  capabilities discussed in this work. Data compiled from NVIDIA
+  architecture whitepapers~\cite{nvidia2017volta,nvidia2020a100,nvidia2022h100}.}
+\label{tab:cc-functional-units}
+\begin{tabular}{l c c c}
+\toprule
+Unit type (per SM) & V100 (CC~7.0) & A100 (CC~8.0) & H100 (CC~9.0) \\
+\midrule
+FP32 CUDA cores      & 64  & 64  & 128 \\
+FP64 CUDA cores      & 32  & 32  & 64  \\
+INT32 cores           & 64  & 64  & 64  \\
+Tensor cores          & 8   & 4   & 4   \\
+SFU                   & 16  & 16  & 16  \\
+LD/ST units           & 16  & 16  & 32  \\
+Active SMs (product)  & 80  & 108 & 132 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In practice, this means kernels compiled for \texttt{sm\_80} run on both
+A100 and H100, but kernels using H100-specific intrinsics (e.g.\
+\texttt{cluster\_sync}, TMA descriptors) will not run on
+A100~\cite{nvidia-cuda-guide}. All kernels in this work target
+\texttt{sm\_80} to maximise portability across CC~$\geq$~8.0 devices.
 
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
@@ -168,83 +242,34 @@ Two observations are relevant here. First, TF32 and BF16 share the same 8-bit ex
 
 Second, FP16 has a severely limited dynamic range (maximum value $65504$), which makes it unsuitable for many scientific workloads without careful scaling. BF16 (``brain floating point''), originally developed for deep learning training on Google's TPUs~\cite{kalamkar2019bfloat16}, avoids this limitation by retaining the FP32 exponent range at the cost of reduced precision (7 fraction bits versus 10 for FP16).
 
-\subsubsection{Examples}
-\paragraph{Example: Encoding a decimal number in FP16.}
-decimal number $0.15625_{10}$ has the binary representation $0.00101_2$ because
-\[
-  0.15625 = \frac{1}{8} + \frac{1}{32} = 0 \times 2^{-1} + 0 \times 2^{-2} + 1 \times 2^{-3} + 0 \times 2^{-4} + 1 \times 2^{-5}
-\]
-holds. To express this as an FP16 number we write it in normalised form,
-\[
-0.00101_2 = 1.01_2 \times 2^{-3},
-\]
-and match it against \cref{eq:ieee754}: the sign is $s = 0$ (positive), the true exponent is $-3$, and the stored exponent is $e = -3 + 15 = 12 = 01100_2$. The fraction field stores the bits after the implicit leading~1, i.e.\ $01$ padded with zeros to 10~bits. The complete bit representation is therefore
-\[
-  \underbrace{0}_{\text{sign}} \;|\; \underbrace{01100}_{\text{exp}} \;|\; \underbrace{0100000000}_{\text{mantissa}}.
-\]
+\subsubsection{Practical Implications}
 
-\paragraph{Example: Absorption in FP16 addition.}
-Consider adding $1024.0$ and $0.5$ in half precision.
-The value $1024.0 = 1.0 \times 2^{10}$ is stored as
-\[
-    \underbrace{0}_{\text{sign}} \;|\; \underbrace{11001}_{\text{exp}=25} \;|\; \underbrace{0000000000}_{\text{mantissa}},
-\]
-while $0.5 = 1.0 \times 2^{-1}$ is stored as
-\[
-    \underbrace{0}_{\text{sign}} \;|\; \underbrace{01110}_{\text{exp}=14} \;|\; \underbrace{0000000000}_{\text{mantissa}}.
-\]
-To perform the addition, the hardware aligns the exponents by shifting the smaller operand's significand to the right by $10 - (-1) = 11$ positions:
-\[
-    0.5 = \underbrace{0.00000000001}_{\text{11 places after the radix point}} \times 2^{10}.
-\]
-Since FP16 retains only 10 fraction bits after the implicit leading~1, the shifted significand falls entirely outside the representable precision and is rounded to zero. The result is $1024.0$---the smaller operand has been \emph{absorbed}.
+Three effects of the bit-level representation are worth highlighting;
+step-by-step worked examples are given in \cref{app:fp-worked-examples}.
 
-Had the same computation been carried out in FP32 (23 fraction bits), the shift of 11~places is well within the available precision and the result is correctly obtained as $1024.5$. This example illustrates why mixed-precision strategies---performing arithmetic at higher precision than the storage format---can recover accuracy at modest cost.
+\paragraph{Absorption.}
+When two operands differ by more exponent bits than the format has fraction
+bits, the smaller operand is rounded away entirely. In FP16 this happens
+easily (e.g.\ $\mathrm{fl}_{16}(1024 + 0.5) = 1024$), while FP32's 23
+fraction bits make absorption a concern only when magnitudes span roughly
+seven orders of magnitude or more.
 
-\paragraph{Example: TF32 truncation in a matrix multiply.}
-The A100 tensor cores accept FP32 inputs but internally truncate the significand from 23 to 10 fraction bits before performing the multiply, while the accumulation remains in full FP32. To see the effect, consider two $2 \times 2$ matrices with entries drawn from familiar constants:
-\[
-    A = \begin{pmatrix} 3.1415927 & 1.2345679 \\ 2.7182817 & 0.9876543 \end{pmatrix}, \qquad
-    B = \begin{pmatrix} 0.9876543 & 2.7182817 \\ 1.2345679 & 3.1415927 \end{pmatrix}.
-\]
-After TF32 truncation, the entries lose their lower 13 significand bits:
-\[
-    \tilde{A} = \begin{pmatrix} 3.1406250 & 1.2343750 \\ 2.7167969 & 0.9873047 \end{pmatrix}, \qquad
-    \tilde{B} = \begin{pmatrix} 0.9873047 & 2.7167969 \\ 1.2343750 & 3.1406250 \end{pmatrix}.
-\]
-The tensor core computes $C_{\text{TF32}} = \tilde{A}\,\tilde{B}$ with the multiplies at TF32 precision and the accumulation in FP32, giving
-\[
-    C_{\text{TF32}} =
-    \begin{pmatrix} 4.6244 & 12.4091 \\ 3.9010 & 10.4817 \end{pmatrix},
-\]
-whereas exact FP32 arithmetic yields
-\[
-    C_{\text{FP32}} = A\,B =
-    \begin{pmatrix} 4.6270 & 12.4182 \\ 3.9040 & 10.4919 \end{pmatrix}.
-\]
-The relative error in each entry is on the order of $5 \times 10^{-4}$ to $10^{-3}$, consistent with TF32's machine epsilon of $\varepsilon \approx 9.8 \times 10^{-4}$.
+\paragraph{TF32 truncation error.}
+Because TF32 tensor-core execution truncates inputs to 10 fraction bits
+before multiply-accumulate, individual entry errors are on the order of
+$\varepsilon_{\text{TF32}} \approx 10^{-3}$, but FP32 accumulation and the
+statistical averaging over many products keep aggregate errors well below
+the truncation error of finite bond-dimension
+approximations~\cite{markidis2018tensorcore-precision,haidar2018tensorcore-ir,fasi2023multiword-tensorcore}.
 
-In practice, the entries of typical tensor contractions are not deliberately crafted to maximise the impact of truncation, and FP32 accumulation across many products reduces the effect of individual input truncations. For scientific kernels, this still requires workload-specific validation, but the underlying mixed-precision behavior is now well studied for tensor-core GEMMs and linear solves~\cite{markidis2018tensorcore-precision,haidar2018tensorcore-ir,fasi2023multiword-tensorcore}.
-
-\paragraph{Remark: Fused multiply-add and single rounding.}
-Modern GPU floating-point units implement the \emph{fused multiply-add} (FMA) operation
-\[
-    \operatorname{fma}(a, b, c) = \operatorname{round}(a \times b + c),
-\]
-where the product $a \times b$ is computed to \emph{full} (unrounded) precision before the addition and only a single rounding step is applied to the final result. By contrast, the non-fused sequence
-\[
-    t = \operatorname{round}(a \times b), \qquad r = \operatorname{round}(t + c)
-\]
-incurs two rounding errors. The difference is most visible when $a \times b$ and $c$ are of similar magnitude but opposite sign, so that their sum is much smaller than either operand.
-This single-rounding property is a core reason FMA-based formulations often have tighter forward error than separate multiply/add sequences~\cite{ieee754-2019,higham2002accuracy,jeannerod2017fma-complex}.
-
-As a concrete example, let $a = b = 1 + 2^{-12}$ and $c = -(1 + 2^{-11})$, all exactly representable in FP32. The exact product is
-\[
-    a \times b = (1 + 2^{-12})^2 = 1 + 2^{-11} + 2^{-24},
-\]
-so the exact result is $a \times b + c = 2^{-24} \approx 5.96 \times 10^{-8}$. In the non-fused path, the intermediate rounding of $a \times b$ to FP32 discards the $2^{-24}$ term (which is below one unit in the last place at magnitude ${\approx}\,1$), yielding $t = 1 + 2^{-11}$, and consequently $r = t + c = 0$---a complete loss of the true result. The FMA, retaining the full product before the addition, returns $2^{-24}$ correctly.
-
-This property is directly relevant to tensor core computation: the multiply-accumulate $D = A \times B + C$ is implemented as a sequence of fused multiply-adds, and the single-rounding semantics mean that accumulated dot products are more accurate than a na\"ive loop of separate multiplies and additions. Recent tensor-core error analyses make this point explicit for matrix products and blocked accumulation schemes~\cite{fasi2023multiword-tensorcore}.
+\paragraph{Fused multiply-add (FMA).}
+GPU tensor cores implement multiply-accumulate as a sequence of fused
+multiply-adds, applying only a single rounding step to
+$\mathrm{round}(a \times b + c)$ rather than the two roundings of separate
+multiply and add. This yields tighter forward error, especially under
+cancellation~\cite{ieee754-2019,higham2002accuracy,jeannerod2017fma-complex}.
+Recent tensor-core error analyses confirm the benefit for matrix products and
+blocked accumulation~\cite{fasi2023multiword-tensorcore}.
 
 \subsubsection{A100 Throughput by Precision}\label{sec:a100-fp-throughput}
 
