@@ -116,7 +116,7 @@ For the same 3D extents $(s_x,s_y,s_z)$ and indices $(x,y,z)$, the column-major 
 \]
 \Cref{lst:transpose-2d} uses row-major layout for the input (\texttt{in[row * N + col]}) and column-major layout for the output (\texttt{out[col * M + row]}), which is precisely the transpose operation.
 
-A concrete example: for a $4 \times 3$ matrix stored in row-major order, the element at row~2, column~1 maps to linear offset $2 \cdot 3 + 1 = 7$. Understanding this mapping is essential for implementing coalesced memory access patterns, discussed in \cref{sec:coalescing}.
+A concrete example: for a $4 \times 3$ matrix stored in row-major order, the element at row~2, column~1 maps to linear offset $2 \cdot 3 + 1 = 7$. This mapping determines whether warp-level memory accesses are coalesced or not (\cref{sec:coalescing}).
 
 \subsection{Shared Memory and Synchronisation}\label{sec:shared-memory}
 
@@ -259,9 +259,8 @@ contraction kernels.
 
 The triple-chevron syntax \texttt{<<<gridDim, blockDim>>>} conceals a
 multi-stage pipeline that spans both host and device~\cite{nvidia-cuda-guide}.
-Understanding this pipeline is essential for reasoning about the cost of
-launching many small kernels, which is the regime encountered in tensor network
-contractions.
+The details matter here because tensor network contractions launch many small
+kernels, and the per-launch overhead of this pipeline adds up.
 
 When the host executes a kernel launch, the following sequence of operations
 takes place:

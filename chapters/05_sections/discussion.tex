@@ -29,16 +29,15 @@ The two most useful profiling microbenchmarks are the coalescing sweep
 (\cref{tab:coalescing-sweep,fig:phenomena-coalescing}) and the register
 pressure study (\cref{tab:register-pressure,fig:phenomena-register-pressure}).
 
-For coalescing, the stride-1 to stride-32 degradation quantifies how quickly
-memory efficiency collapses when warp lanes lose contiguous access patterns.
-The result supports prioritising layout transforms and contraction ordering that
-keep the hottest contracted index unit-stride in memory.
+The coalescing sweep shows that going from stride-1 to stride-32 collapses
+memory efficiency quickly once warp lanes lose contiguous access. The
+practical consequence: layout transforms and contraction orderings that keep
+the hottest contracted index unit-stride in memory pay off disproportionately.
 
-For register pressure, the occupancy drop from $100\%$ to $62.5\%$ with an
-accompanying throughput loss shows that ``more in-register work'' is not
-monotonically beneficial. In practice, this motivates tuning unroll depth and
-accumulator count jointly with occupancy targets rather than maximising
-instruction-level reuse in isolation.
+The register-pressure experiment shows the flip side: occupancy drops from
+$100\%$ to $62.5\%$ and throughput drops with it, so ``more in-register
+work'' is not monotonically better. Unroll depth and accumulator count have
+to be tuned jointly with occupancy targets, not in isolation.
 
 The irregular training pair in \cref{tab:irregular-training-runtime,tab:irregular-training-kpi}
 adds one immediately usable rule for upcoming kernels with skewed shapes

@@ -1,10 +1,9 @@
 % chapters/04_sections/occupancy_and_launch_configuration.text
 \section{Occupancy and Launch Configuration}\label{sec:occupancy}
 
-Launch configuration is tuned as a constrained resource-allocation problem on
-each SM. The central trade-off is that aggressive register/shared-memory usage
-can increase per-thread efficiency while reducing occupancy, which may hurt
-latency hiding.
+Launch configuration is a constrained resource-allocation problem on each SM.
+Using more registers or shared memory per thread can speed up the inner loop
+but cuts occupancy, which in turn hurts latency hiding.
 
 \subsection{Tuning Procedure}
 

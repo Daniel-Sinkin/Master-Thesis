@@ -55,8 +55,8 @@ plus profile-guided fusion on a realistic node topology.
 
 \subsection{Selected Work in Collaborating Research Directions}\label{sec:people-sota}
 
-The following review focuses on work that is directly relevant to this project
-context: Wu, Di~Napoli, Rizzi, Waintal, Legeza, and their close collaborators.
+This review covers work from the groups closest to the present project:
+Wu, Di~Napoli, Rizzi, Waintal, Legeza, and their collaborators.
 
 \subsubsection{Wu and Di Napoli: GPU-Distributed Dense Kernels and Communication}
 
@@ -139,7 +139,7 @@ kernel sequences), the most relevant near-term integration steps are:
 
 \subsubsection{Recurring Implementation Patterns}
 
-Across the above works, four recurring implementation patterns emerge:
+Four patterns show up repeatedly in this literature:
 
 \begin{enumerate}
   \item \textbf{Task bucketing by contraction shape.} Grouping same-shape small
@@ -155,8 +155,8 @@ Across the above works, four recurring implementation patterns emerge:
 \subsubsection{Paper Notes for Implementation Planning (Working Draft)}
 \label{sec:paper-notes-working-draft}
 
-The table below is kept as implementation-oriented notes. It maps paper-level
-results and methodology to concrete optimisation actions for this project.
+The table below is a working reference that translates paper-level findings
+into CUDA optimisation actions for this project.
 
 \begin{table}[H]
 \centering
@@ -264,6 +264,8 @@ postprocess_kernel<<<grid2, block2, 0, s_compute>>>(global_C);
 \end{lstlisting}
 
 \textbf{Why it matters.}
-It mirrors the communication/computation orchestration emphasis in
-Wu--Di~Napoli style distributed GPU kernels and in massively parallel DMRG
-implementations~\cite{wu2022chase-gpu,wu2023chase-nccl,menczer2025massive-jctc}.
+The same overlap pattern---launch compute, post an asynchronous collective,
+gate the next kernel on the collective's completion---appears in the
+distributed ChASE eigensolver~\cite{wu2022chase-gpu,wu2023chase-nccl} and
+in Menczer et al.'s multi-GPU DMRG
+implementation~\cite{menczer2025massive-jctc}.

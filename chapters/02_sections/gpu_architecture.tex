@@ -8,8 +8,8 @@ A100-SXM4 GPU exposes 108 active SMs. The GA100 die itself has
 128 physical SM partitions, with 20 disabled through harvesting/binning (see
 \cref{sec:ga100-yield-appendix}), and all CUDA threads ultimately execute on one
 of the active SMs.
-Understanding the internal structure of an SM is essential for reasoning about 
-occupancy, register pressure, and warp scheduling.
+The internal structure of an SM determines occupancy limits, register
+pressure, and warp scheduling behaviour.
 
 \begin{figure}[H]
   \centering
@@ -71,23 +71,18 @@ sub-partitions. Across \num{108} active SMs, this gives a device-level maximum
 of \num{6912} resident warps and \num{221184} resident threads.
 
 \paragraph{The memory wall on GPUs.}
-Despite the abundance of arithmetic units listed above, memory access
-patterns---not compute efficiency---are the dominant determinant of GPU
-kernel performance. This asymmetry has been understood since at least
-Wulf and McKee's observation that processor speed outpaces memory speed
-by a widening margin~\cite{wulf1995memory-wall}, and it has only
-intensified on GPUs: on the A100, peak FP32 throughput is
-\SI{19.5}{\tera\flops} while peak HBM bandwidth is
-\SI{1555}{\giga\byte\per\second}, giving a ratio of roughly
-$12.5$~FP32 FLOPs per byte---any kernel whose arithmetic intensity
-falls below this ridge point is entirely bandwidth-limited and gains
-nothing from faster arithmetic. In practice, the majority of
-tensor-network contractions encountered in this work fall into or near
-the memory-bound regime, which means that optimising data layout,
-access coalescing, and on-chip reuse through shared-memory tiling
-yields far larger speedups than micro-optimising the compute
-pipeline. This observation guides the entire optimisation strategy
-developed in \cref{ch:design,ch:implementation}.
+Despite all the arithmetic units listed above, memory access patterns---not
+compute efficiency---dominate GPU kernel performance. Wulf and McKee pointed
+out in 1995 that processor speed outpaces memory speed by a widening
+margin~\cite{wulf1995memory-wall}; on GPUs this gap is extreme. The A100
+delivers \SI{19.5}{\tera\flops} of FP32 throughput but only
+\SI{1555}{\giga\byte\per\second} of HBM bandwidth, a ratio of roughly
+$12.5$~FP32 FLOPs per byte. Any kernel below that ridge point is entirely
+bandwidth-limited and gains nothing from faster arithmetic. Most of the
+tensor-network contractions in this work fall into or near the memory-bound
+regime, so optimising data layout, access coalescing, and shared-memory tiling
+matters far more than tuning the compute pipeline. The optimisation strategy
+in \cref{ch:design,ch:implementation} follows directly from this.
 
 \subsection{What Matters in A100 for This Work}\label{sec:a100-whats-new}
 
@@ -244,8 +239,8 @@ Second, FP16 has a severely limited dynamic range (maximum value $65504$), which
 
 \subsubsection{Practical Implications}
 
-Three effects of the bit-level representation are worth highlighting;
-step-by-step worked examples are given in \cref{app:fp-worked-examples}.
+The bit-level representation has three practical consequences for GPU
+kernels; step-by-step worked examples are in \cref{app:fp-worked-examples}.
 
 \paragraph{Absorption.}
 When two operands differ by more exponent bits than the format has fraction
@@ -512,10 +507,10 @@ around GA100 are:
   depending on form factor and server integration~\cite{nvidia-a100-product-specs}.
 \end{itemize}
 
-This distinction matters for performance interpretation: for memory-bound
-kernels, the limiting path is often the GA100$\leftrightarrow$HBM package
-subsystem; for multi-GPU scaling, the dominant path can shift to NVLink; and
-for host-staged workloads, PCIe plus CPU-NUMA placement becomes critical.
+Which of these paths limits performance depends on the workload: memory-bound
+kernels bottleneck on the GA100$\leftrightarrow$HBM package subsystem,
+multi-GPU scaling on NVLink, and host-staged workloads on PCIe plus
+CPU-NUMA placement.
 
 \subsubsection{A100 40GB vs 80GB: HBM2 vs HBM2e}
 \label{sec:a100-40-80}
