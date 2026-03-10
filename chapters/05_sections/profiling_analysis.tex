@@ -1,14 +1,18 @@
 % chapters/05_sections/profiling_analysis.tex
 \section{Profiling Analysis}\label{sec:profiling}
 
-Nsight Compute data is used to explain \emph{why} performance changes after each
-optimisation, not just \emph{how much} it changes.
+Nsight Compute data is used to explain \emph{why} performance changes in the
+current preparatory experiments, not just \emph{how much} it changes.
 
 \subsection{KPI Pack Used for Attribution}
 
 To keep profiling interpretable and comparable, all Nsight Compute runs in this
-thesis use a fixed ten-counter KPI pack. The profiling scripts in the companion repository use exact metric names when available and otherwise
-fall back to equivalent names for the installed Nsight Compute version.
+thesis use a fixed ten-counter KPI pack. The profiling scripts in the companion
+repository use exact metric names when available and otherwise fall back to
+equivalent names for the installed Nsight Compute version. For K8, the intended
+metric is the average-per-cycle form
+\texttt{smsp\_\_warps\_eligible.avg.per\_cycle\_active}; sum-based variants are
+not interpreted as the same quantity~\cite{nvidia-nsight-compute-cli}.
 
 \begin{table}[t]
   \centering
@@ -24,7 +28,7 @@ fall back to equivalent names for the installed Nsight Compute version.
     K5 & \texttt{smsp\_\_pipe\_fma\_cycles\_active.avg.pct\_of\_peak\_sustained\_active} \\
     K6 & \texttt{sm\_\_warps\_active.avg.pct\_of\_peak\_sustained\_active} \\
     K7 & \texttt{launch\_\_occupancy\_limit\_registers} \\
-    K8 & \texttt{smsp\_\_warps\_eligible.sum.per\_cycle\_active} \\
+    K8 & \texttt{smsp\_\_warps\_eligible.avg.per\_cycle\_active} \\
     K9 & \texttt{smsp\_\_issue\_active.avg.pct\_of\_peak\_sustained\_active} \\
     K10 & \texttt{smsp\_\_thread\_inst\_executed\_per\_inst\_executed.pct} \\
     \bottomrule
@@ -75,6 +79,10 @@ fall back to equivalent names for the installed Nsight Compute version.
   are ready to issue in each active cycle of an SM sub-partition. High K8 means
   the scheduler has choices and can keep issue slots fed. Low K8 is a direct
   starvation signal, typically from dependencies or long-latency memory waits.
+  In this thesis, only average-per-cycle forms are used for this
+  interpretation; sum-based aggregates are treated separately because they can
+  scale with aggregation scope and no longer read as ``eligible warps per
+  scheduler cycle''~\cite{nvidia-nsight-compute-cli}.
   \item[K9 (issue active).] K9 reports how often issue slots actually
   dispatch instructions relative to peak sustained activity. High K9 means the
   front end is productive and instruction delivery is healthy. Low K9 together
@@ -95,12 +103,13 @@ configurations:
 \begin{enumerate}
   \item \textbf{Compute-limited pattern:} K1 and K5 are high, while K2/K3 are
   not dominant.
-  \item \textbf{Memory-limited pattern:} K2 and/or K3 are high, K8/K9 are
-  reduced due to memory waiting, and throughput scales weakly with more FMAs.
+  \item \textbf{Memory-limited pattern:} K2 and/or K3 are high, K8/K9 often
+  weaken when memory waiting dominates, and throughput scales weakly with more
+  FMAs.
   \item \textbf{Occupancy/resource-limited pattern:} K7 indicates a register
   limit and K6 remains below expected active-warp levels.
-  \item \textbf{Scheduler starvation pattern:} K8 and K9 drop together,
-  indicating insufficient eligible warps or long-latency dependencies.
+  \item \textbf{Scheduler starvation pattern:} K8 and K9 drop together, which
+  suggests insufficient eligible warps or long-latency dependencies.
   \item \textbf{Divergence/predication loss pattern:} K10 decreases while kernel
   time increases under otherwise similar arithmetic work.
 \end{enumerate}
@@ -129,15 +138,19 @@ K5 $98.67\%$ vs $28.05\%$,
 K9 $56.15\%$ vs $31.50\%$,
 with higher memory pressure in the naive kernel
 (K2 $16.54\%$ vs $3.62\%$).
-The numbers indicate that the naive kernel is not occupancy-limited (K6 is
-high) but issue/compute-efficiency-limited.
+These values are more consistent with issue/compute inefficiency than with an
+occupancy limit: K6 remains high, while K5 and K9 are much weaker in the naive
+kernel.
 
 For the warp-divergence pair, the key discriminator is K10:
 $100\%$ (warp-uniform) vs $50.35\%$ (forced divergent split), matching the
 expected half-warp execution efficiency for a lane-based $16/16$ branch split.
 
 Using a fixed KPI pack reduces trial-and-error profiler exploration and keeps
-profile evidence comparable across optimisation steps.
+profile evidence comparable across optimisation steps. The pack is strongest at
+supporting ``consistent with'' and ``suggests'' statements; it does not by
+itself justify highly specific stall-cause claims without a deeper targeted
+metric pass~\cite{nvidia-nsight-compute-profiling-guide}.
 
 \subsection{Irregular Contraction Training Run}
 
@@ -176,7 +189,6 @@ throughput is $78.9\times$ higher.
     K2: DRAM throughput (\%) & 0.19 & 3.26 & 17.55 \\
     K5: FP32 FMA pipe active (\%) & 3.62 & 23.79 & 41.72 \\
     K6: Warps active (\%) & 12.34 & 88.80 & 77.76 \\
-    K8: Warps eligible (warp/cycle active) & 26.83 & 329.80 & 1167.58 \\
     K9: Issue active (\%) & 5.75 & 32.89 & 62.02 \\
     K10: Thread-inst/inst (\%) & 86.14 & 86.01 & 100.00 \\
     \bottomrule
@@ -186,12 +198,21 @@ throughput is $78.9\times$ higher.
   \label{tab:irregular-training-kpi}
 \end{table}
 
-Three things stand out for later kernel work.
+K8 is intentionally omitted from \cref{tab:irregular-training-kpi}: the
+archived raw export appears to have used
+\texttt{smsp\_\_warps\_eligible.sum.per\_cycle\_active}, and the resulting
+values are too large to interpret as average eligible warps per scheduler
+cycle. Re-extracting this metric with the average suffix is therefore treated
+as a manual-review item rather than as evidence.
+
+Three cautious observations stand out for later kernel work.
 First, K10 is almost unchanged between direct and batched kernels
 ($86.14\%$ vs $86.01\%$), so divergence is not the main limiter in this case.
-Second, K6/K8/K9 move sharply upward in the batched version, which identifies
-scheduler starvation and underfilled execution as the central issue in the
-serial-launch regime.
+Second, K6 and K9 move sharply upward in the batched version, which is
+consistent with much better scheduler feed and less underfilled execution in
+the batched regime. Because K8 is currently withheld pending re-extraction,
+this scheduler-starvation interpretation should be read as suggestive rather
+than definitive.
 Third, the repack kernel itself is not the pathological kernel in this run:
 its K1/K5/K9 values are much higher than the direct contraction kernel.
 

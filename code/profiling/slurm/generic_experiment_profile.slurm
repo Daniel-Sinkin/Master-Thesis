@@ -64,7 +64,10 @@ EXTRA_NVCC_FLAGS_RAW="$(decode_b64 "${EXTRA_NVCC_FLAGS_B64:-}")"
 NCU_METRICS_CSV="$(decode_b64 "${NCU_METRICS_B64:-}")"
 
 if [[ -z "${NCU_METRICS_CSV}" ]]; then
-  NCU_METRICS_CSV="sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,lts__t_sectors.avg.pct_of_peak_sustained_elapsed,l1tex__t_sector_hit_rate.pct,smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active,sm__warps_active.avg.pct_of_peak_sustained_active,smsp__warps_eligible.sum.per_cycle_active,smsp__issue_active.avg.pct_of_peak_sustained_active,smsp__thread_inst_executed_per_inst_executed.pct"
+  NCU_METRICS_CSV="sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,lts__t_sectors.avg.pct_of_peak_sustained_elapsed,l1tex__t_sector_hit_rate.pct,smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active,sm__warps_active.avg.pct_of_peak_sustained_active,smsp__warps_eligible.avg.per_cycle_active,smsp__issue_active.avg.pct_of_peak_sustained_active,smsp__thread_inst_executed_per_inst_executed.pct"
+fi
+if [[ "${NCU_METRICS_CSV}" == *"smsp__warps_eligible.sum.per_cycle_active"* ]]; then
+  echo "WARNING: NCU_METRICS_CSV includes sum-based warps_eligible; prefer avg.per_cycle_active for K8-style analysis."
 fi
 
 RUN_ARGS=()

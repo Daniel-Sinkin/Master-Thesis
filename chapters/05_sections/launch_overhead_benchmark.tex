@@ -5,8 +5,9 @@ As discussed in \cref{sec:kernel-launch-mechanics}, each CUDA kernel launch
 incurs a fixed overhead of several microseconds regardless of the kernel's
 computational workload. For the small GEMM operations typical of tensor network
 contractions, this overhead can dominate total runtime. The following benchmark
-quantifies the effect and validates the kernel fusion strategy adopted in this
-work.
+quantifies the effect as a preparatory methodology-validation experiment and
+tests whether kernel fusion is likely to matter for the workload class studied
+here.
 
 \subsection{Setup}
 
@@ -15,11 +16,15 @@ double-precision GEMM operations on a single A100-SXM4-40GB GPU:
 
 \begin{enumerate}
   \item \textbf{Separate launches:} each GEMM is dispatched as an individual
-    cuBLASDx kernel, incurring the full launch overhead 1000 times.
+    cuBLASDx-based kernel, incurring the full launch overhead 1000 times.
   \item \textbf{Fused kernel:} a single kernel is launched once and performs
     all 1000 GEMM operations sequentially using cuBLASDx's device-side
     API~\cite{cublasdx}, amortising the launch cost to a single invocation.
 \end{enumerate}
+
+In this project, cuBLASDx is a separately installed preview package rather than
+part of a stock CUDA Toolkit installation; the exact package version and
+acquisition path are pinned in \cref{app:reproducibility}~\cite{cublas,nvidia-cublasdx-downloads}.
 
 Matrix sizes range from $n = 1$ to $n = 32$ (square matrices, $m = n = k$),
 covering the regime of small GEMMs representative of tensor contractions with
@@ -82,10 +87,10 @@ matrix size increases and the per-GEMM computation grows, the relative benefit
 of fusion decreases---but even at $n = 32$, the fused kernel remains
 $7.1\times$ faster.
 
-These results directly motivate the kernel fusion strategy used throughout this
-work. Tensor network algorithms typically require many contractions of
-modest size, which places them in the regime where launch overhead dominates. By
-fusing these contractions into a single kernel using cuBLASDx's
-device-side GEMM API, the launch cost is paid once rather than once per
-contraction. The design and implementation of the fused kernels are described in
-\cref{sec:kernel-design}.
+In this preparatory pass, these results motivate treating launch reduction as a
+first-order optimisation lever. Tensor network algorithms typically require many
+contractions of modest size, which places them in the regime where launch
+overhead can dominate. Fusing such contractions into a single kernel using
+cuBLASDx's device-side GEMM API pays the launch cost once rather than once per
+contraction. The design and implementation of the fused kernels are described
+in \cref{sec:kernel-design}.

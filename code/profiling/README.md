@@ -11,11 +11,14 @@ Both SLURM scripts now profile a 10-KPI set (with per-metric fallbacks for Nsigh
 - `smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active`
 - `sm__warps_active.avg.pct_of_peak_sustained_active`
 - `launch__occupancy_limit_registers`
-- `smsp__warps_eligible.sum.per_cycle_active`
+- `smsp__warps_eligible.avg.per_cycle_active`
 - `smsp__issue_active.avg.pct_of_peak_sustained_active`
 - `smsp__thread_inst_executed_per_inst_executed.pct` (divergence-sensitive)
 
 The scripts print the exact metric names they selected in the SLURM stdout log.
+For K8, prefer the average-per-cycle suffix; sum-based variants are kept only
+as compatibility fallbacks and should not be mixed with the average form in
+analysis.
 
 ## Cases
 

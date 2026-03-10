@@ -25,7 +25,7 @@ DEFAULT_NCU_METRICS = [
     "l1tex__t_sector_hit_rate.pct",
     "smsp__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active",
     "sm__warps_active.avg.pct_of_peak_sustained_active",
-    "smsp__warps_eligible.sum.per_cycle_active",
+    "smsp__warps_eligible.avg.per_cycle_active",
     "smsp__issue_active.avg.pct_of_peak_sustained_active",
     "smsp__thread_inst_executed_per_inst_executed.pct",
 ]

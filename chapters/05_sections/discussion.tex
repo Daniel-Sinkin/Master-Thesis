@@ -25,7 +25,7 @@ Improvements are classified as:
 
 \subsection{Microbenchmark Implications for Tensor Networks}
 
-The two most useful profiling microbenchmarks are the coalescing sweep
+The two most useful profiling microbenchmarks so far are the coalescing sweep
 (\cref{tab:coalescing-sweep,fig:phenomena-coalescing}) and the register
 pressure study (\cref{tab:register-pressure,fig:phenomena-register-pressure}).
 
@@ -40,10 +40,10 @@ work'' is not monotonically better. Unroll depth and accumulator count have
 to be tuned jointly with occupancy targets, not in isolation.
 
 The irregular training pair in \cref{tab:irregular-training-runtime,tab:irregular-training-kpi}
-adds one immediately usable rule for upcoming kernels with skewed shapes
+suggests one immediately usable rule for upcoming kernels with skewed shapes
 (e.g.\ $47\times84$ blocks): prioritise launch structure and host/device
 orchestration before low-level arithmetic tuning. In that run, moving from
 serial per-batch launches to one batched launch per step gave a
 $71.7\times$ step-time reduction while K10 stayed nearly unchanged, which
-indicates that scheduler feed and launch/copy structure, not divergence,
-dominated performance.
+is consistent with scheduler feed and launch/copy structure, not divergence,
+dominating performance.

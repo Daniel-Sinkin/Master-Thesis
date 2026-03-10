@@ -3,7 +3,9 @@
 
 All measurements are performed on the A100-based JSC environment documented in
 \cref{app:reproducibility}, with emphasis on reproducibility and fair
-comparison between custom kernels and vendor-library baselines.
+comparison between custom kernels and vendor-library baselines. In the current
+draft, this setup supports exploratory and methodology-validation experiments
+rather than a final workload-complete benchmark campaign.
 
 \subsection{Hardware/Software Baseline}
 
@@ -16,7 +18,7 @@ fixed across all experiments in a campaign.
 
 \subsection{Workload Definition}
 
-The workload suite includes:
+The current workload suite includes:
 
 \begin{itemize}
   \item small to medium GEMM-like contractions representative of target traces,
@@ -28,7 +30,8 @@ The workload suite includes:
 
 Dimensions are selected to cover both launch-dominated and compute-dominated
 regions. Problem sets include non-power-of-two sizes to reflect realistic
-tensor shapes.
+tensor shapes, but they should be read as representative proxies for this
+preparatory pass rather than as the final target-workload distribution.
 
 \subsection{Measurement Protocol}
 

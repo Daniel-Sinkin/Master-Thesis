@@ -50,8 +50,8 @@ Python & 3.9.25 \\
 \multicolumn{2}{l}{\textit{NVIDIA Libraries}} \\
 \midrule
 MATHDx${}^{\dagger}$ & 25.06.0 \\
-cuBLASDx & 0.4.0 (bundled with MATHDx) \\
-CUTLASS & 3.9.0 (bundled with MATHDx) \\
+cuBLASDx (Preview) & 0.4.0 (provided via JSC MATHDx/25.06.0 module) \\
+CUTLASS & 3.9.0 (provided via JSC MATHDx/25.06.0 module) \\
 cuBLAS & Bundled with CUDA Toolkit 12.6 \\
 % cuTENSOR — add row here if used
 \midrule
@@ -63,7 +63,16 @@ Nsight Systems (nsys)${}^{\dagger}$ & TBD \\
 \end{tabularx}
 \end{table}
 
-The NVIDIA driver (590.48.01) reports forward-compatibility with CUDA\,13.1; however, all code was compiled against the CUDA\,12.6 toolkit. CUTLASS and cuBLASDx require compute capability 8.0 (Ampere) or higher; all kernels were compiled with \texttt{-DCMAKE\_CUDA\_ARCHITECTURES=80}.
+The NVIDIA driver (590.48.01) reports forward-compatibility with CUDA\,13.1;
+however, all code was compiled against the CUDA\,12.6 toolkit. cuBLASDx was
+acquired on this system through the JSC \texttt{MATHDx/25.06.0} module as the
+cuBLASDx 0.4.0 preview package; NVIDIA documents that cuBLASDx is not shipped
+with the CUDA Toolkit, so reproducing these experiments requires that separate
+package source rather than a stock CUDA installation~\cite{cublas,nvidia-cublasdx-downloads}. CUTLASS and cuBLASDx require compute capability 8.0 (Ampere)
+or higher. The current \texttt{-DCMAKE\_CUDA\_ARCHITECTURES=80} setting should
+therefore be read as an Ampere-targeted build; running the same binary on newer
+architectures depends on whether PTX and/or additional native targets are
+embedded in the final binary~\cite{nvidia-ada-compat-guide}.
 
 \section{GPU Topology}\label{sec:repro-topology}
 

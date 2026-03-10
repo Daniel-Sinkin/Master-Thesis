@@ -90,8 +90,8 @@ add_metric_group "warps_active" \
 add_metric_group "occ_limit_registers" \
   "launch__occupancy_limit_registers"
 add_metric_group "warps_eligible_per_cycle" \
-  "smsp__warps_eligible.sum.per_cycle_active" \
-  "smsp__warps_eligible.avg.per_cycle_active"
+  "smsp__warps_eligible.avg.per_cycle_active" \
+  "smsp__warps_eligible.sum.per_cycle_active"
 add_metric_group "issue_active" \
   "smsp__issue_active.avg.pct_of_peak_sustained_active" \
   "smsp__issue_active.avg.pct_of_peak_sustained_elapsed"
@@ -113,6 +113,9 @@ printf '  - %s\n' "${SELECTED_METRICS[@]}"
 if [[ ${#MISSING_GROUPS[@]} -gt 0 ]]; then
   echo "Missing KPI groups:"
   printf '  - %s\n' "${MISSING_GROUPS[@]}"
+fi
+if printf '%s\n' "${SELECTED_METRICS[@]}" | grep -qx "smsp__warps_eligible.sum.per_cycle_active"; then
+  echo "WARNING: using sum-based warps_eligible fallback; do not compare it directly with avg.per_cycle_active."
 fi
 
 GOOD_ARGS=(512 16 256 20 120)

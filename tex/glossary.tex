@@ -11,7 +11,10 @@
     In tensor networks, the size of an index shared between two tensors. Larger bond dimensions permit more accurate representations but increase computational and memory cost.
 
   \item[Coalescing]
-    The hardware mechanism by which individual memory requests from threads in a warp are combined into a minimal number of cache-line transactions. Requires consecutive threads to access consecutive addresses.
+    The hardware mechanism by which memory requests from threads in a warp are
+    serviced with one or more memory transactions. On recent CUDA
+    architectures, effective coalescing is best understood as maximising the
+    fraction of each transferred 32-byte segment that is actually used.
 
   \item[Contraction]
     The generalisation of matrix multiplication to tensors: a pairwise summation over one or more shared indices between two tensors, producing a new tensor.
@@ -44,7 +47,9 @@
     A loop transformation that partitions a computation into smaller blocks (tiles) to improve data locality and reuse in caches or shared memory.
 
   \item[Warp]
-    A group of 32 threads that execute in lock-step on the same SM processing block. The warp is the fundamental scheduling unit on NVIDIA GPUs.
+    A group of 32 threads and the fundamental scheduling/SIMT unit on NVIDIA
+    GPUs. On newer architectures, software should not assume implicit
+    lock-step synchronisation across warp lanes.
 
   \item[Warp divergence]
     A performance penalty that occurs when threads within a warp take different branches of a conditional. The hardware serialises the divergent paths, reducing effective parallelism.

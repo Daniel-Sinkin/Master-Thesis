@@ -168,7 +168,7 @@ $(128,128)$ & 10.67 & 10.67 & 0.0 & $(128,128,64)$ \\
   \label{fig:ai-heatmap-fp32}
 \end{figure}
 
-\subsubsection{GEMM Storage Footprint vs A100 Capacity}
+\subsubsection{GEMM Storage Footprint vs Global Memory Capacity}
 \label{sec:gemm-storage-capacity}
 
 For square GEMM dimensions $(k,k,k)$, storing input and output matrices
@@ -186,54 +186,37 @@ The capacity-limited crossover dimension for a memory budget $C$ is
 \begin{table}[H]
 \centering
 \caption{Capacity-limited square dimensions for the GEMM storage model
-$M(k;s)=3k^2s$.}
+$M(k;s)=3k^2s$, interpreted only as a whole-problem storage model.}
 \label{tab:gemm-capacity-thresholds}
 \begin{tabularx}{0.9\textwidth}{X r r}
 \toprule
 Memory limit $C$ & $k_{\max}$ (FP32) & $k_{\max}$ (FP64) \\
 \midrule
 A100 HBM (\SI{40}{\giga\byte}) & \num{57735} & \num{40825} \\
-A100 shared memory per SM (164 KiB) & \num{118} & \num{84} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\begin{figure}[H]
-  \centering
-  \IfFileExists{images/gemm_memory_capacity_a100.pdf}{
-    \includegraphics[width=0.98\textwidth]{gemm_memory_capacity_a100}
-  }{
-    \fbox{
-      \parbox{0.92\textwidth}{
-        Generate this figure with
-        \texttt{python3 scripts/generate_gemm_memory_capacity_plot.py}.
-      }
-    }
-  }
-  \caption{Storage model $M(k;s)=3k^2s$ for square GEMM in FP32 and FP64.
-  Left: intersection with A100 HBM capacity (\SI{40}{\giga\byte}).
-  Right: same model against per-SM shared-memory capacity (164 KiB).}
-  \label{fig:gemm-memory-capacity-a100}
-\end{figure}
-
 \paragraph{Precision choice amplifies all three advantages.}
 The numbers in \cref{tab:gemm-capacity-thresholds} make the compound effect of
-choosing FP32 over FP64 concrete for the A100. First, the maximum square tile
-that fits into a single SM's shared memory grows from $84 \times 84$ to
-$118 \times 118$---a $\sim$\!40\% increase in each dimension and roughly a
-$2\times$ increase in element count---which allows a thread block to cover a
-larger output region per launch and improves data reuse within the tile.
-Second, halving the element width from 8 to 4 bytes doubles the effective
-bandwidth of every level of the memory hierarchy (HBM, L2, shared memory),
+choosing FP32 over FP64 concrete for the A100. First, the maximum square GEMM
+that fits into device HBM under this simple storage model grows from
+\num{40825} to \num{57735}. Second, halving the element width from 8 to 4
+bytes doubles the effective bandwidth of every level of the memory hierarchy,
 shifting the roofline ridge point to lower arithmetic intensities and
 widening the compute-bound regime where tensor cores are fully utilised.
 Third, the A100 provides $2\times$ the FP32 CUDA-core throughput and
 $8\times$ the effective FP32 tensor-core throughput (TF32) compared with
-FP64 (\cref{sec:a100-fp-throughput}). These three effects---larger tiles,
-doubled bandwidth, and higher compute ceilings---compound multiplicatively,
-which is why the FP32 roofline envelope in
+FP64 (\cref{sec:a100-fp-throughput}). These effects compound, which is why the
+FP32 roofline envelope in
 \cref{fig:roofline-a100-h100-combined} sits dramatically above the FP64
 envelope despite the same physical hardware.
+
+This storage model is intentionally not used to infer per-block shared-memory
+tile dimensions. Real GEMM kernels stage only a subset of $A$, $B$, and $C$ at
+once, often with additional padding, double-buffering, and register blocking,
+so shared-memory tile-fit arguments must come from an explicit per-block
+footprint model rather than from the whole-problem capacity model above.
 
 As argued in \cref{sec:fp32-argument}, the physics modelling in tensor
 network computations does not require FP64: bond-dimension truncation errors

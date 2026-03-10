@@ -9,10 +9,12 @@ reference point for GEMM-like workloads~\cite{cublas}. cuTENSOR generalises
 this to tensor contractions and permutation-heavy primitives~\cite{cutensor}.
 
 For the small-kernel regime relevant to tensor-network workflows, cuBLASDx is
-especially important: it enables device-side GEMM composition and supports
-launch-amortisation strategies that are difficult to implement with host-only
-library calls~\cite{cublasdx}. The launch-overhead benchmark in this
-thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
+especially important when available: it enables device-side GEMM composition
+and supports launch-amortisation strategies that are difficult to implement
+with host-only library calls~\cite{cublasdx}. NVIDIA documents cuBLASDx as a
+preview package that is not shipped with the CUDA Toolkit, so any use of it in
+this thesis must be treated as an explicitly version-pinned external
+dependency~\cite{cublas,nvidia-cublasdx-downloads}. The launch-overhead benchmark in this thesis (\cref{sec:launch-overhead-benchmark}) uses this capability directly.
 
 Custom kernels are evaluated against these libraries as
 performance baselines rather than replacements. The objective is to understand

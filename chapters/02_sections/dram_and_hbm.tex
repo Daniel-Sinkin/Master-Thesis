@@ -303,24 +303,17 @@ modeling in later chapters:
     \SI{16}{GB} or \SI{32}{GB} capacity. Both A100 variants use five active
     HBM stacks out of six physical stacks on the package (one disabled for
     yield), giving $5 \times 8 = 40$ independent channels in both cases.
-    The A100-SXM4-40GB uses HBM2 in a \emph{4-Hi} (four-high) stack
-    configuration: \SI{1}{GB} per die $\times$ 4~dies $=$ \SI{8}{GB} per
-    stack, for \SI{40}{GB} total at \SI{1555}{GB/s}. The A100-SXM4-80GB
-    upgrades to HBM2e in an \emph{8-Hi} (eight-high) configuration:
-    \SI{2}{GB} per die $\times$ 8~dies $=$ \SI{16}{GB} per stack, for
-    \SI{80}{GB} total at \SI{2039}{GB/s}~\cite{nvidia2020a100,micron2021hbm2e}.
-    The stacks are physically twice as tall but share the same channel
-    topology; the bandwidth increase comes from the higher per-pin data rate
-    of HBM2e (\SI{3.2}{Gbps} vs.\ $\sim$\SI{2.4}{Gbps} for the HBM2
-    configuration used in A100-40GB). The quantitative impact of this
+    NVIDIA's A100 whitepaper describes the SXM4 subsystem as five active HBM2
+    stacks with eight memory dies per stack; for the 40GB model, the safe
+    facts used in this thesis are therefore the total \SI{40}{GB} capacity and
+    \SI{1555}{GB/s} bandwidth rather than an unsupported per-stack
+    decomposition. The A100-SXM4-80GB upgrades the same five-stack topology to
+    HBM2e, reaching \SI{80}{GB} and \SI{2039}{GB/s}~\cite{nvidia2020a100,micron2021hbm2e}. The quantitative impact of this
     bandwidth difference on roofline modeling is developed in
     \cref{sec:a100-40-80}.
   \item \textbf{Hopper generation.} The H100-SXM5-80GB (2022) moved to
-    HBM3 with six stacks of \SI{13.3}{GB} each, providing \SI{80}{GB} at
-    \SI{3350}{GB/s}~\cite{nvidia2022h100}. The H200 (2024) shares the
-    same GH100 die but upgrades to HBM3e: six stacks totalling
-    \SI{141}{GB} at \SI{4800}{GB/s}. This pattern---same compute die,
-    upgraded memory---mirrors the A100-40GB$\to$80GB transition and
-    illustrates that memory technology often advances faster than a
-    GPU generation cycle.
+    \SI{80}{GB} of HBM3. NVIDIA's Hopper material describes a five-stack HBM3
+    subsystem, and product specifications list \SI{3.35}{\tera\byte\per\second}
+    peak memory bandwidth~\cite{nvidia-hopper-in-depth,nvidia-h100-product-specs}. Later Hopper-derived products further raise memory capacity and
+    bandwidth, but those details are not needed in this preparatory pass.
 \end{enumerate}

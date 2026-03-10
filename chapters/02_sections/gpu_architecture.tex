@@ -119,9 +119,9 @@ hardware. For example, CC~8.0 added hardware-accelerated asynchronous
 global-to-shared memory copies (\texttt{cp.async}) that do not exist on
 CC~7.0, while CC~9.0 introduced the Thread Block Cluster abstraction and
 the Tensor Memory Accelerator (TMA) for bulk asynchronous data movement
-that has no CC~8.0 equivalent. Conversely, higher-CC devices can usually
-run code compiled for a lower CC through forward compatibility, but
-without benefiting from new features.
+that has no CC~8.0 equivalent. Compatibility across generations depends on
+what the binary contains: native cubins are architecture-specific, while PTX
+is forward-compatible and can be JIT-compiled on newer GPUs~\cite{nvidia-ada-compat-guide}.
 
 \Cref{tab:cc-functional-units} summarises the per-SM functional-unit
 counts across the three datacenter generations relevant to this work.
@@ -152,11 +152,14 @@ Active SMs (product)  & 80  & 108 & 132 \\
 \end{tabular}
 \end{table}
 
-In practice, this means kernels compiled for \texttt{sm\_80} run on both
-A100 and H100, but kernels using H100-specific intrinsics (e.g.\
-\texttt{cluster\_sync}, TMA descriptors) will not run on
-A100~\cite{nvidia-cuda-guide}. All kernels in this work target
-\texttt{sm\_80} to maximise portability across CC~$\geq$~8.0 devices.
+In practice, an \texttt{sm\_80} cubin should be read as an Ampere-targeted
+binary, not as an unconditional A100/H100 portability guarantee. Binaries
+intended to span generations should embed PTX and/or additional native code
+for the relevant targets; kernels using H100-specific intrinsics (e.g.\
+\texttt{cluster\_sync}, TMA descriptors) still require Hopper-specific
+compilation paths~\cite{nvidia-ada-compat-guide,nvidia-cuda-guide}. In this
+thesis, \texttt{-DCMAKE\_CUDA\_ARCHITECTURES=80} denotes the current
+Ampere-targeted build configuration.
 
 \subsection{Floating-Point Formats and Precision Trade-offs}\label{sec:fp-formats}
 
@@ -183,13 +186,13 @@ where $k$ is the number of exponent bits.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{FloatingPointBitComparions}
-  \caption{Bit layout comparison of FP64, FP32, TF32, BF16, and FP16, with exponent and significand fields drawn to scale.}
+  \caption{Bit layout comparison of FP64, FP32, BF16, FP16, and the TF32 tensor-core compute format, with exponent and significand fields drawn to scale.}
   \label{fig:fp-bit-patterns}
 \end{figure}
 
 \begin{table}[H]
 \centering
-\caption{Bit layout of floating-point formats relevant to GPU computing. FP64, FP32, and FP16 are defined by IEEE 754~\cite{ieee754-2019}; BF16 and TF32 are industry-defined formats (see text). The mantissa column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}
+\caption{Bit layout of floating-point storage formats relevant to GPU computing, plus the TF32 tensor-core compute format. FP64, FP32, and FP16 are defined by IEEE 754~\cite{ieee754-2019}; BF16 is an industry-defined storage format, and TF32 is an internal tensor-core compute representation rather than a separately stored user datatype~\cite{nvidia-tf32,nvidia-ampere-in-depth}. The mantissa column lists only the explicitly stored fraction bits; all formats carry an additional implicit leading bit for normal numbers.}
 \label{tab:fp-bit-layout}
 \begin{tabularx}{\textwidth}{l r r r r r}
 \toprule
@@ -197,7 +200,7 @@ Format & Total bits & Sign & Exponent & Bias & Mantissa\textsuperscript{1} \\
 \midrule
 FP64 (double) & 64 & 1 & 11 & 1023 & 52 \\
 FP32 (single) & 32 & 1 & 8  & 127  & 23 \\
-TF32           & 19 & 1 & 8  & 127  & 10 \\
+TF32 (compute) & 19 & 1 & 8  & 127  & 10 \\
 BF16 (bfloat16)& 16 & 1 & 8  & 127  & 7  \\
 FP16 (half)    & 16 & 1 & 5  & 15   & 10 \\
 FP8 (E5M2)\textsuperscript{2} & 8 & 1 & 5 & 15 & 2 \\
@@ -218,7 +221,7 @@ The number of exponent bits determines the \emph{dynamic range} (the ratio of th
 
 \begin{table}[H]
 \centering
-\caption{Numerical properties of floating-point formats on the A100. Machine epsilon ($\varepsilon$) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}
+\caption{Numerical properties of the A100 storage formats, plus the effective TF32 tensor-core compute format used for FP32 inputs. Machine epsilon ($\varepsilon$) is the smallest increment to 1.0 that produces a distinct value, i.e.\ $\varepsilon = 2^{-p}$ where $p$ is the number of significand bits (including the implicit bit).}
 \label{tab:fp-properties}
 \begin{tabularx}{\textwidth}{l r r r}
 \toprule
@@ -226,14 +229,25 @@ Format & Largest value & Smallest normal $>0$ & Machine epsilon \\
 \midrule
 FP64  & $\approx 1.8 \times 10^{308}$  & $\approx 2.2 \times 10^{-308}$ & $\approx 2.2 \times 10^{-16}$ \\
 FP32  & $\approx 3.4 \times 10^{38}$   & $\approx 1.2 \times 10^{-38}$  & $\approx 1.2 \times 10^{-7}$  \\
-TF32  & $\approx 3.4 \times 10^{38}$   & $\approx 1.2 \times 10^{-38}$  & $\approx 9.8 \times 10^{-4}$  \\
+TF32 (compute)  & $\approx 3.4 \times 10^{38}$   & $\approx 1.2 \times 10^{-38}$  & $\approx 9.8 \times 10^{-4}$  \\
 BF16  & $\approx 3.3 \times 10^{38}$   & $\approx 1.2 \times 10^{-38}$  & $\approx 7.8 \times 10^{-3}$  \\
 FP16  & $65504$                         & $\approx 6.1 \times 10^{-5}$   & $\approx 9.8 \times 10^{-4}$  \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Two observations are relevant here. First, TF32 and BF16 share the same 8-bit exponent as FP32, so they retain the FP32 dynamic range despite having fewer significand bits. TF32 was introduced for Ampere tensor cores: inputs are stored as FP32 values, while the tensor core internally truncates to 10 significand bits before multiply-accumulate, with accumulation in FP32~\cite{nvidia2020a100}. No explicit data conversion is required in user code. Precision/performance trade-offs for tensor cores have been measured in detail by Markidis et al.~\cite{markidis2018tensorcore-precision} and by Haidar et al.~\cite{haidar2018tensorcore-ir}, who show that mixed-precision tensor-core paths can remain numerically robust when accumulation and solver structure are chosen carefully.
+Two observations are relevant here. First, BF16 and the TF32 compute format
+share the same 8-bit exponent as FP32, so they retain the FP32 dynamic range
+despite having fewer significand bits. TF32 should be understood as a tensor-core
+math mode for FP32 workloads, not as a separately stored datatype: user code
+supplies FP32 inputs, tensor cores round them to TF32 precision for the multiply,
+and accumulation remains in FP32~\cite{nvidia-tf32,nvidia-ampere-in-depth}. No
+explicit data conversion is required in user code. Precision/performance
+trade-offs for tensor cores have been measured in detail by Markidis et
+al.~\cite{markidis2018tensorcore-precision} and by Haidar et
+al.~\cite{haidar2018tensorcore-ir}, who show that mixed-precision tensor-core
+paths can remain numerically robust when accumulation and solver structure are
+chosen carefully.
 
 Second, FP16 has a severely limited dynamic range (maximum value $65504$), which makes it unsuitable for many scientific workloads without careful scaling. BF16 (``brain floating point''), originally developed for deep learning training on Google's TPUs~\cite{kalamkar2019bfloat16}, avoids this limitation by retaining the FP32 exponent range at the cost of reduced precision (7 fraction bits versus 10 for FP16).
 
@@ -250,7 +264,7 @@ fraction bits make absorption a concern only when magnitudes span roughly
 seven orders of magnitude or more.
 
 \paragraph{TF32 truncation error.}
-Because TF32 tensor-core execution truncates inputs to 10 fraction bits
+Because TF32 tensor-core execution rounds FP32 inputs to 10 fraction bits
 before multiply-accumulate, individual entry errors are on the order of
 $\varepsilon_{\text{TF32}} \approx 10^{-3}$, but FP32 accumulation and the
 statistical averaging over many products keep aggregate errors well below
@@ -339,7 +353,11 @@ Where CPUs use deep cache hierarchies to hide latency, GPUs prioritise bandwidth
   \item \textbf{Registers} reside in the SM and offer single-cycle access. They are private to each thread and are the scarcest on-chip resource: the number of registers a kernel uses directly limits occupancy.
   \item \textbf{Shared memory} is also on-chip but visible to all threads in a block, making it the primary mechanism for explicit data reuse and inter-thread communication. Most high-performance kernels---tiled matrix multiplications, tensor contractions---stage data through shared memory to avoid repeated global loads.
   \item \textbf{L2 cache} is shared across all SMs and transparently caches global memory traffic. On the A100 it is \SI{40}{\mega\byte}, modest relative to the core count, which reflects the throughput-oriented design.
-  \item \textbf{HBM (global memory)} provides the bulk storage. The A100-SXM4-40GB provides \SI{40}{\giga\byte} HBM with a peak bandwidth of approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}). Access latency, however, is roughly $500\times$ that of a register access (\cref{tab:a100-memory-latency}).
+  \item \textbf{HBM (global memory)} provides the bulk storage. The
+    A100-SXM4-40GB provides \SI{40}{\giga\byte} HBM with a peak bandwidth of
+    approximately \SI{1555}{\giga\byte\per\second} (\cref{tab:a100-specs}).
+    Compared with on-chip storage, HBM access is much higher latency and must
+    be hidden by concurrency and locality rather than eliminated outright.
 \end{itemize}
 
 On Ampere-class GPUs, memory behavior is often the dominant constraint before
@@ -390,9 +408,9 @@ Hence, the switch penalty relative to a hit is
 $T_{\text{switch}}/T_{\text{hit}}$. Representative HBM/HBM2 timing values
 reported in the memory-systems literature are near-symmetric
 ($t_{\mathrm{RP}} \approx t_{\mathrm{RCD}} \approx t_{\mathrm{CL}} \approx
-\SI{14}{\nano\second}$), which gives a $\approx 3\times$ row-switch cost (\num{48} cycles for a full
-switch versus \num{16} for a column
-read)~\cite{li2018highspeed-dram,jones2022cuda-how-works}.
+\SI{14}{\nano\second}$), which gives a $\approx 3\times$ row-switch cost
+($\approx\SI{42}{\nano\second}$ for a full switch versus
+$\approx\SI{14}{\nano\second}$ for a column read)~\cite{li2018highspeed-dram,jones2022cuda-how-works}.
 
 For kernel design, this matters because row-buffer hits are cheaper than
 repeated row switches in the same bank. Coalesced accesses and shape-bucketed
@@ -468,13 +486,16 @@ Maximum resident threads & \num{221184} \\
 L2 cache (MB) & \num{40} \\
 HBM capacity (GB) & \num{40} \\
 Peak HBM bandwidth (GB/s) & \num{1555} \\
-Base clock frequency (GHz) & \num{1.41} \\
+GPU boost clock used for published peak figures (GHz) & \num{1.41} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The A100 employs high-bandwidth memory as its main device memory, providing the
-throughput required to sustain dense linear algebra kernels.
+throughput required to sustain dense linear algebra kernels. NVIDIA's A100
+whitepaper describes the SXM4 memory subsystem as five active HBM2 stacks with
+eight memory dies per stack, paired with ten 512-bit memory controllers for an
+effective 5120-bit interface~\cite{nvidia2020a100}.
 
 \paragraph{Yield context.}
 The detailed first-order yield sensitivity model and area-scaling calculation
@@ -579,6 +600,8 @@ For CUDA-core arithmetic on A100, using fused multiply-add (2 FLOPs/cycle):
   = 108 \cdot 32 \cdot 2 \cdot 1.41\ \text{GHz}
   \approx 9.7\ \text{TFLOP/s}.
 \]
+Here $f=\SI{1.41}{\giga\hertz}$ is the GPU boost clock used by NVIDIA for the
+published peak-performance figures~\cite{nvidia2020a100}.
 Using the sustained peak HBM bandwidth
 $B_{\max}=\SI{1555}{\giga\byte\per\second}$, a bandwidth-only streaming bound
 for one FLOP per fetched value is
@@ -671,23 +694,14 @@ Maximum resident threads & \num{221184} \\
 \end{table}
 
 
-\subsubsection{Memory Latency}
+\subsubsection{Latency Scale}
 
-\begin{table}[H]
-\centering
-\caption{Approximate memory access latency at different hierarchy levels.}
-\label{tab:a100-memory-latency}
-\begin{tabularx}{\textwidth}{X r}
-\toprule
-Memory level & Latency (cycles) \\
-\midrule
-Registers & \num{1} \\
-Shared memory & \num{20} \\
-L2 cache & \num{200} \\
-HBM global memory & \num{500} \\
-\bottomrule
-\end{tabularx}
-\end{table}
+For the purposes of this thesis, latency comparisons are kept qualitative at
+the hierarchy level: registers and shared memory are on-chip, L2 is an
+intermediate on-chip cache, and HBM-backed global memory is far slower and must
+be hidden through occupancy, coalescing, and locality. Where DRAM timing is
+discussed explicitly, the text uses nanosecond timing parameters rather than
+undefined cycle counts because the relevant clock domains differ.
 
 \subsection{Compute Node Topology}\label{sec:node-topology}
 

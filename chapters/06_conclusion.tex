@@ -1,11 +1,13 @@
 % chapters/06_conclusion.tex
 \section{Summary}\label{sec:summary}
 
-This work examines tensor-network workloads from an HPC perspective. It
-identifies the dominant bottlenecks on A100-class GPUs, applies
-profile-guided optimisations, and measures performance against
-vendor-library baselines. The main control variables are launch overhead,
-memory-hierarchy efficiency, and occupancy-resource trade-offs.
+This work examines tensor-network workloads from an HPC perspective in a
+preparatory optimisation phase. The current results establish a
+profile-guided workflow, validate a set of microbenchmarks and methodology
+checks, and identify the dominant levers on A100-class GPUs: launch overhead,
+memory-hierarchy efficiency, and occupancy-resource trade-offs. They should be
+read as early evidence and infrastructure for later target-specific tuning,
+not yet as the final optimisation study.
 
 \section{Limitations}\label{sec:limitations}
 
@@ -14,7 +16,10 @@ The current scope has three deliberate limitations:
 \begin{itemize}
   \item physics-specific algorithm derivations and notation are out of scope,
   \item optimisation focus is on Ampere-era kernels and one-node execution,
-  \item coverage of workload diversity is bounded by available benchmark traces.
+  \item coverage of workload diversity is bounded by available benchmark traces,
+  \item the final workload/kernel set is still being fixed, so the current
+    chapter emphasises proxy kernels, microbenchmarks, and methodology
+    validation.
 \end{itemize}
 
 \section{Future Work}\label{sec:future-work}
@@ -22,6 +27,8 @@ The current scope has three deliberate limitations:
 Natural continuation points are:
 
 \begin{enumerate}
+  \item selecting and characterising the final target kernel/workload set, then
+    reapplying the same correctness and profiling workflow to those kernels,
   \item extending the same methodology to Hopper/H100-class hardware while
     preserving comparability with A100 results,
   \item deeper multi-GPU overlap strategies (communication/computation

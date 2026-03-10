@@ -17,11 +17,14 @@ configuration records:
   \item compiler and CUDA toolkit versions,
   \item target architecture flags,
   \item enabled precision modes and feature toggles,
-  \item linked baseline libraries (cuBLAS, cuTENSOR, cuBLASDx where used).
+  \item linked baseline libraries (cuBLAS, cuTENSOR, and the separately
+    provided cuBLASDx preview package where used).
 \end{itemize}
 
 This metadata is logged with benchmark output so each result can be traced to a
-specific binary configuration.
+specific binary configuration. When cuBLASDx is enabled, the recorded metadata
+also includes its exact package version and acquisition source because NVIDIA
+does not ship cuBLASDx as part of a stock CUDA Toolkit installation~\cite{cublas,nvidia-cublasdx-downloads}.
 
 \subsection{Runtime Integration}
 

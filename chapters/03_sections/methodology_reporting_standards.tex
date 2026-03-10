@@ -122,6 +122,50 @@ To avoid over-claiming, each optimisation claim must satisfy:
 If an effect is observed but mechanism counters do not match, the result is
 reported as empirical but non-attributed; no causal interpretation is claimed.
 
+\subsection{Correctness Validation Policy}
+
+Performance numbers are only reported for variants that also pass an explicit
+correctness check. The policy is intentionally target-independent:
+
+\begin{enumerate}
+  \item \textbf{Reference path.} The preferred reference is a trusted vendor or
+  mathematically straightforward baseline under the same problem definition and
+  layout. When that is unavailable, the fallback is the simplest unfused
+  implementation or a higher-precision host/device reference.
+  \item \textbf{Tolerance reporting.} Numerical deviation is reported with at
+  least one absolute measure (for example max absolute error) and one relative
+  measure (for example relative max error or relative Frobenius norm), so both
+  small-magnitude and large-magnitude discrepancies remain visible.
+  \item \textbf{FP32/TF32 checks.} FP32 variants are checked directly against
+  the chosen reference. TF32-enabled variants are checked against an FP32
+  reference path and are accepted only if the observed deviation remains within
+  the declared tolerance for that benchmark family.
+  \item \textbf{Performance gate.} No runtime, throughput, or energy claim is
+  treated as valid unless the compared outputs have first passed the same
+  correctness check under the stated workload and precision settings.
+\end{enumerate}
+
+\subsection{Evidence Levels for Profiling Claims}
+
+The fixed KPI pack supports disciplined wording rather than one universal level
+of certainty:
+
+\begin{itemize}
+  \item \textbf{``Consistent with''} means one or more KPI movements align with
+  the proposed mechanism, but alternative explanations remain plausible.
+  \item \textbf{``Suggests''} means several KPIs and the runtime effect point in
+  the same direction across repeated runs, but the mechanism is still not
+  uniquely isolated.
+  \item \textbf{``Demonstrates''} is reserved for cases where the evidence is
+  direct and specific, or where a targeted deep-dive metric set isolates the
+  mechanism with little ambiguity.
+\end{itemize}
+
+In particular, stall-reason language is kept conservative unless dedicated
+stall metrics are collected in a focused profiling pass; the fixed KPI pack is
+usually sufficient to suggest scheduler starvation or memory pressure, but not
+to demonstrate one unique stall cause~\cite{nvidia-nsight-compute-profiling-guide}.
+
 \subsection{Threats-to-Validity Template}
 
 Each results subsection reports the following validity classes:

@@ -26,8 +26,12 @@ Both the grid and each block can be specified with up to three dimensions, which
 \end{figure}
 
 The hierarchy in \cref{fig:cuda-thread-hierarchy} also includes \emph{warps}:
-groups of 32 threads that execute in lock-step on the SM's SIMT (Single
-Instruction, Multiple Thread) units.
+groups of 32 threads, which are the fundamental SIMT (Single Instruction,
+Multiple Thread) execution unit on NVIDIA GPUs. For introductory explanations
+it is common to describe a warp as executing one common instruction stream, but
+on Volta and newer architectures independent thread scheduling means code must
+not rely on implicit warp-synchronous progress unless the required
+synchronisation is made explicit~\cite{nvidia-cuda-guide}.
 
 \subsubsection{Kernel Syntax and Launch Configuration}
 
@@ -94,7 +98,7 @@ GPU memory is addressed linearly, so multidimensional arrays must be mapped to o
 \end{equation}
 which generalises to higher-order tensors by successive multiplication with trailing dimensions. For a 3D tensor with logical indices $(x,y,z)$ and extents $(s_x,s_y,s_z)$, a common row-major linearisation is
 \begin{equation}\label{eq:row-major-3d}
-  \text{offset}(x,y,z)=x+s_x\,y+s_x s_y\,z.
+  \text{offset}(x,y,z)=((x\,s_y)+y)s_z+z=x\,s_y s_z+y\,s_z+z.
 \end{equation}
 Equivalently, using row-major index names $(i,j,k)$ for a shape $(D_0,D_1,D_2)$:
 \[
@@ -112,15 +116,26 @@ In column-major (Fortran) order, the convention used by cuBLAS and most BLAS lib
 \end{equation}
 For the same 3D extents $(s_x,s_y,s_z)$ and indices $(x,y,z)$, the column-major form is
 \[
-  \text{offset}(x,y,z)=z+s_z\,y+s_z s_y\,x.
+  \text{offset}(x,y,z)=x+s_x\,y+s_x s_y\,z.
 \]
-\Cref{lst:transpose-2d} uses row-major layout for the input (\texttt{in[row * N + col]}) and column-major layout for the output (\texttt{out[col * M + row]}), which is precisely the transpose operation.
+More generally, for rank-$d$ tensors in column-major order,
+\[
+  \text{offset}(i_0,\dots,i_{d-1})=
+  \sum_{m=0}^{d-1}
+  i_m \prod_{n=0}^{m-1} D_n,
+\]
+which is the column-major counterpart of the row-major formula above. In
+\Cref{lst:transpose-2d}, the input is an $M \times N$ row-major matrix
+(\texttt{in[row * N + col]}), and the output index
+\texttt{out[col * M + row]} is simply the row-major index of the transposed
+$N \times M$ output matrix. The kernel therefore stores the transpose; it does
+not require switching to a different storage convention for the output array.
 
 A concrete example: for a $4 \times 3$ matrix stored in row-major order, the element at row~2, column~1 maps to linear offset $2 \cdot 3 + 1 = 7$. This mapping determines whether warp-level memory accesses are coalesced or not (\cref{sec:coalescing}).
 
 \subsection{Shared Memory and Synchronisation}\label{sec:shared-memory}
 
-Shared memory is an on-chip, programmer-managed memory space visible to all threads within a block. It serves two purposes: as a software-managed cache to stage data from global memory, and as a communication channel between threads in the same block. Because shared memory has much lower latency than global memory (approximately \num{20} cycles versus \num{500} cycles on the A100, cf.\ \cref{tab:a100-memory-latency}), its effective use is often the difference between a bandwidth-bound kernel and one that approaches peak compute throughput.
+Shared memory is an on-chip, programmer-managed memory space visible to all threads within a block. It serves two purposes: as a software-managed cache to stage data from global memory, and as a communication channel between threads in the same block. Because shared memory is much lower latency than HBM-backed global memory, its effective use is often the difference between a bandwidth-bound kernel and one that approaches peak compute throughput.
 
 \subsubsection{Static and Dynamic Allocation}
 
@@ -143,7 +158,7 @@ Dynamic allocation is useful when the tile size depends on runtime parameters, w
 
 \subsubsection{Tiled Matrix Multiplication}\label{sec:tiled-matmul}
 
-The canonical use of shared memory is tiled (or blocked) matrix multiplication. A na\"ive matrix multiplication kernel that computes $C = AB$ with $A \in \R^{M \times K}$ and $B \in \R^{K \times N}$ has each thread compute one element of $C$ by reading an entire row of $A$ and column of $B$ from global memory. This results in $\BigO(K)$ global loads per thread and an arithmetic intensity of roughly $2\;\text{FLOPs}/\text{byte}$---well below the A100's crossover point of $\approx 9.6\;\text{FLOPs}/\text{byte}$ for FP32 (\cref{tab:a100-derived}).
+The canonical use of shared memory is tiled (or blocked) matrix multiplication. A na\"ive matrix multiplication kernel that computes $C = AB$ with $A \in \R^{M \times K}$ and $B \in \R^{K \times N}$ has each thread compute one element of $C$ by reading an entire row of $A$ and column of $B$ from global memory. This results in $\BigO(K)$ global loads per thread. For the common FP32 per-output-element implementation, each thread performs about $2K$ FLOPs while reading about $2K$ FP32 input values ($8K$ bytes), so the arithmetic intensity is roughly $0.25\;\text{FLOPs}/\text{byte}$ before the output traffic is even counted---far below the A100-SXM4-40GB FP32 ridge point (\cref{tab:a100-derived}).
 
 Tiling reduces global memory traffic by loading the input matrices into shared memory in small blocks (tiles), computing partial dot products from the tile, and then advancing to the next tile. \Cref{lst:tiled-matmul} shows the structure of this approach.
 
@@ -197,7 +212,11 @@ For a tile size of $T$, the number of global memory loads per output element dro
 
 \subsubsection{Global Memory Coalescing}
 
-When a warp executes a load or store instruction, the hardware combines the 32 individual thread addresses into as few memory transactions as possible. If consecutive threads access consecutive memory addresses (i.e.\ thread $i$ accesses address $\text{base} + i$), the accesses are \emph{coalesced} into a minimal number of 128-byte cache line transactions. Non-coalesced access patterns---strided or scattered---require multiple transactions for the same warp, wasting bandwidth.
+When a warp executes a load or store instruction, the hardware services the 32
+thread addresses with one or more memory transactions. For devices of compute
+capability 6.0 and newer, coalescing is described in terms of 32-byte memory
+transactions: if the threads of a warp access adjacent 4-byte words, a fully
+coalesced access is serviced by four 32-byte transactions~\cite{nvidia-cuda-best-practices,nvidia-cuda-guide}. The practical objective is to maximise the ratio of bytes requested by the warp to bytes transferred by the memory system. Strided or scattered patterns lower that ratio and therefore waste bandwidth even when the accesses are still legal.
 
 Consider accessing a row-major $M \times N$ matrix. Iterating over columns (adjacent elements in memory) with consecutive threads produces coalesced accesses:
 

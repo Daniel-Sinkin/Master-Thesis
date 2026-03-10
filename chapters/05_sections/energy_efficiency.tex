@@ -6,8 +6,8 @@ energy-to-solution is also an operational objective in HPC: cluster power
 budgets are finite, and lower joules per job improve both operating cost and
 system throughput under queue load~\cite{kocot2023energy-aware,green500-top500}.
 For this reason, the same optimisation decisions used for speed (contraction
-order, coalescing, launch reduction, occupancy control) are evaluated here from
-an energy perspective as well.
+order, coalescing, launch reduction, occupancy control) are examined here from
+an exploratory energy perspective as well.
 
 \subsection{Why Energy Matters}
 
@@ -16,7 +16,7 @@ short and medium kernels in iterative loops. In this regime, wasted launches,
 redundant arithmetic, and avoidable memory traffic increase both runtime and
 board energy. On A100-class GPUs, where arithmetic throughput is high and
 kernel orchestration is often the bottleneck for moderate sizes, runtime
-improvements frequently translate directly into energy improvements at fixed
+improvements often translate into energy improvements at fixed
 clock/power settings~\cite{nvidia2020a100,nvidia-cuda-best-practices}.
 
 Scope note: the measurements and models in this section focus on GPU board
@@ -85,7 +85,7 @@ energy efficiency simultaneously.
 
 \subsection{Implications for the Current Kernel Set}
 
-The profiling results translate directly into energy expectations:
+The profiling results suggest corresponding energy tendencies:
 \begin{enumerate}
   \item \textbf{Contraction-order improvement} (TN case study) reduces
   arithmetic work from $\BigO(Bd_p^2\chi^2)$ to
@@ -153,7 +153,7 @@ for \emph{relative} algorithmic comparisons in this work. Absolute board
 energy values should still be interpreted conservatively, and whole-node/facility
 energy remains out of scope.
 
-\subsection{TODO: Fill in --- GEMM Data-Pattern Switching Experiment}\label{sec:energy-gemm-switching-todo}
+\subsection{Exploratory SGEMM Data-Pattern Switching Experiment}\label{sec:energy-gemm-switching-todo}
 
 To test whether data values alone can measurably change GPU board power at
 fixed kernel structure, a controlled SGEMM sweep is added in
@@ -173,7 +173,10 @@ captures per-mode runtime CSV files and per-mode \texttt{nvidia-smi}
 power traces, so energy can be integrated mode-by-mode with the protocol above.
 Industry talks regularly motivate this with switching-activity arguments
 ($\alpha C V^2 f$ intuition), but this experiment is structured to check the
-effect empirically for the specific kernels and node setup used in this thesis
+effect empirically for the specific kernels and node setup used in this thesis.
+At this stage, the result is treated as hypothesis-generating rather than as a
+settled mechanism claim because the telemetry path has not yet been
+independently cross-validated for this experiment
 ~\cite{jones2022cuda-how-works}.
 
 \begin{figure}[t]
@@ -188,8 +191,8 @@ effect empirically for the specific kernels and node setup used in this thesis
       }
     }
   }
-  \caption{Measured SGEMM value-pattern sweep on A100 (active GPU only, currently
-  imported subset of modes). Left: mean active board power.
+  \caption{Preliminary SGEMM value-pattern sweep on A100 (active GPU only,
+  currently imported subset of modes). Left: mean active board power.
   Right: energy normalized to a 120\,s active window.}
   \label{fig:gemm-switching-energy}
 \end{figure}
@@ -197,8 +200,9 @@ effect empirically for the specific kernels and node setup used in this thesis
 \begin{table}[t]
   \centering
   \small
-  \caption{Current measured subset from the SGEMM value-pattern sweep on A100
-  (active GPU, normalized to 120\,s for comparability across runs).}
+  \caption{Current measured subset from the exploratory SGEMM value-pattern
+  sweep on A100 (active GPU, normalized to 120\,s for comparability across
+  runs).}
   \label{tab:gemm-switching-placeholder}
   \setlength{\tabcolsep}{4pt}
   \begin{tabular}{lrrrr}
@@ -216,12 +220,14 @@ effect empirically for the specific kernels and node setup used in this thesis
 Mode labels \texttt{zero/$n$} denote periodic-zero initialization where every
 $n$-th element is set to zero.
 
-With the currently imported modes, throughput remains near FP32 peak while
-board power separates strongly by input pattern.  Relative to
+With the currently imported modes, throughput appears to remain near FP32 peak
+while board power separates strongly by input pattern. Relative to
 \texttt{all\_zero}, \texttt{zero\_every\_2} increases normalized energy by
 about $38\%$, \texttt{zero\_every\_4} by about $51\%$, and
-\texttt{zero\_every\_3} by about $63\%$. This indicates a clear value-pattern energy effect without a comparable
-throughput shift in the same runs.
+\texttt{zero\_every\_3} by about $63\%$. These preliminary numbers suggest a
+value-pattern-dependent energy effect on this measurement path without a
+comparably large throughput shift in the same runs, but they should not yet be
+read as a verified causal mechanism.
 
 Expected outcome from prior work:
 \begin{itemize}
@@ -241,4 +247,7 @@ Expected outcome from prior work:
 
 The intent of this experiment is comparative, not absolute: if the measured
 spread is small, it still defines a practical upper bound on value-pattern
-effects for the contraction kernels studied here.
+effects for the contraction kernels studied here. If the spread remains large
+after cross-validation with an independent measurement path, it would justify a
+more targeted follow-up; until then, the result remains an exploratory
+observation.
