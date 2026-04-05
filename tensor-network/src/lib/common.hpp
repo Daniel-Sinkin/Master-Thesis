@@ -7,7 +7,7 @@
 #include <stdfloat>
 #endif
 
-namespace tn {
+namespace ds_tn {
 
 using usize = std::size_t;
 using isize = std::ptrdiff_t;
@@ -50,4 +50,4 @@ namespace literals {
 
 } // namespace literals
 
-} // namespace tn
+} // namespace ds_tn

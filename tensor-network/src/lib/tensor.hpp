@@ -2,7 +2,7 @@
 
 #include "common.hpp"
 
-namespace tn {
+namespace ds_tn {
 // Placeholder for future tensor data structures.
 
-} // namespace tn
+} // namespace ds_tn
