@@ -94,13 +94,39 @@ def main() -> None:
 
     # Panel 1: HBM capacity.
     ax0 = axes[0]
-    ax0.plot(k_hbm, fp32_hbm_curve, color="#1F77B4", linewidth=2.8, label="FP32 storage")
-    ax0.plot(k_hbm, fp64_hbm_curve, color="#D62728", linewidth=2.8, label="FP64 storage")
-    ax0.axhline(args.hbm_gb, color="#444444", linewidth=1.7, linestyle=(0, (4, 3)), label=f"A100 HBM ({args.hbm_gb:.0f} GB)")
+    ax0.plot(
+        k_hbm, fp32_hbm_curve, color="#1F77B4", linewidth=2.8, label="FP32 storage"
+    )
+    ax0.plot(
+        k_hbm, fp64_hbm_curve, color="#D62728", linewidth=2.8, label="FP64 storage"
+    )
+    ax0.axhline(
+        args.hbm_gb,
+        color="#444444",
+        linewidth=1.7,
+        linestyle=(0, (4, 3)),
+        label=f"A100 HBM ({args.hbm_gb:.0f} GB)",
+    )
     ax0.axvline(k_fp32_hbm, color="#1F77B4", linewidth=1.4, linestyle=(0, (2, 3)))
     ax0.axvline(k_fp64_hbm, color="#D62728", linewidth=1.4, linestyle=(0, (2, 3)))
-    ax0.scatter([k_fp32_hbm], [args.hbm_gb], color="#1F77B4", s=46, zorder=6, edgecolors="#0f172a", linewidths=0.5)
-    ax0.scatter([k_fp64_hbm], [args.hbm_gb], color="#D62728", s=46, zorder=6, edgecolors="#0f172a", linewidths=0.5)
+    ax0.scatter(
+        [k_fp32_hbm],
+        [args.hbm_gb],
+        color="#1F77B4",
+        s=46,
+        zorder=6,
+        edgecolors="#0f172a",
+        linewidths=0.5,
+    )
+    ax0.scatter(
+        [k_fp64_hbm],
+        [args.hbm_gb],
+        color="#D62728",
+        s=46,
+        zorder=6,
+        edgecolors="#0f172a",
+        linewidths=0.5,
+    )
     ax0.set_xlim(0, kmax_hbm)
     ax0.set_ylim(0, max(fp64_hbm_curve) * 1.05)
     ax0.set_xlabel("Square dimension k for GEMM (k, k, k)")
@@ -111,23 +137,57 @@ def main() -> None:
 
     # Panel 2: shared-memory limit (same model, zoomed for small k).
     ax1 = axes[1]
-    ax1.plot(k_shared, fp32_shared_curve, color="#1F77B4", linewidth=2.8, label="FP32 storage")
-    ax1.plot(k_shared, fp64_shared_curve, color="#D62728", linewidth=2.8, label="FP64 storage")
-    ax1.axhline(args.shared_kib, color="#444444", linewidth=1.7, linestyle=(0, (4, 3)), label=f"A100 shared memory ({args.shared_kib:.0f} KiB)")
+    ax1.plot(
+        k_shared,
+        fp32_shared_curve,
+        color="#1F77B4",
+        linewidth=2.8,
+        label="FP32 storage",
+    )
+    ax1.plot(
+        k_shared,
+        fp64_shared_curve,
+        color="#D62728",
+        linewidth=2.8,
+        label="FP64 storage",
+    )
+    ax1.axhline(
+        args.shared_kib,
+        color="#444444",
+        linewidth=1.7,
+        linestyle=(0, (4, 3)),
+        label=f"A100 shared memory ({args.shared_kib:.0f} KiB)",
+    )
     ax1.axvline(k_fp32_shared, color="#1F77B4", linewidth=1.4, linestyle=(0, (2, 3)))
     ax1.axvline(k_fp64_shared, color="#D62728", linewidth=1.4, linestyle=(0, (2, 3)))
-    ax1.scatter([k_fp32_shared], [args.shared_kib], color="#1F77B4", s=46, zorder=6, edgecolors="#0f172a", linewidths=0.5)
-    ax1.scatter([k_fp64_shared], [args.shared_kib], color="#D62728", s=46, zorder=6, edgecolors="#0f172a", linewidths=0.5)
+    ax1.scatter(
+        [k_fp32_shared],
+        [args.shared_kib],
+        color="#1F77B4",
+        s=46,
+        zorder=6,
+        edgecolors="#0f172a",
+        linewidths=0.5,
+    )
+    ax1.scatter(
+        [k_fp64_shared],
+        [args.shared_kib],
+        color="#D62728",
+        s=46,
+        zorder=6,
+        edgecolors="#0f172a",
+        linewidths=0.5,
+    )
     ax1.set_xlim(0, kmax_shared)
     ax1.set_ylim(0, max(fp64_shared_curve) * 1.02)
     ax1.set_xlabel("Square dimension k for GEMM (k, k, k)")
     ax1.set_ylabel("Storage for A+B+C [KiB]")
-    ax1.set_title("Same Footprint Model vs Per-SM Shared-Memory Limit")
+    ax1.set_title("Per-SM Shared-Memory Limit")
     ax1.grid(True)
     ax1.legend(loc="upper left")
 
     fig.suptitle(
-        "GEMM Storage Capacity Model for A100 (A, B, C only; no workspace)",
+        "GEMM Capacity for A100",
         y=1.03,
         fontsize=16,
     )

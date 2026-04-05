@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtn_pch.a CMakeFiles/tn_pch.dir/src/lib/pch.cpp.o
+/usr/bin/ranlib libtn_pch.a
