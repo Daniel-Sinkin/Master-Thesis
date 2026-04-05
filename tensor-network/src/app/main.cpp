@@ -1,3 +1,5 @@
-auto main() -> int {
+
+
+int main() {
     return 0;
 }

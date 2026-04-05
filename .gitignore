@@ -43,6 +43,8 @@
 
 *.DS_Store
 
+.cache/
+build/
 build/*
 
 __pycache__
