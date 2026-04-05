@@ -1,4 +1,0 @@
-/Users/danielsinkin/GitHub_private/Master-Thesis/tensor-network/build/CMakeFiles/tn_pch.dir
-/Users/danielsinkin/GitHub_private/Master-Thesis/tensor-network/build/CMakeFiles/tn_app.dir
-/Users/danielsinkin/GitHub_private/Master-Thesis/tensor-network/build/CMakeFiles/edit_cache.dir
-/Users/danielsinkin/GitHub_private/Master-Thesis/tensor-network/build/CMakeFiles/rebuild_cache.dir

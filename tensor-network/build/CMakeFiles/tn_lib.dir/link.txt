@@ -1,2 +1,0 @@
-/usr/bin/ar qc libtn_lib.a CMakeFiles/tn_lib.dir/src/lib/tensor.cpp.o
-/usr/bin/ranlib libtn_lib.a

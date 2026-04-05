@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(BLA_VENDOR Apple)
+find_package(BLAS REQUIRED)
+
 file(CREATE_LINK
   "${CMAKE_BINARY_DIR}/compile_commands.json"
   "${CMAKE_SOURCE_DIR}/compile_commands.json"
@@ -19,6 +22,12 @@ target_precompile_headers(tn_pch PUBLIC src/lib/pch.hpp)
 
 add_library(tn_lib INTERFACE)
 target_include_directories(tn_lib INTERFACE ${CMAKE_SOURCE_DIR}/src/lib)
+target_compile_definitions(tn_lib INTERFACE ACCELERATE_NEW_LAPACK)
+if (TARGET BLAS::BLAS)
+  target_link_libraries(tn_lib INTERFACE BLAS::BLAS)
+else()
+  target_link_libraries(tn_lib INTERFACE ${BLAS_LIBRARIES})
+endif()
 
 add_executable(tn_app src/app/main.cpp)
 set_target_properties(tn_app PROPERTIES OUTPUT_NAME tensor-network)
