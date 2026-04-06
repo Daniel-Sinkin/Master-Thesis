@@ -1,3 +1,4 @@
+// lib/tensor.cpp
 #include "tensor.hpp"
 
 #include <array>

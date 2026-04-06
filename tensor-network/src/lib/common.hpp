@@ -1,3 +1,4 @@
+// lib/common.hpp
 #pragma once
 
 #include <cstddef>
