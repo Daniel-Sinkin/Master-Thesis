@@ -20,13 +20,17 @@ add_library(tn_pch OBJECT src/lib/pch.cpp)
 target_include_directories(tn_pch PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
 target_precompile_headers(tn_pch PUBLIC src/lib/pch.hpp)
 
-add_library(tn_lib INTERFACE)
-target_include_directories(tn_lib INTERFACE ${CMAKE_SOURCE_DIR}/src/lib)
-target_compile_definitions(tn_lib INTERFACE ACCELERATE_NEW_LAPACK)
+add_library(tn_lib STATIC
+  src/lib/tensor.cpp
+  src/lib/tensor_blas.cpp
+)
+target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
+target_compile_definitions(tn_lib PRIVATE ACCELERATE_NEW_LAPACK)
+target_precompile_headers(tn_lib REUSE_FROM tn_pch)
 if (TARGET BLAS::BLAS)
-  target_link_libraries(tn_lib INTERFACE BLAS::BLAS)
+  target_link_libraries(tn_lib PUBLIC BLAS::BLAS)
 else()
-  target_link_libraries(tn_lib INTERFACE ${BLAS_LIBRARIES})
+  target_link_libraries(tn_lib PUBLIC ${BLAS_LIBRARIES})
 endif()
 
 add_executable(tn_app src/app/main.cpp)
@@ -89,4 +93,5 @@ function(set_strict_warnings target_name)
 endfunction()
 
 set_strict_warnings(tn_pch)
+set_strict_warnings(tn_lib)
 set_strict_warnings(tn_app)
