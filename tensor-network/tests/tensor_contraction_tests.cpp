@@ -16,9 +16,10 @@ TEST_CASE("partition_indices separates shared and unshared legs with stable orde
 
     const auto partition = partition_indices(left, right);
 
-    REQUIRE(partition.left == std::vector<std::string>{"a", "b"});
-    REQUIRE(partition.right == std::vector<std::string>{"c", "d"});
-    REQUIRE(partition.shared == std::vector<std::string>{"i", "j"});
+    REQUIRE(partition.left_not_shared == std::vector<usize>{2, 3});
+    REQUIRE(partition.left_shared == std::vector<usize>{1, 0});
+    REQUIRE(partition.right_shared == std::vector<usize>{2, 3});
+    REQUIRE(partition.right_not_shared == std::vector<usize>{0, 1});
 }
 
 TEST_CASE("contraction_output_tensor preserves left then right leg ordering", "[tensor]")
@@ -27,7 +28,7 @@ TEST_CASE("contraction_output_tensor preserves left then right leg ordering", "[
     const auto right = Tensor({11, 13, 3, 2}, {"c", "d", "i", "j"});
 
     const auto output = contraction_output_tensor(left, right);
-    const auto expected_legs = std::array<std::string, 4>{"a", "b", "c", "d"};
+    const std::array<std::string, 4> expected_legs{"a", "b", "c", "d"};
 
     REQUIRE(output.shape(0) == 5zu);
     REQUIRE(output.shape(1) == 7zu);

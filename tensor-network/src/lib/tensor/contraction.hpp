@@ -14,9 +14,10 @@ using IndexNames = std::span<const std::string>;
 
 struct IndexPartition
 {
-    std::vector<std::string> left{};    // preserves original ordering
-    std::vector<std::string> right{};   // preserves original ordering
-    std::vector<std::string> shared{};  // sorted lexicographically
+    std::vector<usize> left_not_shared{};   // preserves original left ordering
+    std::vector<usize> left_shared{};       // sorted by shared leg name lexicographically
+    std::vector<usize> right_shared{};      // aligned with left_shared
+    std::vector<usize> right_not_shared{};  // preserves original right ordering
 };
 
 [[nodiscard]] auto partition_indices(IndexNames left, IndexNames right) -> IndexPartition;

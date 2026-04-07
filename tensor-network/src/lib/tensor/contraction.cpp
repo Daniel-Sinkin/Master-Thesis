@@ -9,6 +9,13 @@ namespace ds_tn
 namespace
 {
 
+struct SharedLeg
+{
+    std::string name{};
+    usize left_index{0};
+    usize right_index{0};
+};
+
 auto require_valid_tensor(const Tensor& tensor, const char* argument_name) -> void
 {
     if (tensor.validity() != TensorValidity::valid)
@@ -19,44 +26,36 @@ auto require_valid_tensor(const Tensor& tensor, const char* argument_name) -> vo
     }
 }
 
-[[nodiscard]] auto remove_shared(IndexNames names, std::span<const std::string> shared)
-    -> std::vector<std::string>
+[[nodiscard]] auto
+is_shared(IndexNames names, IndexNames other_names, usize index, std::vector<SharedLeg>& shared_legs)
+    -> bool
 {
-    auto out = std::vector<std::string>{};
-    out.reserve(names.size());
-
-    for (const auto& name : names)
+    const auto& name = names[index];
+    for (auto other_index = 0zu; other_index < other_names.size(); ++other_index)
     {
-        if (std::ranges::contains(shared, name))
+        if (other_names[other_index] == name)
         {
-            continue;
-        }
-        out.push_back(name);
-    }
-
-    return out;
-}
-
-[[nodiscard]] auto leg_extent(const Tensor& tensor, std::string_view leg_name) -> usize
-{
-    for (auto axis = 0zu; axis < tensor.rank(); ++axis)
-    {
-        if (tensor.leg_name(axis) == leg_name)
-        {
-            return tensor.shape(axis);
+            shared_legs.push_back({
+                .name = std::string{name},
+                .left_index = index,
+                .right_index = other_index,
+            });
+            return true;
         }
     }
-
-    throw std::invalid_argument("Requested leg name is not present on the tensor.");
+    return false;
 }
 
 auto require_matching_shared_extents(
-    const Tensor& left, const Tensor& right, std::span<const std::string> shared
+    const Tensor& left,
+    const Tensor& right,
+    std::span<const usize> left_shared,
+    std::span<const usize> right_shared
 ) -> void
 {
-    for (const auto& leg_name : shared)
+    for (auto i = 0zu; i < left_shared.size(); ++i)
     {
-        if (leg_extent(left, leg_name) != leg_extent(right, leg_name))
+        if (left.shape(left_shared[i]) != right.shape(right_shared[i]))
         {
             throw std::invalid_argument(
                 "contraction_output_shape requires shared legs to have matching extents."
@@ -69,23 +68,46 @@ auto require_matching_shared_extents(
 
 auto partition_indices(IndexNames left, IndexNames right) -> IndexPartition
 {
-    auto shared = std::vector<std::string>{};
-    shared.reserve(std::min(left.size(), right.size()));
+    auto shared_legs = std::vector<SharedLeg>{};
+    shared_legs.reserve(std::min(left.size(), right.size()));
+    auto left_not_shared = std::vector<usize>{};
+    left_not_shared.reserve(left.size());
+    auto right_not_shared = std::vector<usize>{};
+    right_not_shared.reserve(right.size());
 
-    for (const auto& name : left)
+    for (auto left_index = 0zu; left_index < left.size(); ++left_index)
     {
-        if (std::ranges::contains(right, name))
+        if (!is_shared(left, right, left_index, shared_legs))
         {
-            shared.push_back(name);
+            left_not_shared.push_back(left_index);
         }
     }
 
-    std::ranges::sort(shared);
+    std::ranges::sort(shared_legs, std::less{}, &SharedLeg::name);
+
+    auto left_shared = std::vector<usize>{};
+    auto right_shared = std::vector<usize>{};
+    left_shared.reserve(shared_legs.size());
+    right_shared.reserve(shared_legs.size());
+    for (const auto& shared_leg : shared_legs)
+    {
+        left_shared.push_back(shared_leg.left_index);
+        right_shared.push_back(shared_leg.right_index);
+    }
+
+    for (auto right_index = 0zu; right_index < right.size(); ++right_index)
+    {
+        if (!std::ranges::contains(right_shared, right_index))
+        {
+            right_not_shared.push_back(right_index);
+        }
+    }
 
     return {
-        .left = remove_shared(left, shared),
-        .right = remove_shared(right, shared),
-        .shared = std::move(shared),
+        .left_not_shared = std::move(left_not_shared),
+        .left_shared = std::move(left_shared),
+        .right_shared = std::move(right_shared),
+        .right_not_shared = std::move(right_not_shared),
     };
 }
 
@@ -99,26 +121,36 @@ auto partition_indices(const Tensor& left, const Tensor& right) -> IndexPartitio
 auto contraction_output_legs(const Tensor& left, const Tensor& right) -> std::vector<std::string>
 {
     const auto partition = partition_indices(left, right);
-    auto legs = partition.left;
-    legs.insert(legs.end(), partition.right.begin(), partition.right.end());
+    auto legs = std::vector<std::string>{};
+    legs.reserve(partition.left_not_shared.size() + partition.right_not_shared.size());
+
+    for (const auto axis : partition.left_not_shared)
+    {
+        legs.push_back(left.leg_name(axis));
+    }
+    for (const auto axis : partition.right_not_shared)
+    {
+        legs.push_back(right.leg_name(axis));
+    }
+
     return legs;
 }
 
 auto contraction_output_shape(const Tensor& left, const Tensor& right) -> std::vector<usize>
 {
     const auto partition = partition_indices(left, right);
-    require_matching_shared_extents(left, right, partition.shared);
+    require_matching_shared_extents(left, right, partition.left_shared, partition.right_shared);
 
     auto shape = std::vector<usize>{};
-    shape.reserve(partition.left.size() + partition.right.size());
+    shape.reserve(partition.left_not_shared.size() + partition.right_not_shared.size());
 
-    for (const auto& leg_name : partition.left)
+    for (const auto axis : partition.left_not_shared)
     {
-        shape.push_back(leg_extent(left, leg_name));
+        shape.push_back(left.shape(axis));
     }
-    for (const auto& leg_name : partition.right)
+    for (const auto axis : partition.right_not_shared)
     {
-        shape.push_back(leg_extent(right, leg_name));
+        shape.push_back(right.shape(axis));
     }
 
     return shape;
