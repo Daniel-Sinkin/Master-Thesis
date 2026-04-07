@@ -31,6 +31,7 @@ add_library(tn_lib STATIC
   src/lib/ndarray/lanczos.cpp
   src/lib/ndarray/lapack.cpp
   src/lib/ndarray/stats.cpp
+  src/lib/tensor/contraction.cpp
   src/lib/tensor/compare.cpp
   src/lib/tensor/tensor.cpp
 )
@@ -130,6 +131,7 @@ if (TN_BUILD_TESTS)
     tests/ndarray_lanczos_tests.cpp
     tests/ndarray_lapack_tests.cpp
     tests/ndarray_blas_tests.cpp
+    tests/tensor_contraction_tests.cpp
     tests/tensor_tests.cpp
   )
   set_target_properties(tn_tests PROPERTIES OUTPUT_NAME tensor-network-tests)
