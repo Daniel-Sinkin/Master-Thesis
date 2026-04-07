@@ -1,17 +1,18 @@
 #include "ndarray/ndarray.hpp"
 
+#include <array>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
-#include <array>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-namespace ds_tn {
+namespace ds_tn
+{
 
-TEST_CASE("NDArray supports rank-0 scalars and rank queries", "[ndarray]") {
+TEST_CASE("NDArray supports rank-0 scalars and rank queries", "[ndarray]")
+{
     auto scalar = NDArray::scalar(42.0);
 
     REQUIRE(scalar.validity() == NDArrayValidity::valid);
@@ -28,7 +29,8 @@ TEST_CASE("NDArray supports rank-0 scalars and rank queries", "[ndarray]") {
     REQUIRE(scalar.indices_from_linear(0).empty());
 }
 
-TEST_CASE("NDArray default construction yields a zero scalar", "[ndarray]") {
+TEST_CASE("NDArray default construction yields a zero scalar", "[ndarray]")
+{
     const auto array = NDArray{};
 
     REQUIRE(array.validity() == NDArrayValidity::valid);
@@ -38,7 +40,8 @@ TEST_CASE("NDArray default construction yields a zero scalar", "[ndarray]") {
     REQUIRE(array() == Catch::Approx(0.0));
 }
 
-TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]") {
+TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]")
+{
     auto array = NDArray({2, 3, 4});
     array(1, 1, 1) = 7.0;
     array(std::array<usize, 3>{0, 2, 3}) = 9.0;
@@ -54,7 +57,8 @@ TEST_CASE("NDArray indexing uses row-major strides and supports negative indices
     REQUIRE_THROWS_AS(array(-3, 0, 0), std::out_of_range);
 }
 
-TEST_CASE("NDArray factories build vectors and matrices", "[ndarray]") {
+TEST_CASE("NDArray factories build vectors and matrices", "[ndarray]")
+{
     const auto vector = NDArray::vector(1.0, 2.0, 3.0);
     const auto matrix = NDArray::matrix({
         {1.0, 2.0, 3.0},
@@ -66,22 +70,28 @@ TEST_CASE("NDArray factories build vectors and matrices", "[ndarray]") {
     REQUIRE(vector.validity() == NDArrayValidity::valid);
     REQUIRE(vector.is_vector());
     REQUIRE(std::ranges::equal(vector.shape(), std::span<const usize>{expected_vector_shape}));
+    REQUIRE(vector.shape(0) == 3zu);
     REQUIRE(vector(-1) == Catch::Approx(3.0));
 
     REQUIRE(matrix.validity() == NDArrayValidity::valid);
     REQUIRE(matrix.is_matrix());
     REQUIRE(std::ranges::equal(matrix.shape(), std::span<const usize>{expected_matrix_shape}));
+    REQUIRE(matrix.shape(0) == 2zu);
+    REQUIRE(matrix.shape(1) == 3zu);
     REQUIRE(matrix(-1, -1) == Catch::Approx(6.0));
+    REQUIRE_THROWS_AS(matrix.shape(2), std::out_of_range);
 
     REQUIRE_THROWS_AS(
         NDArray::matrix({
             {1.0, 2.0},
             {3.0},
         }),
-        std::invalid_argument);
+        std::invalid_argument
+    );
 }
 
-TEST_CASE("NDArray scalar operations and normalization behave as expected", "[ndarray]") {
+TEST_CASE("NDArray scalar operations and normalization behave as expected", "[ndarray]")
+{
     auto values = NDArray::vector(1.0, -2.0, 3.0);
 
     values.add_scalar(1.0);
@@ -118,7 +128,8 @@ TEST_CASE("NDArray scalar operations and normalization behave as expected", "[nd
     REQUIRE_THROWS_AS(values.divide_scalar(0.0), std::invalid_argument);
 }
 
-TEST_CASE("NDArray printing covers rank 0, 1, 2, and 3", "[ndarray]") {
+TEST_CASE("NDArray printing covers rank 0, 1, 2, and 3", "[ndarray]")
+{
     auto scalar = std::ostringstream{};
     NDArray::scalar(42.0).print(4, true, scalar);
     REQUIRE(scalar.str() == "NDArray(rank=0, shape=[])\n42.0000\n");
@@ -129,28 +140,35 @@ TEST_CASE("NDArray printing covers rank 0, 1, 2, and 3", "[ndarray]") {
 
     auto matrix = std::ostringstream{};
     NDArray::matrix({
-        {40.0, -15.3},
-        {-21.0, 21.89},
-    }).print(4, true, matrix);
-    REQUIRE(matrix.str() == "NDArray(rank=2, shape=[2 x 2])\n[ 40.0000 -15.3000]\n[-21.0000  21.8900]\n");
+                        {40.0, -15.3},
+                        {-21.0, 21.89},
+                    })
+        .print(4, true, matrix);
+    REQUIRE(
+        matrix.str()
+        == "NDArray(rank=2, shape=[2 x 2])\n[ 40.0000 "
+           "-15.3000]\n[-21.0000  21.8900]\n"
+    );
 
     auto rank3 = NDArray({2, 2, 2});
-    for (usize index = 0; index < rank3.size(); ++index) {
+    for (usize index = 0; index < rank3.size(); ++index)
+    {
         rank3.data()[index] = static_cast<f64>(index + 1);
     }
 
     auto tensor3 = std::ostringstream{};
     rank3.print(1, true, tensor3);
     REQUIRE(
-        tensor3.str() ==
-        "NDArray(rank=3, shape=[2 x 2 x 2])\n"
-        "slice 0\n"
-        "[1.0 2.0]\n"
-        "[3.0 4.0]\n"
-        "\n"
-        "slice 1\n"
-        "[5.0 6.0]\n"
-        "[7.0 8.0]\n");
+        tensor3.str()
+        == "NDArray(rank=3, shape=[2 x 2 x 2])\n"
+           "slice 0\n"
+           "[1.0 2.0]\n"
+           "[3.0 4.0]\n"
+           "\n"
+           "slice 1\n"
+           "[5.0 6.0]\n"
+           "[7.0 8.0]\n"
+    );
 }
 
-} // namespace ds_tn
+}  // namespace ds_tn

@@ -5,14 +5,15 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
 #include <cmath>
 #include <limits>
 #include <stdexcept>
 
-namespace ds_tn {
+namespace ds_tn
+{
 
-TEST_CASE("NDArray generators are reproducible and validate their parameters", "[ndarray][random]") {
+TEST_CASE("NDArray generators are reproducible and validate their parameters", "[ndarray][random]")
+{
     auto generator_a = NDArrayGenerator(1234);
     auto generator_b = NDArrayGenerator(1234);
 
@@ -20,7 +21,8 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
     const auto uniform_b = generator_b.uniform({3, 4}, -2.0, 3.0);
     REQUIRE(close_per_element(uniform_a, uniform_b, 0.0));
 
-    for (usize index = 0; index < uniform_a.size(); ++index) {
+    for (usize index = 0; index < uniform_a.size(); ++index)
+    {
         REQUIRE(uniform_a.data()[index] >= -2.0);
         REQUIRE(uniform_a.data()[index] <= 3.0);
     }
@@ -31,14 +33,16 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
             .lower = -1.0,
             .upper = 1.0,
         },
-        77);
+        77
+    );
     const auto uniform_options_seed_b = NDArray::random_uniform(
         {2, 3},
         RandomUniformOptions{
             .lower = -1.0,
             .upper = 1.0,
         },
-        77);
+        77
+    );
     REQUIRE(close_per_element(uniform_options_seed_a, uniform_options_seed_b, 0.0));
 
     const auto uniform_default_seed_a = NDArray::random_uniform(
@@ -46,13 +50,15 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
         RandomUniformOptions{
             .lower = -1.0,
             .upper = 1.0,
-        });
+        }
+    );
     const auto uniform_default_seed_b = NDArray::random_uniform(
         {2, 3},
         RandomUniformOptions{
             .lower = -1.0,
             .upper = 1.0,
-        });
+        }
+    );
     REQUIRE(not close_per_element(uniform_default_seed_a, uniform_default_seed_b, 0.0));
 
     const auto normal_options_seed_a = NDArray::random_normal(
@@ -61,14 +67,16 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
             .mu = 0.0,
             .sigma = 1.0,
         },
-        99);
+        99
+    );
     const auto normal_options_seed_b = NDArray::random_normal(
         {2, 3},
         RandomNormalOptions{
             .mu = 0.0,
             .sigma = 1.0,
         },
-        99);
+        99
+    );
     REQUIRE(close_per_element(normal_options_seed_a, normal_options_seed_b, 0.0));
 
     const auto normal_default_seed_a = NDArray::random_normal(
@@ -76,24 +84,79 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
         RandomNormalOptions{
             .mu = 0.0,
             .sigma = 1.0,
-        });
+        }
+    );
     const auto normal_default_seed_b = NDArray::random_normal(
         {2, 3},
         RandomNormalOptions{
             .mu = 0.0,
             .sigma = 1.0,
-        });
+        }
+    );
     REQUIRE(not close_per_element(normal_default_seed_a, normal_default_seed_b, 0.0));
 
-    REQUIRE(close_per_element(generator_a.uniform({4}, 2.5, 2.5), NDArray::vector(2.5, 2.5, 2.5, 2.5), 0.0));
-    REQUIRE(close_per_element(generator_a.normal({4}, -3.0, 0.0), NDArray::vector(-3.0, -3.0, -3.0, -3.0), 0.0));
+    REQUIRE(close_per_element(
+        generator_a.uniform({4}, 2.5, 2.5), NDArray::vector(2.5, 2.5, 2.5, 2.5), 0.0
+    ));
+    REQUIRE(close_per_element(
+        generator_a.normal({4}, -3.0, 0.0), NDArray::vector(-3.0, -3.0, -3.0, -3.0), 0.0
+    ));
 
     REQUIRE_THROWS_AS(generator_a.uniform({2}, 2.0, 1.0), std::invalid_argument);
-    REQUIRE_THROWS_AS(generator_a.uniform({2}, 0.0, std::numeric_limits<f64>::infinity()), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        generator_a.uniform({2}, 0.0, std::numeric_limits<f64>::infinity()), std::invalid_argument
+    );
     REQUIRE_THROWS_AS(generator_a.normal({2}, 0.0, -1.0), std::invalid_argument);
 }
 
-TEST_CASE("NDArray norms and element summaries flatten over all entries", "[ndarray][stats]") {
+TEST_CASE(
+    "NDArray random dispatch accepts shared option variants and metadata formatting stays stable",
+    "[ndarray][random][metadata]"
+)
+{
+    auto generator_a = NDArrayGenerator(314);
+    auto generator_b = NDArrayGenerator(314);
+
+    const auto generated_uniform_a = generator_a.generate(
+        {2, 2},
+        RandomUniformOptions{
+            .lower = -0.5,
+            .upper = 0.5,
+        }
+    );
+    const auto generated_uniform_b = generator_b.generate(
+        {2, 2},
+        RandomUniformOptions{
+            .lower = -0.5,
+            .upper = 0.5,
+        }
+    );
+    REQUIRE(close_per_element(generated_uniform_a, generated_uniform_b, 0.0));
+
+    const auto generated_normal_a = NDArray::random(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 2.0,
+            .sigma = 0.25,
+        },
+        202
+    );
+    const auto generated_normal_b = NDArray::random(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 2.0,
+            .sigma = 0.25,
+        },
+        202
+    );
+    REQUIRE(close_per_element(generated_normal_a, generated_normal_b, 0.0));
+
+    REQUIRE(NDArray{}.format_metadata() == "NDArray(shape=[])");
+    REQUIRE(generated_normal_a.format_metadata() == "NDArray(shape=[2 x 3])");
+}
+
+TEST_CASE("NDArray norms and element summaries flatten over all entries", "[ndarray][stats]")
+{
     const auto matrix = NDArray::matrix({
         {3.0, 4.0},
         {-12.0, 0.0},
@@ -118,7 +181,8 @@ TEST_CASE("NDArray norms and element summaries flatten over all entries", "[ndar
     REQUIRE_THROWS_AS(lp_norm(matrix, 0.0), std::invalid_argument);
 }
 
-TEST_CASE("NDArray comparison helpers are pure shape and data comparisons", "[ndarray][compare]") {
+TEST_CASE("NDArray comparison helpers are pure shape and data comparisons", "[ndarray][compare]")
+{
     const auto lhs = NDArray::matrix({
         {1.0, 2.0},
         {3.0, 4.0},
@@ -136,4 +200,28 @@ TEST_CASE("NDArray comparison helpers are pure shape and data comparisons", "[nd
     REQUIRE(not close_accumulated(lhs, rhs, -1.0));
 }
 
-} // namespace ds_tn
+TEST_CASE("NDArray symmetry check respects square shape and tolerance", "[ndarray][compare]")
+{
+    const auto symmetric = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {2.0, 4.0, 5.0},
+        {3.0, 5.0, 6.0},
+    });
+    const auto almost_symmetric = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {2.0 + 5e-7, 4.0, 5.0},
+        {3.0, 5.0, 6.0},
+    });
+    const auto not_square = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {2.0, 4.0, 5.0},
+    });
+
+    REQUIRE(is_symmetric(symmetric));
+    REQUIRE(is_symmetric(almost_symmetric, 1e-6));
+    REQUIRE(not is_symmetric(almost_symmetric, 1e-8));
+    REQUIRE(not is_symmetric(not_square));
+    REQUIRE(not is_symmetric(symmetric, -1.0));
+}
+
+}  // namespace ds_tn

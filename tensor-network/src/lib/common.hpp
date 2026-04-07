@@ -10,12 +10,13 @@
 #include <stdexcept>
 
 #if __has_include(<stdfloat>)
-#include <stdfloat>
+#    include <stdfloat>
 #endif
 
 #include <ranges>
 
-namespace ds_tn {
+namespace ds_tn
+{
 
 using usize = std::size_t;
 using isize = std::ptrdiff_t;
@@ -43,50 +44,54 @@ static_assert(sizeof(f32) == 4);
 static_assert(sizeof(f64) == 8);
 
 template <std::integral Integer>
-[[nodiscard]] constexpr auto iota_n(Integer end) {
+[[nodiscard]] constexpr auto iota_n(Integer end)
+{
     return std::views::iota(Integer{0}, end);
 }
 
 template <std::integral Integer>
-[[nodiscard]] constexpr auto iota_n(Integer begin, Integer end) {
+[[nodiscard]] constexpr auto iota_n(Integer begin, Integer end)
+{
     return std::views::iota(begin, end);
 }
 
 template <typename T, usize Extent>
-[[nodiscard]] constexpr auto iota_n(std::span<T, Extent> values) {
+[[nodiscard]] constexpr auto iota_n(std::span<T, Extent> values)
+{
     return iota_n(values.size());
 }
 
 template <typename T, usize LeftExtent, usize RightExtent>
-[[nodiscard]] constexpr auto inner_product(
-    std::span<const T, LeftExtent> lhs,
-    std::span<const T, RightExtent> rhs) -> T {
-    if (lhs.size() != rhs.size()) {
+[[nodiscard]] constexpr auto
+inner_product(std::span<const T, LeftExtent> lhs, std::span<const T, RightExtent> rhs) -> T
+{
+    if (lhs.size() != rhs.size())
+    {
         throw std::invalid_argument("inner_product requires spans of the same size.");
     }
     return std::transform_reduce(
-        lhs.begin(),
-        lhs.end(),
-        rhs.begin(),
-        T{0},
-        std::plus<T>{},
-        std::multiplies<T>{});
+        lhs.begin(), lhs.end(), rhs.begin(), T{0}, std::plus<T>{}, std::multiplies<T>{}
+    );
 }
 
-namespace literals {
+namespace literals
+{
 
-[[nodiscard]] constexpr auto operator""_b(unsigned long long value) noexcept -> usize {
+[[nodiscard]] constexpr auto operator""_b(unsigned long long value) noexcept -> usize
+{
     return static_cast<usize>(value);
 }
 
-[[nodiscard]] constexpr auto operator""_kib(unsigned long long value) noexcept -> usize {
+[[nodiscard]] constexpr auto operator""_kib(unsigned long long value) noexcept -> usize
+{
     return static_cast<usize>(value * 1024ULL);
 }
 
-[[nodiscard]] constexpr auto operator""_mib(unsigned long long value) noexcept -> usize {
+[[nodiscard]] constexpr auto operator""_mib(unsigned long long value) noexcept -> usize
+{
     return static_cast<usize>(value * 1024ULL * 1024ULL);
 }
 
-} // namespace literals
+}  // namespace literals
 
-} // namespace ds_tn
+}  // namespace ds_tn

@@ -3,14 +3,17 @@
 
 #include "ndarray/ndarray.hpp"
 
-namespace ds_tn {
+namespace ds_tn
+{
 
-auto axpy(f64 alpha, const NDArray &x, NDArray &y) -> void;
-auto axpy(f64 alpha, const NDArray &x, const NDArray &y, NDArray &out) -> void;
-auto matrix_matrix_product(const NDArray &lhs, const NDArray &rhs, NDArray &out) -> void;
-[[nodiscard]] auto matrix_matrix_product(const NDArray &lhs, const NDArray &rhs) -> NDArray;
-auto matrix_vector_product(const NDArray &matrix, const NDArray &vector, NDArray &out) -> void;
-[[nodiscard]] auto matrix_vector_product(const NDArray &matrix, const NDArray &vector) -> NDArray;
-[[nodiscard]] auto dot_product(const NDArray &lhs, const NDArray &rhs) -> f64;
+auto axpy(f64 alpha, const NDArray& x, NDArray& y) -> void;
+auto axpy(f64 alpha, const NDArray& x, const NDArray& y, NDArray& out) -> void;
+auto gram_matrix(const NDArray& matrix, NDArray& out) -> void;
+[[nodiscard]] auto gram_matrix(const NDArray& matrix) -> NDArray;
+auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs, NDArray& out) -> void;
+[[nodiscard]] auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs) -> NDArray;
+auto matrix_vector_product(const NDArray& matrix, const NDArray& vector, NDArray& out) -> void;
+[[nodiscard]] auto matrix_vector_product(const NDArray& matrix, const NDArray& vector) -> NDArray;
+[[nodiscard]] auto dot_product(const NDArray& lhs, const NDArray& rhs) -> f64;
 
-} // namespace ds_tn
+}  // namespace ds_tn

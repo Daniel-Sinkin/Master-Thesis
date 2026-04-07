@@ -9,13 +9,17 @@
 #include <ranges>
 #include <stdexcept>
 
-namespace ds_tn {
-namespace {
+namespace ds_tn
+{
+namespace
+{
 
-[[nodiscard]] auto make_seeded_engine() -> std::mt19937_64 {
+[[nodiscard]] auto make_seeded_engine() -> std::mt19937_64
+{
     auto seed_data = std::array<std::random_device::result_type, 8>{};
     auto random_device = std::random_device{};
-    for (auto &seed : seed_data) {
+    for (auto& seed : seed_data)
+    {
         seed = random_device();
     }
 
@@ -23,51 +27,88 @@ namespace {
     return std::mt19937_64{seed_sequence};
 }
 
-} // namespace
+}  // namespace
 
-NDArrayGenerator::NDArrayGenerator()
-    : engine_(make_seeded_engine()) {}
+NDArrayGenerator::NDArrayGenerator() : engine_(make_seeded_engine())
+{
+}
 
-NDArrayGenerator::NDArrayGenerator(NDArraySeed seed)
-    : engine_(seed) {}
+NDArrayGenerator::NDArrayGenerator(NDArraySeed seed) : engine_(seed)
+{
+}
 
-auto NDArrayGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -> NDArray {
-    if (not std::isfinite(lower) or not std::isfinite(upper)) {
+auto NDArrayGenerator::generate(std::vector<usize> shape, RandomOptions options) -> NDArray
+{
+    return std::visit(
+        [&](const auto& typed_options) -> NDArray
+        {
+            using Options = std::decay_t<decltype(typed_options)>;
+
+            if constexpr (std::same_as<Options, RandomUniformOptions>)
+            {
+                return uniform(std::move(shape), typed_options.lower, typed_options.upper);
+            }
+            else if constexpr (std::same_as<Options, RandomNormalOptions>)
+            {
+                return normal(std::move(shape), typed_options.mu, typed_options.sigma);
+            }
+        },
+        options
+    );
+}
+
+auto NDArrayGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -> NDArray
+{
+    if (not std::isfinite(lower) or not std::isfinite(upper))
+    {
         throw std::invalid_argument("NDArrayGenerator::uniform requires finite range endpoints.");
     }
-    if (lower > upper) {
+    if (lower > upper)
+    {
         throw std::invalid_argument("NDArrayGenerator::uniform requires lower <= upper.");
     }
 
     auto out = NDArray(std::move(shape));
-    if (lower == upper) {
+    if (lower == upper)
+    {
         std::ranges::fill(out.data(), out.data() + out.size(), lower);
         return out;
     }
 
-    auto distribution =
-        std::uniform_real_distribution<f64>{lower, std::nextafter(upper, std::numeric_limits<f64>::infinity())};
-    std::ranges::generate(out.data(), out.data() + out.size(), [&]() { return distribution(engine_); });
+    auto distribution = std::uniform_real_distribution<f64>{
+        lower, std::nextafter(upper, std::numeric_limits<f64>::infinity())
+    };
+    std::ranges::generate(
+        out.data(), out.data() + out.size(), [&]() { return distribution(engine_); }
+    );
     return out;
 }
 
-auto NDArrayGenerator::normal(std::vector<usize> shape, f64 mu, f64 sigma) -> NDArray {
-    if (not std::isfinite(mu) or not std::isfinite(sigma)) {
-        throw std::invalid_argument("NDArrayGenerator::normal requires finite distribution parameters.");
+auto NDArrayGenerator::normal(std::vector<usize> shape, f64 mu, f64 sigma) -> NDArray
+{
+    if (not std::isfinite(mu) or not std::isfinite(sigma))
+    {
+        throw std::invalid_argument(
+            "NDArrayGenerator::normal requires finite distribution parameters."
+        );
     }
-    if (sigma < 0.0) {
+    if (sigma < 0.0)
+    {
         throw std::invalid_argument("NDArrayGenerator::normal requires sigma >= 0.");
     }
 
     auto out = NDArray(std::move(shape));
-    if (sigma == 0.0) {
+    if (sigma == 0.0)
+    {
         std::ranges::fill(out.data(), out.data() + out.size(), mu);
         return out;
     }
 
     auto distribution = std::normal_distribution<f64>{mu, sigma};
-    std::ranges::generate(out.data(), out.data() + out.size(), [&]() { return distribution(engine_); });
+    std::ranges::generate(
+        out.data(), out.data() + out.size(), [&]() { return distribution(engine_); }
+    );
     return out;
 }
 
-} // namespace ds_tn
+}  // namespace ds_tn

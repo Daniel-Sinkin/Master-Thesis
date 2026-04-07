@@ -4,12 +4,13 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
-
 #include <stdexcept>
 
-namespace ds_tn {
+namespace ds_tn
+{
 
-TEST_CASE("axpy supports normal, self-alias, and out-parameter forms", "[ndarray][blas]") {
+TEST_CASE("axpy supports normal, self-alias, and out-parameter forms", "[ndarray][blas]")
+{
     auto x = NDArray::vector(1.0, 2.0, 3.0);
     auto y = NDArray::vector(4.0, 5.0, 6.0);
     axpy(2.0, x, y);
@@ -33,7 +34,37 @@ TEST_CASE("axpy supports normal, self-alias, and out-parameter forms", "[ndarray
     REQUIRE(close_per_element(out_is_x, NDArray::vector(6.0, 9.0, 12.0), 0.0));
 }
 
-TEST_CASE("matrix-vector product supports return and out overloads and rejects aliasing", "[ndarray][blas]") {
+TEST_CASE("gram_matrix computes A^T A and supports the out overload", "[ndarray][blas]")
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {4.0, 5.0, 6.0},
+    });
+    const auto expected = NDArray::matrix({
+        {17.0, 22.0, 27.0},
+        {22.0, 29.0, 36.0},
+        {27.0, 36.0, 45.0},
+    });
+
+    REQUIRE(close_per_element(gram_matrix(matrix), expected, 1e-12));
+
+    auto out = NDArray({3, 3});
+    gram_matrix(matrix, out);
+    REQUIRE(close_per_element(out, expected, 1e-12));
+
+    auto aliased = NDArray::matrix({
+        {1.0, 2.0},
+        {3.0, 4.0},
+    });
+    REQUIRE_THROWS_AS(gram_matrix(aliased, aliased), std::runtime_error);
+}
+
+TEST_CASE(
+    "matrix-vector product supports return and out overloads and rejects "
+    "aliasing",
+    "[ndarray][blas]"
+)
+{
     const auto matrix = NDArray::matrix({
         {1.0, 2.0, 3.0},
         {4.0, 5.0, 6.0},
@@ -55,7 +86,12 @@ TEST_CASE("matrix-vector product supports return and out overloads and rejects a
     REQUIRE_THROWS_AS(matrix_vector_product(square, aliased, aliased), std::runtime_error);
 }
 
-TEST_CASE("matrix-matrix product supports return and out overloads and rejects aliasing", "[ndarray][blas]") {
+TEST_CASE(
+    "matrix-matrix product supports return and out overloads and rejects "
+    "aliasing",
+    "[ndarray][blas]"
+)
+{
     const auto lhs = NDArray::matrix({
         {1.0, 2.0, 3.0},
         {4.0, 5.0, 6.0},
@@ -87,7 +123,8 @@ TEST_CASE("matrix-matrix product supports return and out overloads and rejects a
     REQUIRE_THROWS_AS(matrix_matrix_product(aliased, square_rhs, aliased), std::runtime_error);
 }
 
-TEST_CASE("dot_product flattens matching NDArrays", "[ndarray][blas]") {
+TEST_CASE("dot_product flattens matching NDArrays", "[ndarray][blas]")
+{
     const auto lhs = NDArray::matrix({
         {1.0, 2.0},
         {3.0, 4.0},
@@ -101,4 +138,4 @@ TEST_CASE("dot_product flattens matching NDArrays", "[ndarray][blas]") {
     REQUIRE_THROWS_AS(dot_product(lhs, NDArray::vector(1.0, 2.0, 3.0, 4.0)), std::runtime_error);
 }
 
-} // namespace ds_tn
+}  // namespace ds_tn
