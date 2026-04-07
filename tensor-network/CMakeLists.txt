@@ -27,6 +27,7 @@ add_library(tn_lib STATIC
   src/lib/ndarray/blas.cpp
   src/lib/ndarray/compare.cpp
   src/lib/ndarray/generator.cpp
+  src/lib/ndarray/lanczos.cpp
   src/lib/ndarray/lapack.cpp
   src/lib/ndarray/stats.cpp
   src/lib/tensor/tensor.cpp
@@ -123,6 +124,7 @@ if (TN_BUILD_TESTS)
     tests/common_tests.cpp
     tests/ndarray_tests.cpp
     tests/ndarray_random_stats_compare_tests.cpp
+    tests/ndarray_lanczos_tests.cpp
     tests/ndarray_lapack_tests.cpp
     tests/ndarray_blas_tests.cpp
     tests/tensor_tests.cpp
