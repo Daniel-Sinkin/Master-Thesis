@@ -89,6 +89,9 @@ auto append_matrix(
 
 } // namespace
 
+NDArray::NDArray()
+    : NDArray(std::vector<usize>{}) {}
+
 NDArray::NDArray(std::vector<usize> shape)
     : shape_(std::move(shape)),
       strides_(shape_.size(), 1) {
@@ -107,7 +110,7 @@ auto NDArray::initialize_storage() -> void {
 }
 
 auto NDArray::scalar(f64 value) -> NDArray {
-    auto out = NDArray({});
+    auto out = NDArray{};
     out.data_[0] = value;
     return out;
 }
@@ -118,21 +121,26 @@ auto NDArray::vector(std::initializer_list<f64> values) -> NDArray {
     return out;
 }
 
-auto NDArray::random_uniform(std::vector<usize> shape, f64 lower, f64 upper, std::optional<NDArraySeed> seed)
-    -> NDArray {
+auto NDArray::random_uniform(
+    std::vector<usize> shape,
+    RandomUniformOptions options,
+    std::optional<NDArraySeed> seed) -> NDArray {
     if (seed.has_value()) {
-        return NDArrayGenerator(*seed).uniform(std::move(shape), lower, upper);
+        return NDArrayGenerator(*seed).uniform(std::move(shape), options.lower, options.upper);
     }
 
-    return NDArrayGenerator{}.uniform(std::move(shape), lower, upper);
+    return NDArrayGenerator{}.uniform(std::move(shape), options.lower, options.upper);
 }
 
-auto NDArray::random_normal(std::vector<usize> shape, f64 mu, f64 sigma, std::optional<NDArraySeed> seed) -> NDArray {
+auto NDArray::random_normal(
+    std::vector<usize> shape,
+    RandomNormalOptions options,
+    std::optional<NDArraySeed> seed) -> NDArray {
     if (seed.has_value()) {
-        return NDArrayGenerator(*seed).normal(std::move(shape), mu, sigma);
+        return NDArrayGenerator(*seed).normal(std::move(shape), options.mu, options.sigma);
     }
 
-    return NDArrayGenerator{}.normal(std::move(shape), mu, sigma);
+    return NDArrayGenerator{}.normal(std::move(shape), options.mu, options.sigma);
 }
 
 auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> NDArray {
@@ -172,6 +180,10 @@ auto NDArray::data() const noexcept -> const f64 * {
     return data_.data();
 }
 
+auto NDArray::l2_norm() const -> f64 {
+    return ds_tn::l2_norm(*this);
+}
+
 auto NDArray::normalized() const -> NDArray {
     auto out = *this;
     out.normalize();
@@ -183,7 +195,7 @@ auto NDArray::normalize() -> void {
         throw std::invalid_argument("normalize requires a valid NDArray.");
     }
 
-    const auto norm = l2_norm(*this);
+    const auto norm = l2_norm();
     if (not std::isfinite(norm) or norm == 0.0) {
         throw std::runtime_error("Cannot normalize an NDArray with zero or non-finite L2 norm.");
     }

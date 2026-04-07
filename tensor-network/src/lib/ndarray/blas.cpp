@@ -33,7 +33,7 @@ auto require_same_shape(const NDArray &lhs, const NDArray &rhs, const char *func
 
 } // namespace
 
-auto axpy(NDArray &y, f64 alpha, const NDArray &x) -> void {
+auto axpy(f64 alpha, const NDArray &x, NDArray &y) -> void {
     require_valid_array(y, "axpy", "y");
     require_valid_array(x, "axpy", "x");
     require_same_shape(y, x, "axpy");
@@ -46,7 +46,7 @@ auto axpy(NDArray &y, f64 alpha, const NDArray &x) -> void {
     cblas_daxpy(as_blas_int(y.size()), alpha, x.data(), 1, y.data(), 1);
 }
 
-auto axpy(const NDArray &y, f64 alpha, const NDArray &x, NDArray &out) -> void {
+auto axpy(f64 alpha, const NDArray &x, const NDArray &y, NDArray &out) -> void {
     require_valid_array(y, "axpy", "y");
     require_valid_array(x, "axpy", "x");
     require_valid_array(out, "axpy", "out");
@@ -54,13 +54,13 @@ auto axpy(const NDArray &y, f64 alpha, const NDArray &x, NDArray &out) -> void {
     require_same_shape(y, out, "axpy");
 
     if (&out == &y) {
-        axpy(out, alpha, x);
+        axpy(alpha, x, out);
         return;
     }
 
     if (&out == &x) {
         out.multiply_scalar(alpha);
-        axpy(out, 1.0, y);
+        axpy(1.0, y, out);
         return;
     }
 

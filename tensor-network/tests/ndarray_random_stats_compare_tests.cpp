@@ -25,14 +25,65 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
         REQUIRE(uniform_a.data()[index] <= 3.0);
     }
 
-    REQUIRE(close_per_element(
-        NDArray::random_uniform({2, 3}, -1.0, 1.0, 77),
-        NDArray::random_uniform({2, 3}, -1.0, 1.0, 77),
-        0.0));
-    REQUIRE(close_per_element(
-        NDArray::random_normal({2, 3}, 0.0, 1.0, 99),
-        NDArray::random_normal({2, 3}, 0.0, 1.0, 99),
-        0.0));
+    const auto uniform_options_seed_a = NDArray::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        },
+        77);
+    const auto uniform_options_seed_b = NDArray::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        },
+        77);
+    REQUIRE(close_per_element(uniform_options_seed_a, uniform_options_seed_b, 0.0));
+
+    const auto uniform_default_seed_a = NDArray::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        });
+    const auto uniform_default_seed_b = NDArray::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        });
+    REQUIRE(not close_per_element(uniform_default_seed_a, uniform_default_seed_b, 0.0));
+
+    const auto normal_options_seed_a = NDArray::random_normal(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 0.0,
+            .sigma = 1.0,
+        },
+        99);
+    const auto normal_options_seed_b = NDArray::random_normal(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 0.0,
+            .sigma = 1.0,
+        },
+        99);
+    REQUIRE(close_per_element(normal_options_seed_a, normal_options_seed_b, 0.0));
+
+    const auto normal_default_seed_a = NDArray::random_normal(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 0.0,
+            .sigma = 1.0,
+        });
+    const auto normal_default_seed_b = NDArray::random_normal(
+        {2, 3},
+        RandomNormalOptions{
+            .mu = 0.0,
+            .sigma = 1.0,
+        });
+    REQUIRE(not close_per_element(normal_default_seed_a, normal_default_seed_b, 0.0));
 
     REQUIRE(close_per_element(generator_a.uniform({4}, 2.5, 2.5), NDArray::vector(2.5, 2.5, 2.5, 2.5), 0.0));
     REQUIRE(close_per_element(generator_a.normal({4}, -3.0, 0.0), NDArray::vector(-3.0, -3.0, -3.0, -3.0), 0.0));

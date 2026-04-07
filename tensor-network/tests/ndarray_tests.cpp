@@ -28,6 +28,16 @@ TEST_CASE("NDArray supports rank-0 scalars and rank queries", "[ndarray]") {
     REQUIRE(scalar.indices_from_linear(0).empty());
 }
 
+TEST_CASE("NDArray default construction yields a zero scalar", "[ndarray]") {
+    const auto array = NDArray{};
+
+    REQUIRE(array.validity() == NDArrayValidity::valid);
+    REQUIRE(array.rank() == 0zu);
+    REQUIRE(array.size() == 1zu);
+    REQUIRE(array.shape().empty());
+    REQUIRE(array() == Catch::Approx(0.0));
+}
+
 TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]") {
     auto array = NDArray({2, 3, 4});
     array(1, 1, 1) = 7.0;

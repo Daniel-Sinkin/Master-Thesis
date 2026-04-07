@@ -12,24 +12,24 @@ namespace ds_tn {
 TEST_CASE("axpy supports normal, self-alias, and out-parameter forms", "[ndarray][blas]") {
     auto x = NDArray::vector(1.0, 2.0, 3.0);
     auto y = NDArray::vector(4.0, 5.0, 6.0);
-    axpy(y, 2.0, x);
+    axpy(2.0, x, y);
     REQUIRE(close_per_element(y, NDArray::vector(6.0, 9.0, 12.0), 0.0));
 
     auto self = NDArray::vector(1.0, 2.0, 3.0);
-    axpy(self, 2.0, self);
+    axpy(2.0, self, self);
     REQUIRE(close_per_element(self, NDArray::vector(3.0, 6.0, 9.0), 0.0));
 
     auto out = NDArray({3});
-    axpy(NDArray::vector(4.0, 5.0, 6.0), 2.0, NDArray::vector(1.0, 2.0, 3.0), out);
+    axpy(2.0, NDArray::vector(1.0, 2.0, 3.0), NDArray::vector(4.0, 5.0, 6.0), out);
     REQUIRE(close_per_element(out, NDArray::vector(6.0, 9.0, 12.0), 0.0));
 
     auto out_is_y = NDArray::vector(4.0, 5.0, 6.0);
-    axpy(out_is_y, 2.0, NDArray::vector(1.0, 2.0, 3.0), out_is_y);
+    axpy(2.0, NDArray::vector(1.0, 2.0, 3.0), out_is_y, out_is_y);
     REQUIRE(close_per_element(out_is_y, NDArray::vector(6.0, 9.0, 12.0), 0.0));
 
     auto out_is_x = NDArray::vector(1.0, 2.0, 3.0);
     const auto y_copy = NDArray::vector(4.0, 5.0, 6.0);
-    axpy(y_copy, 2.0, out_is_x, out_is_x);
+    axpy(2.0, out_is_x, y_copy, out_is_x);
     REQUIRE(close_per_element(out_is_x, NDArray::vector(6.0, 9.0, 12.0), 0.0));
 }
 

@@ -18,6 +18,16 @@ namespace ds_tn {
 
 using NDArraySeed = std::mt19937_64::result_type;
 
+struct RandomUniformOptions {
+    f64 lower{0.0};
+    f64 upper{1.0};
+};
+
+struct RandomNormalOptions {
+    f64 mu{0.0};
+    f64 sigma{1.0};
+};
+
 enum class NDArrayValidity : u8 {
     valid = 0,
     shape_stride_size_mismatch,
@@ -28,19 +38,18 @@ enum class NDArrayValidity : u8 {
 
 class NDArray {
 public:
+    NDArray();
     explicit NDArray(std::vector<usize> shape);
 
     [[nodiscard]] static auto scalar(f64 value) -> NDArray;
     [[nodiscard]] static auto vector(std::initializer_list<f64> values) -> NDArray;
     [[nodiscard]] static auto random_uniform(
         std::vector<usize> shape,
-        f64 lower = 0.0,
-        f64 upper = 1.0,
+        RandomUniformOptions options = {},
         std::optional<NDArraySeed> seed = std::nullopt) -> NDArray;
     [[nodiscard]] static auto random_normal(
         std::vector<usize> shape,
-        f64 mu = 0.0,
-        f64 sigma = 1.0,
+        RandomNormalOptions options = {},
         std::optional<NDArraySeed> seed = std::nullopt) -> NDArray;
 
     template <typename... Values>
@@ -80,6 +89,7 @@ public:
 
     [[nodiscard]] auto indices_from_linear(usize linear_index) const -> std::vector<usize>;
     [[nodiscard]] auto validity() const noexcept -> NDArrayValidity;
+    [[nodiscard]] auto l2_norm() const -> f64;
     [[nodiscard]] auto normalized() const -> NDArray;
     auto normalize() -> void;
     auto add_scalar(f64 scalar) -> NDArray &;

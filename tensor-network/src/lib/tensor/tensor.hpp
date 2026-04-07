@@ -25,6 +25,7 @@ enum class TensorValidity : u8 {
 
 class Tensor {
 public:
+    Tensor() = default;
     explicit Tensor(NDArray array);
     Tensor(NDArray array, std::span<const std::string> leg_names);
     Tensor(NDArray array, std::initializer_list<std::string> leg_names);
@@ -36,13 +37,11 @@ public:
     [[nodiscard]] static auto vector(std::initializer_list<f64> values) -> Tensor;
     [[nodiscard]] static auto random_uniform(
         std::vector<usize> shape,
-        f64 lower = 0.0,
-        f64 upper = 1.0,
+        RandomUniformOptions options = {},
         std::optional<TensorSeed> seed = std::nullopt) -> Tensor;
     [[nodiscard]] static auto random_normal(
         std::vector<usize> shape,
-        f64 mu = 0.0,
-        f64 sigma = 1.0,
+        RandomNormalOptions options = {},
         std::optional<TensorSeed> seed = std::nullopt) -> Tensor;
 
     template <typename... Values>
@@ -89,7 +88,7 @@ public:
     [[nodiscard]] auto is_tensor3() const noexcept -> bool;
 
 private:
-    NDArray values_{std::vector<usize>{}};
+    NDArray values_{};
     std::vector<std::string> leg_names_{};
 };
 

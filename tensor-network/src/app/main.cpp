@@ -4,19 +4,64 @@
 #include "ndarray/stats.hpp"   // IWYU pragma: keep
 #include "tensor/tensor.hpp"   // IWYU pragma: keep
 
-#include <iostream>
+namespace ds_tn {
+
+struct LanczosConfig {
+    bool precondition_checks{true};
+    bool iteration_checks{false}; // expensive
+    RandomNormalOptions random_options{.mu = 0.0, .sigma = 0.1};
+    std::optional<NDArraySeed> seed{};
+};
+struct LanczosResult {
+    NDArray x;
+    f64 lambda;
+};
+auto lanczos(NDArray A, usize m = 20, LanczosConfig cfg = {}) -> LanczosResult {
+    return {NDArray::scalar(0.0), lambda{}};
+}
+} // namespace ds_tn
 
 int main() {
     using namespace ds_tn;
 
     constexpr usize n{3};
-    const auto A = NDArray::random_normal({n, n}, 0.0, 1.0, 7);
-    const auto x = NDArray::random_normal({n}, 0.0, 1.0, 11);
-    const auto y = matrix_vector_product(A, x);
-    auto tensor = Tensor{y, {"result"}};
+    constexpr usize m{20};
 
-    tensor.print();
-    std::cout << "l2(y) = " << l2_norm(y) << '\n';
+    const auto A = NDArray::random_normal({n, n}, {.sigma = 0.1});
 
-    return 0;
+    auto v_prev = NDArray({n});
+    auto v_curr = NDArray::random_normal({n}, {.sigma = 0.1});
+    v_curr.normalize();
+
+    NDArray Av{{n}};
+    auto update_Av = [&A, &v_curr, &Av] { matrix_vector_product(A, v_curr, Av); };
+
+    std::vector<f64> alphas;
+    std::vector<f64> betas;
+    std::vector<NDArray> vs;
+
+    alphas.reserve(m);
+    betas.reserve(m);
+    vs.reserve(m);
+
+    vs.push_back(v_curr);
+
+    for (auto iter = 0zu; iter < m; ++iter) {
+        if constexpr (false) {
+            assert(alphas.size() == iter);
+            assert(betas.size() == iter);
+            assert(vs.size() == iter + 1);
+        }
+        update_Av();
+        alphas.push_back(dot_product(Av, v_curr));
+
+        axpy(-alphas.back(), v_curr, Av);
+        if (iter > 0) {
+            axpy(betas.back(), v_prev, Av);
+        }
+
+        for (auto j = 0zu; j < iter; ++j) {
+            axpy(-dot_product(Av, vs[j]), vs[j], Av);
+        }
+    }
 }

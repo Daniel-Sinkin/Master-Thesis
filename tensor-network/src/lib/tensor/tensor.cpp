@@ -108,18 +108,16 @@ auto Tensor::vector(std::initializer_list<f64> values) -> Tensor {
 
 auto Tensor::random_uniform(
     std::vector<usize> shape,
-    f64 lower,
-    f64 upper,
+    RandomUniformOptions options,
     std::optional<TensorSeed> seed) -> Tensor {
-    return Tensor{NDArray::random_uniform(std::move(shape), lower, upper, seed)};
+    return Tensor{NDArray::random_uniform(std::move(shape), options, seed)};
 }
 
 auto Tensor::random_normal(
     std::vector<usize> shape,
-    f64 mu,
-    f64 sigma,
+    RandomNormalOptions options,
     std::optional<TensorSeed> seed) -> Tensor {
-    return Tensor{NDArray::random_normal(std::move(shape), mu, sigma, seed)};
+    return Tensor{NDArray::random_normal(std::move(shape), options, seed)};
 }
 
 auto Tensor::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> Tensor {

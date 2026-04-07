@@ -22,6 +22,17 @@ TEST_CASE("Tensor wraps NDArray data and auto-generates unique readable leg name
     REQUIRE(first.leg_name(0) != second.leg_name(0));
 }
 
+TEST_CASE("Tensor default construction yields a zero scalar tensor", "[tensor]") {
+    const auto tensor = Tensor{};
+
+    REQUIRE(tensor.validity() == TensorValidity::valid);
+    REQUIRE(tensor.rank() == 0zu);
+    REQUIRE(tensor.size() == 1zu);
+    REQUIRE(tensor.shape().empty());
+    REQUIRE(tensor.leg_names().empty());
+    REQUIRE(tensor() == Catch::Approx(0.0));
+}
+
 TEST_CASE("Tensor accepts explicit leg names and delegates indexing to its NDArray", "[tensor]") {
     auto tensor = Tensor(
         NDArray::matrix({
@@ -66,9 +77,29 @@ TEST_CASE("Tensor factory helpers preserve the NDArray payload and attach defaul
     REQUIRE(close_per_element(vector.array(), NDArray::vector(1.0, 2.0, 3.0), 0.0));
     REQUIRE(close_per_element(matrix.array(), NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}}), 0.0));
 
-    const auto random_a = Tensor::random_uniform({2, 3}, -1.0, 1.0, 123);
-    const auto random_b = Tensor::random_uniform({2, 3}, -1.0, 1.0, 123);
+    const auto random_a = Tensor::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        },
+        123);
+    const auto random_b = Tensor::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        },
+        123);
+    const auto random_c = Tensor::random_uniform(
+        {2, 3},
+        RandomUniformOptions{
+            .lower = -1.0,
+            .upper = 1.0,
+        },
+        123);
     REQUIRE(close_per_element(random_a.array(), random_b.array(), 0.0));
+    REQUIRE(close_per_element(random_a.array(), random_c.array(), 0.0));
     REQUIRE(random_a.leg_name(0) != random_b.leg_name(0));
 }
 
