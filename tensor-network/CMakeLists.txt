@@ -23,6 +23,9 @@ target_precompile_headers(tn_pch PUBLIC src/lib/pch.hpp)
 add_library(tn_lib STATIC
   src/lib/tensor.cpp
   src/lib/tensor_blas.cpp
+  src/lib/tensor_compare.cpp
+  src/lib/tensor_generator.cpp
+  src/lib/tensor_stats.cpp
 )
 target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
 target_compile_definitions(tn_lib PRIVATE ACCELERATE_NEW_LAPACK)
