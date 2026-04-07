@@ -1,0 +1,40 @@
+#include "common.hpp"
+
+#include <catch2/catch_test_macros.hpp>
+
+#include <array>
+#include <vector>
+
+namespace ds_tn {
+namespace {
+
+template <typename Range>
+[[nodiscard]] auto collect(Range &&range) {
+    auto values = std::vector<usize>{};
+    for (const auto value : range) {
+        values.push_back(value);
+    }
+    return values;
+}
+
+} // namespace
+
+TEST_CASE("iota_n helper covers its supported forms", "[common]") {
+    REQUIRE(collect(iota_n(4zu)) == std::vector<usize>{0, 1, 2, 3});
+    REQUIRE(collect(iota_n(2zu, 5zu)) == std::vector<usize>{2, 3, 4});
+
+    const auto values = std::array<usize, 3>{9, 8, 7};
+    REQUIRE(collect(iota_n(std::span{values})) == std::vector<usize>{0, 1, 2});
+}
+
+TEST_CASE("inner_product helper computes the explicit transform reduce form", "[common]") {
+    const auto lhs = std::array<usize, 3>{1, 2, 3};
+    const auto rhs = std::array<usize, 3>{4, 5, 6};
+
+    REQUIRE(inner_product(std::span{lhs}, std::span{rhs}) == 32zu);
+
+    const auto shorter = std::array<usize, 2>{1, 2};
+    REQUIRE_THROWS_AS(inner_product(std::span{lhs}, std::span{shorter}), std::invalid_argument);
+}
+
+} // namespace ds_tn

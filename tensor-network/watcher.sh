@@ -9,6 +9,7 @@ watchexec --restart \
   --stop-signal SIGTERM \
   --stop-timeout 2s \
   --watch src \
+  --watch tests \
   --watch CMakeLists.txt \
   --watch run.sh \
   --ignore 'build/**' \

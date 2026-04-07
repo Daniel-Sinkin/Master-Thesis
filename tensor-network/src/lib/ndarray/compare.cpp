@@ -1,5 +1,5 @@
-// lib/tensor_compare.cpp
-#include "tensor_compare.hpp"
+// lib/ndarray/compare.cpp
+#include "ndarray/compare.hpp"
 
 #include <cmath>
 #include <numeric>
@@ -8,14 +8,14 @@
 namespace ds_tn {
 namespace {
 
-[[nodiscard]] auto comparable(const Tensor &lhs, const Tensor &rhs, f64 tolerance) -> bool {
-    return tolerance >= 0.0 and lhs.validity() == TensorValidity::valid and rhs.validity() == TensorValidity::valid and
-           std::ranges::equal(lhs.shape(), rhs.shape());
+[[nodiscard]] auto comparable(const NDArray &lhs, const NDArray &rhs, f64 tolerance) -> bool {
+    return tolerance >= 0.0 and lhs.validity() == NDArrayValidity::valid and rhs.validity() == NDArrayValidity::valid
+           and std::ranges::equal(lhs.shape(), rhs.shape());
 }
 
 } // namespace
 
-auto close_per_element(const Tensor &lhs, const Tensor &rhs, f64 tolerance) -> bool {
+auto close_per_element(const NDArray &lhs, const NDArray &rhs, f64 tolerance) -> bool {
     if (not comparable(lhs, rhs, tolerance)) {
         return false;
     }
@@ -25,7 +25,7 @@ auto close_per_element(const Tensor &lhs, const Tensor &rhs, f64 tolerance) -> b
     });
 }
 
-auto close_accumulated(const Tensor &lhs, const Tensor &rhs, f64 tolerance) -> bool {
+auto close_accumulated(const NDArray &lhs, const NDArray &rhs, f64 tolerance) -> bool {
     if (not comparable(lhs, rhs, tolerance)) {
         return false;
     }

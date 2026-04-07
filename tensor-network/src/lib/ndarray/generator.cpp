@@ -1,5 +1,5 @@
-// lib/tensor_generator.cpp
-#include "tensor_generator.hpp"
+// lib/ndarray/generator.cpp
+#include "ndarray/generator.hpp"
 
 #include <algorithm>
 #include <array>
@@ -25,21 +25,21 @@ namespace {
 
 } // namespace
 
-TensorGenerator::TensorGenerator()
+NDArrayGenerator::NDArrayGenerator()
     : engine_(make_seeded_engine()) {}
 
-TensorGenerator::TensorGenerator(TensorSeed seed)
+NDArrayGenerator::NDArrayGenerator(NDArraySeed seed)
     : engine_(seed) {}
 
-auto TensorGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -> Tensor {
+auto NDArrayGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -> NDArray {
     if (not std::isfinite(lower) or not std::isfinite(upper)) {
-        throw std::invalid_argument("TensorGenerator::uniform requires finite range endpoints.");
+        throw std::invalid_argument("NDArrayGenerator::uniform requires finite range endpoints.");
     }
     if (lower > upper) {
-        throw std::invalid_argument("TensorGenerator::uniform requires lower <= upper.");
+        throw std::invalid_argument("NDArrayGenerator::uniform requires lower <= upper.");
     }
 
-    auto out = Tensor(std::move(shape));
+    auto out = NDArray(std::move(shape));
     if (lower == upper) {
         std::ranges::fill(out.data(), out.data() + out.size(), lower);
         return out;
@@ -51,15 +51,15 @@ auto TensorGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) ->
     return out;
 }
 
-auto TensorGenerator::normal(std::vector<usize> shape, f64 mu, f64 sigma) -> Tensor {
+auto NDArrayGenerator::normal(std::vector<usize> shape, f64 mu, f64 sigma) -> NDArray {
     if (not std::isfinite(mu) or not std::isfinite(sigma)) {
-        throw std::invalid_argument("TensorGenerator::normal requires finite distribution parameters.");
+        throw std::invalid_argument("NDArrayGenerator::normal requires finite distribution parameters.");
     }
     if (sigma < 0.0) {
-        throw std::invalid_argument("TensorGenerator::normal requires sigma >= 0.");
+        throw std::invalid_argument("NDArrayGenerator::normal requires sigma >= 0.");
     }
 
-    auto out = Tensor(std::move(shape));
+    auto out = NDArray(std::move(shape));
     if (sigma == 0.0) {
         std::ranges::fill(out.data(), out.data() + out.size(), mu);
         return out;
