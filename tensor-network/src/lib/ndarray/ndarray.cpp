@@ -309,6 +309,36 @@ auto NDArray::divide_scalar(f64 scalar) -> NDArray&
     return *this;
 }
 
+auto NDArray::operator+=(const NDArray& rhs) -> NDArray&
+{
+    if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("NDArray array addition requires valid NDArrays.");
+    }
+    if (shape_ != rhs.shape_)
+    {
+        throw std::invalid_argument("NDArray array addition requires matching shapes.");
+    }
+
+    cblas_daxpy(as_blas_int(size()), 1.0, rhs.data(), 1, data(), 1);
+    return *this;
+}
+
+auto NDArray::operator-=(const NDArray& rhs) -> NDArray&
+{
+    if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("NDArray array subtraction requires valid NDArrays.");
+    }
+    if (shape_ != rhs.shape_)
+    {
+        throw std::invalid_argument("NDArray array subtraction requires matching shapes.");
+    }
+
+    cblas_daxpy(as_blas_int(size()), -1.0, rhs.data(), 1, data(), 1);
+    return *this;
+}
+
 auto NDArray::operator+=(f64 scalar) -> NDArray&
 {
     return add_scalar(scalar);
@@ -475,6 +505,12 @@ auto NDArray::is_matrix() const noexcept -> bool
 auto NDArray::is_tensor3() const noexcept -> bool
 {
     return rank() == 3;
+}
+
+auto operator+(NDArray lhs, const NDArray& rhs) -> NDArray
+{
+    lhs += rhs;
+    return lhs;
 }
 
 }  // namespace ds_tn

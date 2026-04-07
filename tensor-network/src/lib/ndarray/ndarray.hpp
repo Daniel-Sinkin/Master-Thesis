@@ -119,6 +119,8 @@ class NDArray
     auto subtract_scalar(f64 scalar) -> NDArray&;
     auto multiply_scalar(f64 scalar) -> NDArray&;
     auto divide_scalar(f64 scalar) -> NDArray&;
+    auto operator+=(const NDArray& rhs) -> NDArray&;
+    auto operator-=(const NDArray& rhs) -> NDArray&;
     auto operator+=(f64 scalar) -> NDArray&;
     auto operator-=(f64 scalar) -> NDArray&;
     auto operator*=(f64 scalar) -> NDArray&;
@@ -177,5 +179,7 @@ class NDArray
     std::vector<usize> strides_{};
     std::vector<f64> data_{};
 };
+
+[[nodiscard]] auto operator+(NDArray lhs, const NDArray& rhs) -> NDArray;
 
 }  // namespace ds_tn

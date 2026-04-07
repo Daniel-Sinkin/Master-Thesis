@@ -1,4 +1,5 @@
 #include "ndarray/compare.hpp"
+#include "tensor/compare.hpp"
 #include "tensor/tensor.hpp"
 
 #include <array>
@@ -116,6 +117,44 @@ TEST_CASE(
     REQUIRE(close_per_element(random_a.array(), random_b.array(), 0.0));
     REQUIRE(close_per_element(random_a.array(), random_c.array(), 0.0));
     REQUIRE(random_a.leg_name(0) != random_b.leg_name(0));
+}
+
+TEST_CASE("Tensor comparison helpers compare payloads and ignore leg labels", "[tensor][compare]")
+{
+    const auto lhs = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"left", "right"}
+    );
+    const auto rhs = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0 + 5e-7},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+    const auto different_shape = Tensor::vector(1.0, 2.0, 3.0);
+
+    REQUIRE(close_per_element(lhs, rhs, 1e-6));
+    REQUIRE(not close_per_element(lhs, rhs, 1e-8));
+    REQUIRE(close_accumulated(lhs, rhs, 1e-6));
+    REQUIRE(not close_accumulated(lhs, rhs, 1e-8));
+    REQUIRE(not close_per_element(lhs, different_shape, 1e-6));
+}
+
+TEST_CASE("Tensor zero check respects tolerance", "[tensor][compare]")
+{
+    const auto zero = Tensor{};
+    const auto near_zero = Tensor::vector(1e-9, -5e-10, 2e-9);
+    const auto non_zero = Tensor::vector(1e-6, 0.0, 0.0);
+
+    REQUIRE(is_zero(zero));
+    REQUIRE(is_zero(near_zero, 1e-8));
+    REQUIRE(not is_zero(near_zero, 1e-10));
+    REQUIRE(not is_zero(non_zero, 1e-8));
+    REQUIRE(not is_zero(non_zero, -1.0));
 }
 
 TEST_CASE("Tensor metadata formatting reports the wrapped shape", "[tensor][metadata]")

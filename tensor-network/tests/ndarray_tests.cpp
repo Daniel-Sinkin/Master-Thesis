@@ -128,6 +128,36 @@ TEST_CASE("NDArray scalar operations and normalization behave as expected", "[nd
     REQUIRE_THROWS_AS(values.divide_scalar(0.0), std::invalid_argument);
 }
 
+TEST_CASE("NDArray supports array addition and subtraction operators", "[ndarray]")
+{
+    auto lhs = NDArray::vector(1.0, 2.0, 3.0);
+    const auto rhs = NDArray::vector(0.5, -1.0, 4.0);
+
+    lhs += rhs;
+    REQUIRE(lhs(0) == Catch::Approx(1.5));
+    REQUIRE(lhs(1) == Catch::Approx(1.0));
+    REQUIRE(lhs(2) == Catch::Approx(7.0));
+
+    lhs -= rhs;
+    REQUIRE(lhs(0) == Catch::Approx(1.0));
+    REQUIRE(lhs(1) == Catch::Approx(2.0));
+    REQUIRE(lhs(2) == Catch::Approx(3.0));
+
+    const auto sum = lhs + rhs;
+    REQUIRE(sum(0) == Catch::Approx(1.5));
+    REQUIRE(sum(1) == Catch::Approx(1.0));
+    REQUIRE(sum(2) == Catch::Approx(7.0));
+
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0},
+        {3.0, 4.0},
+    });
+
+    REQUIRE_THROWS_AS(lhs += matrix, std::invalid_argument);
+    REQUIRE_THROWS_AS(lhs -= matrix, std::invalid_argument);
+    REQUIRE_THROWS_AS(static_cast<void>(lhs + matrix), std::invalid_argument);
+}
+
 TEST_CASE("NDArray printing covers rank 0, 1, 2, and 3", "[ndarray]")
 {
     auto scalar = std::ostringstream{};

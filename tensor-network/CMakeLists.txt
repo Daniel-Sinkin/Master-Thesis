@@ -30,6 +30,7 @@ add_library(tn_lib STATIC
   src/lib/ndarray/lanczos.cpp
   src/lib/ndarray/lapack.cpp
   src/lib/ndarray/stats.cpp
+  src/lib/tensor/compare.cpp
   src/lib/tensor/tensor.cpp
 )
 target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
