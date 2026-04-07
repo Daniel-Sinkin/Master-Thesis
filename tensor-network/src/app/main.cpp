@@ -1,46 +1,34 @@
 // app/main.cpp
-#include "ndarray/blas.hpp"     // IWYU pragma: keep
-#include "ndarray/lanczos.hpp"  // IWYU pragma: keep
-#include "ndarray/ndarray.hpp"  // IWYU pragma: keep
+#include "ndarray/ndarray.hpp"
+#include "permutation/permutation.hpp"
 
-#include <print>
-
-namespace ds_tn
-{
-auto contract_simple(const NDArray& A, const NDArray& B, usize axis_a, usize axis_b) -> NDArray
-{
-
-    return {};
-}
-}  // namespace ds_tn
+#include <cassert>
 
 int main()
 {
     using namespace ds_tn;
 
-    const auto A = []
-    {
-        auto out = NDArray::random({10, 10}, RandomNormalOptions{}, 7);
-        out = gram_matrix(out);
-        out *= 0.5;
-        return out;
-    }();
+    const auto base = NDArray::tensor3({
+        {
+            {0.0, 1.0},
+            {2.0, 3.0},
+            {4.0, 5.0},
+        },
+        {
+            {6.0, 7.0},
+            {8.0, 9.0},
+            {10.0, 11.0},
+        },
+    });
+    const auto permutation = Permutation{1, 2, 0};
+    assert(permutation.size() == base.rank());
+    assert(permutation.at(0) == 1);
+    assert(permutation[1] == 2);
 
-    if (const auto res = lanczos(A, {.num_iterations = 30, .verbose = false}); res)
-    {
-        auto [ritz_vec, ritz_val] = *res;
-        std::println("Lanczos smallest Ritz value: {:.8f}", ritz_val);
-        ritz_vec.print(6);
-        auto Av = matrix_vector_product(A, ritz_vec);
-        axpy(-ritz_val, ritz_vec, Av);
-        Av.print(6);
-    }
-    else
-    {
-        std::println(
-            "Failed to perform lanczos for {}, got error code {}.",
-            A.format_metadata(),
-            to_string(res.error())
-        );
-    }
+    const auto permuted = apply_permutation(base, permutation);
+    assert(permuted.shape(0) == 2);
+    assert(permuted.shape(1) == 2);
+    assert(permuted.shape(2) == 3);
+    assert(permuted(0, 0, 1) == 2.0);
+    assert(permuted(1, 1, 2) == 11.0);
 }

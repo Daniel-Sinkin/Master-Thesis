@@ -34,7 +34,7 @@ auto require_valid_array(const NDArray& array, const char* function_name, const 
 
 auto require_same_shape(const NDArray& lhs, const NDArray& rhs, const char* function_name) -> void
 {
-    if (not std::ranges::equal(lhs.shape(), rhs.shape()))
+    if (not lhs.same_shape(rhs))
     {
         throw std::runtime_error(
             std::string{function_name} + " requires NDArrays with identical shapes."

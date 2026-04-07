@@ -23,6 +23,7 @@ target_include_directories(tn_pch PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
 target_precompile_headers(tn_pch PUBLIC src/lib/pch.hpp)
 
 add_library(tn_lib STATIC
+  src/lib/permutation/permutation.cpp
   src/lib/ndarray/ndarray.cpp
   src/lib/ndarray/blas.cpp
   src/lib/ndarray/compare.cpp
@@ -123,6 +124,7 @@ if (TN_BUILD_TESTS)
 
   add_executable(tn_tests
     tests/common_tests.cpp
+    tests/permutation_tests.cpp
     tests/ndarray_tests.cpp
     tests/ndarray_random_stats_compare_tests.cpp
     tests/ndarray_lanczos_tests.cpp

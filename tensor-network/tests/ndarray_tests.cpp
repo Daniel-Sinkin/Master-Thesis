@@ -40,15 +40,56 @@ TEST_CASE("NDArray default construction yields a zero scalar", "[ndarray]")
     REQUIRE(array() == Catch::Approx(0.0));
 }
 
+TEST_CASE("NDArray zeros_like copies shape and zero-initializes values", "[ndarray]")
+{
+    const auto scalar = NDArray::scalar(42.0).zeros_like();
+
+    REQUIRE(scalar.validity() == NDArrayValidity::valid);
+    REQUIRE(scalar.is_scalar());
+    REQUIRE(scalar() == Catch::Approx(0.0));
+
+    auto source = NDArray::tensor3({
+        {
+            {0.0, 1.0},
+            {2.0, 3.0},
+            {4.0, 5.0},
+        },
+        {
+            {6.0, 7.0},
+            {8.0, 9.0},
+            {10.0, 11.0},
+        },
+    });
+    source(1, 2, 1) = 99.0;
+
+    const auto zeros = source.zeros_like();
+    const auto expected_shape = std::array<usize, 3>{2, 3, 2};
+
+    REQUIRE(zeros.validity() == NDArrayValidity::valid);
+    REQUIRE(zeros.is_tensor3());
+    REQUIRE(source.same_shape(zeros));
+    REQUIRE(NDArray::same_shape(source, zeros));
+    REQUIRE(std::ranges::equal(zeros.shape(), std::span<const usize>{expected_shape}));
+    REQUIRE(zeros.size() == source.size());
+    REQUIRE(NDArray::same_shape(NDArray::zeros_like(source), zeros));
+
+    for (usize index = 0; index < zeros.size(); ++index)
+    {
+        REQUIRE(zeros.data(index) == Catch::Approx(0.0));
+    }
+}
+
 TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]")
 {
     auto array = NDArray({2, 3, 4});
     array(1, 1, 1) = 7.0;
     array(std::array<usize, 3>{0, 2, 3}) = 9.0;
+    array.data(5) = -2.5;
 
     REQUIRE(array(1, 1, 1) == Catch::Approx(7.0));
     REQUIRE(array(-1, -2, -3) == Catch::Approx(7.0));
     REQUIRE(array(std::array<usize, 3>{0, 2, 3}) == Catch::Approx(9.0));
+    REQUIRE(array.data(5) == Catch::Approx(-2.5));
     REQUIRE(array.indices_from_linear(17) == std::vector<usize>{1, 1, 1});
     REQUIRE(array.indices_from_linear(11) == std::vector<usize>{0, 2, 3});
 
@@ -57,15 +98,51 @@ TEST_CASE("NDArray indexing uses row-major strides and supports negative indices
     REQUIRE_THROWS_AS(array(-3, 0, 0), std::out_of_range);
 }
 
-TEST_CASE("NDArray factories build vectors and matrices", "[ndarray]")
+TEST_CASE("NDArray same_shape distinguishes identical and different shapes", "[ndarray]")
+{
+    const auto lhs = NDArray({2, 3, 2});
+    const auto rhs = NDArray::tensor3({
+        {
+            {0.0, 1.0},
+            {2.0, 3.0},
+            {4.0, 5.0},
+        },
+        {
+            {6.0, 7.0},
+            {8.0, 9.0},
+            {10.0, 11.0},
+        },
+    });
+    const auto different = NDArray({2, 2, 3});
+
+    REQUIRE(lhs.same_shape(rhs));
+    REQUIRE(NDArray::same_shape(lhs, rhs));
+    REQUIRE_FALSE(lhs.same_shape(different));
+    REQUIRE_FALSE(NDArray::same_shape(lhs, different));
+}
+
+TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[ndarray]")
 {
     const auto vector = NDArray::vector(1.0, 2.0, 3.0);
     const auto matrix = NDArray::matrix({
         {1.0, 2.0, 3.0},
         {4.0, 5.0, 6.0},
     });
+    const auto tensor3 = NDArray::tensor3({
+        {
+            {0.0, 1.0},
+            {2.0, 3.0},
+            {4.0, 5.0},
+        },
+        {
+            {6.0, 7.0},
+            {8.0, 9.0},
+            {10.0, 11.0},
+        },
+    });
     const auto expected_vector_shape = std::array<usize, 1>{3};
     const auto expected_matrix_shape = std::array<usize, 2>{2, 3};
+    const auto expected_tensor3_shape = std::array<usize, 3>{2, 3, 2};
 
     REQUIRE(vector.validity() == NDArrayValidity::valid);
     REQUIRE(vector.is_vector());
@@ -81,10 +158,43 @@ TEST_CASE("NDArray factories build vectors and matrices", "[ndarray]")
     REQUIRE(matrix(-1, -1) == Catch::Approx(6.0));
     REQUIRE_THROWS_AS(matrix.shape(2), std::out_of_range);
 
+    REQUIRE(tensor3.validity() == NDArrayValidity::valid);
+    REQUIRE(tensor3.is_tensor3());
+    REQUIRE(std::ranges::equal(tensor3.shape(), std::span<const usize>{expected_tensor3_shape}));
+    REQUIRE(tensor3.shape(0) == 2zu);
+    REQUIRE(tensor3.shape(1) == 3zu);
+    REQUIRE(tensor3.shape(2) == 2zu);
+    REQUIRE(tensor3(1, 2, 1) == Catch::Approx(11.0));
+    REQUIRE(tensor3(-1, -1, -1) == Catch::Approx(11.0));
+    REQUIRE_THROWS_AS(tensor3.shape(3), std::out_of_range);
+
     REQUIRE_THROWS_AS(
         NDArray::matrix({
             {1.0, 2.0},
             {3.0},
+        }),
+        std::invalid_argument
+    );
+
+    REQUIRE_THROWS_AS(
+        NDArray::tensor3({
+            {
+                {1.0, 2.0},
+                {3.0, 4.0},
+            },
+            {
+                {5.0, 6.0},
+            },
+        }),
+        std::invalid_argument
+    );
+
+    REQUIRE_THROWS_AS(
+        NDArray::tensor3({
+            {
+                {1.0, 2.0},
+                {3.0},
+            },
         }),
         std::invalid_argument
     );

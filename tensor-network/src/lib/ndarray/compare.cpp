@@ -13,8 +13,7 @@ namespace
 [[nodiscard]] auto comparable(const NDArray& lhs, const NDArray& rhs, f64 tolerance) -> bool
 {
     return tolerance >= 0.0 and lhs.validity() == NDArrayValidity::valid
-           and rhs.validity() == NDArrayValidity::valid
-           and std::ranges::equal(lhs.shape(), rhs.shape());
+           and rhs.validity() == NDArrayValidity::valid and lhs.same_shape(rhs);
 }
 
 }  // namespace

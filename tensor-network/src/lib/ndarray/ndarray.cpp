@@ -166,6 +166,11 @@ auto NDArray::random_normal(
     return NDArray::random(std::move(shape), options, seed);
 }
 
+auto NDArray::zeros_like(const NDArray& other) -> NDArray
+{
+    return NDArray(std::vector<usize>{other.shape().begin(), other.shape().end()});
+}
+
 auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> NDArray
 {
     const auto row_count = rows.size();
@@ -186,6 +191,47 @@ auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> 
     }
 
     return out;
+}
+
+auto NDArray::tensor3(
+    std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
+) -> NDArray
+{
+    const auto slice_count = slices.size();
+    const auto row_count = slice_count == 0 ? usize{0} : slices.begin()->size();
+    const auto col_count =
+        row_count == 0 ? usize{0} : slices.begin()->begin()->size();
+
+    auto out = NDArray({slice_count, row_count, col_count});
+    auto* cursor = out.data();
+
+    for (const auto& slice : slices)
+    {
+        if (slice.size() != row_count)
+        {
+            throw std::invalid_argument(
+                "NDArray::tensor3 requires all slices to have the same number of rows."
+            );
+        }
+
+        for (const auto& row : slice)
+        {
+            if (row.size() != col_count)
+            {
+                throw std::invalid_argument(
+                    "NDArray::tensor3 requires all rows to have the same length."
+                );
+            }
+            cursor = std::ranges::copy(row, cursor).out;
+        }
+    }
+
+    return out;
+}
+
+auto NDArray::same_shape(const NDArray& lhs, const NDArray& rhs) noexcept -> bool
+{
+    return std::ranges::equal(lhs.shape_, rhs.shape_);
 }
 
 auto NDArray::rank() const noexcept -> usize
@@ -222,6 +268,21 @@ auto NDArray::data() const noexcept -> const f64*
     return data_.data();
 }
 
+auto NDArray::data(usize linear_index) noexcept -> f64&
+{
+    return data_[linear_index];
+}
+
+auto NDArray::data(usize linear_index) const noexcept -> const f64&
+{
+    return data_[linear_index];
+}
+
+auto NDArray::same_shape(const NDArray& other) const noexcept -> bool
+{
+    return NDArray::same_shape(*this, other);
+}
+
 auto NDArray::l2_norm() const -> f64
 {
     return ds_tn::l2_norm(*this);
@@ -232,6 +293,11 @@ auto NDArray::normalized() const -> NDArray
     auto out = *this;
     out.normalize();
     return out;
+}
+
+auto NDArray::zeros_like() const -> NDArray
+{
+    return NDArray::zeros_like(*this);
 }
 
 auto NDArray::format_metadata() const -> std::string

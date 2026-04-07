@@ -68,6 +68,7 @@ class NDArray
         RandomNormalOptions options = {},
         std::optional<NDArraySeed> seed = std::nullopt
     ) -> NDArray;
+    [[nodiscard]] static auto zeros_like(const NDArray& other) -> NDArray;
 
     template <typename... Values>
         requires(sizeof...(Values) > 0) and (std::convertible_to<Values, f64> and ...)
@@ -78,6 +79,10 @@ class NDArray
 
     [[nodiscard]] static auto matrix(std::initializer_list<std::initializer_list<f64>> rows)
         -> NDArray;
+    [[nodiscard]] static auto tensor3(
+        std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
+    ) -> NDArray;
+    [[nodiscard]] static auto same_shape(const NDArray& lhs, const NDArray& rhs) noexcept -> bool;
 
     [[nodiscard]] auto rank() const noexcept -> usize;
     [[nodiscard]] auto size() const noexcept -> usize;
@@ -85,6 +90,9 @@ class NDArray
     [[nodiscard]] auto shape(usize axis) const -> usize;
     [[nodiscard]] auto data() noexcept -> f64*;
     [[nodiscard]] auto data() const noexcept -> const f64*;
+    [[nodiscard]] auto data(usize linear_index) noexcept -> f64&;
+    [[nodiscard]] auto data(usize linear_index) const noexcept -> const f64&;
+    [[nodiscard]] auto same_shape(const NDArray& other) const noexcept -> bool;
 
     auto operator()(std::span<const usize> indices) -> f64&;
     auto operator()(std::span<const usize> indices) const -> const f64&;
@@ -113,6 +121,7 @@ class NDArray
     [[nodiscard]] auto validity() const noexcept -> NDArrayValidity;
     [[nodiscard]] auto l2_norm() const -> f64;
     [[nodiscard]] auto normalized() const -> NDArray;
+    [[nodiscard]] auto zeros_like() const -> NDArray;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto normalize() -> void;
     auto add_scalar(f64 scalar) -> NDArray&;
