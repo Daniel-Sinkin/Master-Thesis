@@ -66,8 +66,8 @@ TEST_CASE("Tensor factory helpers preserve the NDArray payload and attach defaul
     REQUIRE(close_per_element(vector.array(), NDArray::vector(1.0, 2.0, 3.0), 0.0));
     REQUIRE(close_per_element(matrix.array(), NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}}), 0.0));
 
-    const auto random_a = Tensor::uniform_random({2, 3}, -1.0, 1.0, 123);
-    const auto random_b = Tensor::uniform_random({2, 3}, -1.0, 1.0, 123);
+    const auto random_a = Tensor::random_uniform({2, 3}, -1.0, 1.0, 123);
+    const auto random_b = Tensor::random_uniform({2, 3}, -1.0, 1.0, 123);
     REQUIRE(close_per_element(random_a.array(), random_b.array(), 0.0));
     REQUIRE(random_a.leg_name(0) != random_b.leg_name(0));
 }

@@ -26,12 +26,12 @@ TEST_CASE("NDArray generators are reproducible and validate their parameters", "
     }
 
     REQUIRE(close_per_element(
-        NDArray::uniform_random({2, 3}, -1.0, 1.0, 77),
-        NDArray::uniform_random({2, 3}, -1.0, 1.0, 77),
+        NDArray::random_uniform({2, 3}, -1.0, 1.0, 77),
+        NDArray::random_uniform({2, 3}, -1.0, 1.0, 77),
         0.0));
     REQUIRE(close_per_element(
-        NDArray::normal_random({2, 3}, 0.0, 1.0, 99),
-        NDArray::normal_random({2, 3}, 0.0, 1.0, 99),
+        NDArray::random_normal({2, 3}, 0.0, 1.0, 99),
+        NDArray::random_normal({2, 3}, 0.0, 1.0, 99),
         0.0));
 
     REQUIRE(close_per_element(generator_a.uniform({4}, 2.5, 2.5), NDArray::vector(2.5, 2.5, 2.5, 2.5), 0.0));

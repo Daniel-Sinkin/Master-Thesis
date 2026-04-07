@@ -118,7 +118,8 @@ auto NDArray::vector(std::initializer_list<f64> values) -> NDArray {
     return out;
 }
 
-auto NDArray::uniform_random(std::vector<usize> shape, f64 lower, f64 upper, std::optional<NDArraySeed> seed) -> NDArray {
+auto NDArray::random_uniform(std::vector<usize> shape, f64 lower, f64 upper, std::optional<NDArraySeed> seed)
+    -> NDArray {
     if (seed.has_value()) {
         return NDArrayGenerator(*seed).uniform(std::move(shape), lower, upper);
     }
@@ -126,7 +127,7 @@ auto NDArray::uniform_random(std::vector<usize> shape, f64 lower, f64 upper, std
     return NDArrayGenerator{}.uniform(std::move(shape), lower, upper);
 }
 
-auto NDArray::normal_random(std::vector<usize> shape, f64 mu, f64 sigma, std::optional<NDArraySeed> seed) -> NDArray {
+auto NDArray::random_normal(std::vector<usize> shape, f64 mu, f64 sigma, std::optional<NDArraySeed> seed) -> NDArray {
     if (seed.has_value()) {
         return NDArrayGenerator(*seed).normal(std::move(shape), mu, sigma);
     }

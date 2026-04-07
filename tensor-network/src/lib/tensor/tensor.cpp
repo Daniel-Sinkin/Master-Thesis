@@ -99,31 +99,31 @@ Tensor::Tensor(std::vector<usize> shape, std::initializer_list<std::string> leg_
     : Tensor(NDArray(std::move(shape)), leg_names) {}
 
 auto Tensor::scalar(f64 value) -> Tensor {
-    return Tensor(NDArray::scalar(value));
+    return Tensor{NDArray::scalar(value)};
 }
 
 auto Tensor::vector(std::initializer_list<f64> values) -> Tensor {
-    return Tensor(NDArray::vector(values));
+    return Tensor{NDArray::vector(values)};
 }
 
-auto Tensor::uniform_random(
+auto Tensor::random_uniform(
     std::vector<usize> shape,
     f64 lower,
     f64 upper,
     std::optional<TensorSeed> seed) -> Tensor {
-    return Tensor(NDArray::uniform_random(std::move(shape), lower, upper, seed));
+    return Tensor{NDArray::random_uniform(std::move(shape), lower, upper, seed)};
 }
 
-auto Tensor::normal_random(
+auto Tensor::random_normal(
     std::vector<usize> shape,
     f64 mu,
     f64 sigma,
     std::optional<TensorSeed> seed) -> Tensor {
-    return Tensor(NDArray::normal_random(std::move(shape), mu, sigma, seed));
+    return Tensor{NDArray::random_normal(std::move(shape), mu, sigma, seed)};
 }
 
 auto Tensor::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> Tensor {
-    return Tensor(NDArray::matrix(rows));
+    return Tensor{NDArray::matrix(rows)};
 }
 
 auto Tensor::rank() const noexcept -> usize {

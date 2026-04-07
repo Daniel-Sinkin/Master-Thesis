@@ -34,12 +34,12 @@ public:
 
     [[nodiscard]] static auto scalar(f64 value) -> Tensor;
     [[nodiscard]] static auto vector(std::initializer_list<f64> values) -> Tensor;
-    [[nodiscard]] static auto uniform_random(
+    [[nodiscard]] static auto random_uniform(
         std::vector<usize> shape,
         f64 lower = 0.0,
         f64 upper = 1.0,
         std::optional<TensorSeed> seed = std::nullopt) -> Tensor;
-    [[nodiscard]] static auto normal_random(
+    [[nodiscard]] static auto random_normal(
         std::vector<usize> shape,
         f64 mu = 0.0,
         f64 sigma = 1.0,
