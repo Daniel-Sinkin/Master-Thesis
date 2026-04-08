@@ -21,6 +21,16 @@ namespace ds_tn
 namespace
 {
 
+template <typename T>
+    requires requires(T t, T s) {
+        { t * s } -> std::convertible_to<T>;
+        T{1};
+    }
+[[nodiscard]] auto product(std::span<const T> values) -> T
+{
+    return std::accumulate(values.begin(), values.end(), T{1}, std::multiplies<>{});
+}
+
 [[nodiscard]] auto as_blas_int(usize value) -> __LAPACK_int
 {
     if (value > static_cast<usize>(std::numeric_limits<__LAPACK_int>::max()))
@@ -171,6 +181,36 @@ auto NDArray::zeros_like(const NDArray& other) -> NDArray
     return NDArray(std::vector<usize>{other.shape().begin(), other.shape().end()});
 }
 
+auto NDArray::reshape(const NDArray& array, std::span<const usize> new_shape) noexcept
+    -> std::expected<NDArray, ReshapeError>
+{
+    if (array.validity() != NDArrayValidity::valid)
+    {
+        return std::unexpected{ReshapeError::invalid_array};
+    }
+    if (product<usize>(new_shape) != array.size())
+    {
+        return std::unexpected{ReshapeError::wrong_total};
+    }
+
+    try
+    {
+        auto out = NDArray{std::vector<usize>{new_shape.begin(), new_shape.end()}};
+        std::ranges::copy(array.data(), array.data() + array.size(), out.data());
+        return out;
+    }
+    catch (...)
+    {
+        return std::unexpected{ReshapeError::allocation_failed};
+    }
+}
+
+auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_shape) noexcept
+    -> std::expected<NDArray, ReshapeError>
+{
+    return NDArray::reshape(array, std::span<const usize>{new_shape.begin(), new_shape.size()});
+}
+
 auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> NDArray
 {
     const auto row_count = rows.size();
@@ -298,6 +338,18 @@ auto NDArray::normalized() const -> NDArray
 auto NDArray::zeros_like() const -> NDArray
 {
     return NDArray::zeros_like(*this);
+}
+
+auto NDArray::reshape(std::span<const usize> new_shape) const noexcept
+    -> std::expected<NDArray, ReshapeError>
+{
+    return NDArray::reshape(*this, new_shape);
+}
+
+auto NDArray::reshape(std::initializer_list<usize> new_shape) const noexcept
+    -> std::expected<NDArray, ReshapeError>
+{
+    return NDArray::reshape(*this, new_shape);
 }
 
 auto NDArray::format_metadata() const -> std::string

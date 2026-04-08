@@ -6,25 +6,12 @@
 
 #include <algorithm>
 #include <array>
-#include <concepts>
-#include <functional>
-#include <numeric>
 #include <stdexcept>
 
 namespace ds_tn
 {
 namespace
 {
-
-template <typename T>
-    requires requires(T t, T s) {
-        { t * s } -> std::convertible_to<T>;
-        T{1};
-    }
-[[nodiscard]] auto product(std::span<const T> values) -> T
-{
-    return std::accumulate(values.begin(), values.end(), T{1}, std::multiplies<>{});
-}
 
 [[nodiscard]] auto concat_indices(std::span<const usize> lhs, std::span<const usize> rhs)
     -> std::vector<usize>
@@ -57,21 +44,16 @@ product_over_selected_axes(std::span<const usize> shape, std::span<const usize> 
     return out;
 }
 
-[[nodiscard]] auto
-reshape_copy(const NDArray& array, std::span<const usize> new_shape) -> NDArray
+[[nodiscard]] auto reshape_or_throw(const NDArray& array, std::span<const usize> new_shape) -> NDArray
 {
-    if (array.validity() != NDArrayValidity::valid)
+    auto reshaped = array.reshape(new_shape);
+    if (!reshaped)
     {
-        throw std::invalid_argument("reshape_copy requires a valid NDArray.");
+        throw std::runtime_error(
+            "contract reshape failed with error = " + std::string{to_string(reshaped.error())}
+        );
     }
-    if (product<usize>(new_shape) != array.size())
-    {
-        throw std::invalid_argument("reshape_copy requires shape product to match NDArray size.");
-    }
-
-    auto out = NDArray{std::vector<usize>{new_shape.begin(), new_shape.end()}};
-    std::ranges::copy(array.data(), array.data() + array.size(), out.data());
-    return out;
+    return std::move(reshaped).value();
 }
 
 auto require_valid_tensor(const Tensor& tensor, const char* argument_name) -> void
@@ -250,14 +232,14 @@ auto contract(const Tensor& left, const Tensor& right) -> Tensor
         right, permutation_from_axis_order(concat_indices(right_shared, right_not_shared))
     );
 
-    const auto left_matrix = reshape_copy(
+    const auto left_matrix = reshape_or_throw(
         left_transposed.array(),
         std::array{
             product_over_selected_axes(left.shape(), left_not_shared),
             product_over_selected_axes(left.shape(), left_shared),
         }
     );
-    const auto right_matrix = reshape_copy(
+    const auto right_matrix = reshape_or_throw(
         right_transposed.array(),
         std::array{
             product_over_selected_axes(right.shape(), right_shared),
@@ -267,7 +249,7 @@ auto contract(const Tensor& left, const Tensor& right) -> Tensor
 
     auto out = contraction_output_tensor(left, right);
     const auto flattened = matrix_matrix_product(left_matrix, right_matrix);
-    out.array() = reshape_copy(flattened, out.shape());
+    out.array() = reshape_or_throw(flattened, out.shape());
     return out;
 }
 
