@@ -89,11 +89,11 @@ auto gram_matrix(const NDArray& matrix, NDArray& out) -> void
     require_valid_array(matrix, "gram_matrix", "matrix");
     require_valid_array(out, "gram_matrix", "out");
 
-    if (!matrix.is_matrix() || !out.is_matrix())
+    if (!matrix.is_matrix() or !out.is_matrix())
     {
         throw std::runtime_error("gram_matrix requires rank-2 NDArrays.");
     }
-    if (out.shape(0) != matrix.shape(1) || out.shape(1) != matrix.shape(1))
+    if (out.shape(0) != matrix.shape(1) or out.shape(1) != matrix.shape(1))
     {
         throw std::runtime_error("gram_matrix requires out.shape == {matrix.cols, matrix.cols}.");
     }

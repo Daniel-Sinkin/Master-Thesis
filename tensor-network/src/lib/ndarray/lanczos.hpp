@@ -28,6 +28,7 @@ enum class LanczosError : u8
     invalid_dimension,
     invalid_iteration_count,
     invalid_operator_output,
+    tridiagonal_eigendecomp_failed,
 };
 
 [[nodiscard]] constexpr auto to_string(LanczosError error) noexcept -> std::string_view
@@ -46,6 +47,8 @@ enum class LanczosError : u8
             return "invalid_iteration_count";
         case LanczosError::invalid_operator_output:
             return "invalid_operator_output";
+        case LanczosError::tridiagonal_eigendecomp_failed:
+            return "tridiagonal_eigendecomp_failed";
     }
 
     return "unknown_lanczos_error";

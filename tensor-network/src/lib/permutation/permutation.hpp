@@ -11,6 +11,8 @@
 namespace ds_tn
 {
 
+class Tensor;
+
 class Permutation
 {
   public:
@@ -74,5 +76,7 @@ class Permutation
 
 [[nodiscard]] auto apply_permutation(const NDArray& array, const Permutation& permutation)
     -> NDArray;
+[[nodiscard]] auto apply_permutation(const Tensor& tensor, const Permutation& permutation)
+    -> Tensor;
 
 }  // namespace ds_tn

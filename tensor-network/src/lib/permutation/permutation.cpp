@@ -1,6 +1,8 @@
 // lib/permutation/permutation.cpp
 #include "permutation/permutation.hpp"
 
+#include "tensor/tensor.hpp"
+
 #include <utility>
 
 namespace ds_tn
@@ -72,6 +74,24 @@ auto apply_permutation(const NDArray& array, const Permutation& permutation) -> 
     }
 
     return out;
+}
+
+auto apply_permutation(const Tensor& tensor, const Permutation& permutation) -> Tensor
+{
+    if (tensor.validity() != TensorValidity::valid)
+    {
+        throw std::invalid_argument("apply_permutation requires a valid Tensor.");
+    }
+    if (tensor.rank() != permutation.size())
+    {
+        throw std::invalid_argument(
+            "apply_permutation requires permutation size to match Tensor rank."
+        );
+    }
+
+    const auto permuted_array = apply_permutation(tensor.array(), permutation);
+    auto permuted_leg_names = permutation.apply(tensor.leg_names());
+    return Tensor{std::move(permuted_array), std::move(permuted_leg_names)};
 }
 
 }  // namespace ds_tn

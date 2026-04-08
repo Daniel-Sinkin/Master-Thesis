@@ -30,9 +30,11 @@ class Tensor
   public:
     Tensor() = default;
     explicit Tensor(NDArray array);
+    Tensor(NDArray array, std::vector<std::string> leg_names);
     Tensor(NDArray array, std::span<const std::string> leg_names);
     Tensor(NDArray array, std::initializer_list<std::string> leg_names);
     explicit Tensor(std::vector<usize> shape);
+    Tensor(std::vector<usize> shape, std::vector<std::string> leg_names);
     Tensor(std::vector<usize> shape, std::span<const std::string> leg_names);
     Tensor(std::vector<usize> shape, std::initializer_list<std::string> leg_names);
 

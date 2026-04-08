@@ -33,7 +33,7 @@ using u32 = std::uint32_t;
 using u16 = std::uint16_t;
 using u8 = std::uint8_t;
 
-#if defined(__cpp_lib_stdfloat) && __cpp_lib_stdfloat >= 202207L
+#if defined(__cpp_lib_stdfloat) and __cpp_lib_stdfloat >= 202207L
 using f32 = std::float32_t;
 using f64 = std::float64_t;
 #else

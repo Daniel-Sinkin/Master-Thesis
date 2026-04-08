@@ -123,7 +123,12 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
         std::println("Lanczos Krylov dimension: {}", krylov_dimension);
     }
 
-    const auto [evals, evecs] = sym_tri_eigendecomp({.diagonal = alphas, .off_diagonal = betas});
+    auto eig = sym_tri_eigendecomp({.diagonal = alphas, .off_diagonal = betas});
+    if (!eig)
+    {
+        return std::unexpected{LanczosError::tridiagonal_eigendecomp_failed};
+    }
+    const auto& [evals, evecs] = *eig;
 
     if (cfg.verbose)
     {
@@ -162,7 +167,7 @@ auto lanczos(const NDArray& A, LanczosConfig cfg) -> std::expected<LanczosResult
     {
         return std::unexpected{LanczosError::matrix_not_square};
     }
-    if (cfg.check_symmetric && !is_symmetric(A, cfg.symmetry_tolerance))
+    if (cfg.check_symmetric and !is_symmetric(A, cfg.symmetry_tolerance))
     {
         return std::unexpected{LanczosError::matrix_not_symmetric};
     }

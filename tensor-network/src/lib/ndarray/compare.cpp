@@ -52,7 +52,7 @@ auto close_accumulated(const NDArray& lhs, const NDArray& rhs, f64 tolerance) ->
 
 auto is_symmetric(const NDArray& matrix, f64 tolerance) -> bool
 {
-    if (tolerance < 0.0 || matrix.validity() != NDArrayValidity::valid || !matrix.is_matrix()
+    if (tolerance < 0.0 or matrix.validity() != NDArrayValidity::valid or !matrix.is_matrix()
         || matrix.shape(0) != matrix.shape(1))
     {
         return false;

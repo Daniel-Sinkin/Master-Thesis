@@ -95,6 +95,17 @@ Tensor::Tensor(NDArray array)
 {
 }
 
+Tensor::Tensor(NDArray array, std::vector<std::string> leg_names)
+    : values_(std::move(array)), leg_names_(std::move(leg_names))
+{
+    if (leg_names_validity(values_.shape(), leg_names_) != TensorValidity::valid)
+    {
+        throw std::invalid_argument(
+            "Tensor leg names must match rank, be non-empty, and be unique."
+        );
+    }
+}
+
 Tensor::Tensor(NDArray array, std::span<const std::string> leg_names)
     : values_(std::move(array)), leg_names_(leg_names.begin(), leg_names.end())
 {
@@ -112,6 +123,11 @@ Tensor::Tensor(NDArray array, std::initializer_list<std::string> leg_names)
 }
 
 Tensor::Tensor(std::vector<usize> shape) : Tensor(NDArray(std::move(shape)))
+{
+}
+
+Tensor::Tensor(std::vector<usize> shape, std::vector<std::string> leg_names)
+    : Tensor(NDArray(std::move(shape)), std::move(leg_names))
 {
 }
 
@@ -241,15 +257,15 @@ auto Tensor::validity() const noexcept -> TensorValidity
 
 auto Tensor::format_metadata() const -> std::string
 {
-    return "Tensor(shape=" + shape_to_string(shape()) + ")";
+    return "Tensor(shape=" + shape_to_string(shape()) + ", legs=" + leg_names_to_string(leg_names_)
+           + ")";
 }
 
 auto Tensor::print(usize precision, bool show_metadata, std::ostream& out) const -> void
 {
     if (show_metadata)
     {
-        out << "Tensor(rank=" << rank() << ", shape=" << shape_to_string(shape())
-            << ", legs=" << leg_names_to_string(leg_names_) << ")\n";
+        out << format_metadata() << '\n';
     }
 
     values_.print(precision, false, out);

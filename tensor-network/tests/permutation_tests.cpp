@@ -1,7 +1,10 @@
 #include "permutation/permutation.hpp"
+#include "tensor/tensor.hpp"
 
+#include <array>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <ranges>
 #include <stdexcept>
 #include <vector>
 
@@ -44,6 +47,37 @@ TEST_CASE("apply_permutation permutes NDArray shape and values", "[permutation][
     REQUIRE(permuted.shape(0) == 2zu);
     REQUIRE(permuted.shape(1) == 2zu);
     REQUIRE(permuted.shape(2) == 3zu);
+    REQUIRE(permuted(0, 0, 1) == Catch::Approx(2.0));
+    REQUIRE(permuted(1, 1, 2) == Catch::Approx(11.0));
+
+    REQUIRE_THROWS_AS(apply_permutation(base, Permutation{0, 1}), std::invalid_argument);
+}
+
+TEST_CASE("apply_permutation permutes Tensor shape, values, and leg names", "[permutation][tensor]")
+{
+    const auto base = Tensor(
+        NDArray::tensor3({
+            {
+                {0.0, 1.0},
+                {2.0, 3.0},
+                {4.0, 5.0},
+            },
+            {
+                {6.0, 7.0},
+                {8.0, 9.0},
+                {10.0, 11.0},
+            },
+        }),
+        {"j", "i", "a"}
+    );
+
+    const auto permuted = apply_permutation(base, Permutation{1, 2, 0});
+    const std::array<std::string, 3> expected_legs{"a", "j", "i"};
+
+    REQUIRE(permuted.shape(0) == 2zu);
+    REQUIRE(permuted.shape(1) == 2zu);
+    REQUIRE(permuted.shape(2) == 3zu);
+    REQUIRE(std::ranges::equal(permuted.leg_names(), std::span<const std::string>{expected_legs}));
     REQUIRE(permuted(0, 0, 1) == Catch::Approx(2.0));
     REQUIRE(permuted(1, 1, 2) == Catch::Approx(11.0));
 

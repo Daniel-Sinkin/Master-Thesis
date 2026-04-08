@@ -157,10 +157,21 @@ TEST_CASE("Tensor zero check respects tolerance", "[tensor][compare]")
     REQUIRE(not is_zero(non_zero, -1.0));
 }
 
-TEST_CASE("Tensor metadata formatting reports the wrapped shape", "[tensor][metadata]")
+TEST_CASE("Tensor metadata formatting reports shape and leg names", "[tensor][metadata]")
 {
-    REQUIRE(Tensor{}.format_metadata() == "Tensor(shape=[])");
-    REQUIRE(Tensor::matrix({{1.0, 2.0}, {3.0, 4.0}}).format_metadata() == "Tensor(shape=[2 x 2])");
+    REQUIRE(Tensor{}.format_metadata() == "Tensor(shape=[], legs=[])");
+
+    const auto tensor = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+
+    REQUIRE(
+        tensor.format_metadata() == "Tensor(shape=[2 x 2], legs=[row, col])"
+    );
 }
 
 TEST_CASE("Tensor printing includes leg metadata and the aligned NDArray body", "[tensor]")
@@ -178,7 +189,7 @@ TEST_CASE("Tensor printing includes leg metadata and the aligned NDArray body", 
 
     REQUIRE(
         output.str()
-        == "Tensor(rank=2, shape=[2 x 2], legs=[left, right])\n"
+        == "Tensor(shape=[2 x 2], legs=[left, right])\n"
            "[ 40.0000 -15.3000]\n"
            "[-21.0000  21.8900]\n"
     );
