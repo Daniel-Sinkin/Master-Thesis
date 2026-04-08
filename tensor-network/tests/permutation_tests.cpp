@@ -29,7 +29,7 @@ TEST_CASE("Permutation validates mappings and supports forward and inverse appli
 
 TEST_CASE("apply_permutation permutes NDArray shape and values", "[permutation][ndarray]")
 {
-    const auto base = NDArray::tensor3({
+    const auto base = NDArray::rank3({
         {
             {0.0, 1.0},
             {2.0, 3.0},
@@ -56,7 +56,7 @@ TEST_CASE("apply_permutation permutes NDArray shape and values", "[permutation][
 TEST_CASE("apply_permutation permutes Tensor shape, values, and leg names", "[permutation][tensor]")
 {
     const auto base = Tensor(
-        NDArray::tensor3({
+        NDArray::rank3({
             {
                 {0.0, 1.0},
                 {2.0, 3.0},

@@ -146,6 +146,32 @@ auto Tensor::scalar(f64 value) -> Tensor
     return Tensor{NDArray::scalar(value)};
 }
 
+auto Tensor::diag(const Tensor& vector) -> Tensor
+{
+    if (vector.validity() != TensorValidity::valid)
+    {
+        throw std::invalid_argument("Tensor::diag requires a valid Tensor.");
+    }
+    if (!vector.is_vector())
+    {
+        throw std::invalid_argument("Tensor::diag requires a rank-1 Tensor.");
+    }
+
+    const auto base = vector.leg_name(0);
+    return Tensor{
+        NDArray::diag(vector.array()),
+        {
+            base + "_row",
+            base + "_col",
+        },
+    };
+}
+
+auto Tensor::iota(usize size) -> Tensor
+{
+    return Tensor{NDArray::iota(size)};
+}
+
 auto Tensor::vector(std::initializer_list<f64> values) -> Tensor
 {
     return Tensor{NDArray::vector(values)};
@@ -174,6 +200,13 @@ auto Tensor::random_normal(
 auto Tensor::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> Tensor
 {
     return Tensor{NDArray::matrix(rows)};
+}
+
+auto Tensor::rank3(
+    std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
+) -> Tensor
+{
+    return Tensor{NDArray::rank3(slices)};
 }
 
 auto Tensor::rank() const noexcept -> usize
@@ -253,6 +286,11 @@ auto Tensor::validity() const noexcept -> TensorValidity
     }
 
     return leg_names_validity(values_.shape(), leg_names_);
+}
+
+auto Tensor::diag() const -> Tensor
+{
+    return Tensor::diag(*this);
 }
 
 auto Tensor::format_metadata() const -> std::string

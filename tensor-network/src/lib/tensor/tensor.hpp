@@ -39,6 +39,8 @@ class Tensor
     Tensor(std::vector<usize> shape, std::initializer_list<std::string> leg_names);
 
     [[nodiscard]] static auto scalar(f64 value) -> Tensor;
+    [[nodiscard]] static auto diag(const Tensor& vector) -> Tensor;
+    [[nodiscard]] static auto iota(usize size) -> Tensor;
     [[nodiscard]] static auto vector(std::initializer_list<f64> values) -> Tensor;
     [[nodiscard]] static auto random(
         std::vector<usize> shape,
@@ -65,6 +67,9 @@ class Tensor
 
     [[nodiscard]] static auto matrix(std::initializer_list<std::initializer_list<f64>> rows)
         -> Tensor;
+    [[nodiscard]] static auto rank3(
+        std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
+    ) -> Tensor;
 
     [[nodiscard]] auto rank() const noexcept -> usize;
     [[nodiscard]] auto size() const noexcept -> usize;
@@ -96,6 +101,7 @@ class Tensor
 
     [[nodiscard]] auto indices_from_linear(usize linear_index) const -> std::vector<usize>;
     [[nodiscard]] auto validity() const noexcept -> TensorValidity;
+    [[nodiscard]] auto diag() const -> Tensor;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto print(usize precision = 4, bool show_metadata = true, std::ostream& out = std::cout) const
         -> void;

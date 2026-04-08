@@ -80,15 +80,43 @@ TEST_CASE(
 )
 {
     const auto scalar = Tensor::scalar(5.0);
+    const auto iota = Tensor::iota(4);
     const auto vector = Tensor::vector(1.0, 2.0, 3.0);
     const auto matrix = Tensor::matrix({
         {1.0, 2.0},
         {3.0, 4.0},
     });
+    const auto rank3 = Tensor::rank3({
+        {
+            {0.0, 1.0},
+            {2.0, 3.0},
+        },
+        {
+            {4.0, 5.0},
+            {6.0, 7.0},
+        },
+    });
 
     REQUIRE(scalar() == Catch::Approx(5.0));
+    REQUIRE(iota.is_vector());
+    REQUIRE(close_per_element(iota.array(), NDArray::vector(1.0, 2.0, 3.0, 4.0), 0.0));
     REQUIRE(close_per_element(vector.array(), NDArray::vector(1.0, 2.0, 3.0), 0.0));
     REQUIRE(close_per_element(matrix.array(), NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}}), 0.0));
+    REQUIRE(close_per_element(
+        rank3.array(),
+        NDArray::rank3({
+            {
+                {0.0, 1.0},
+                {2.0, 3.0},
+            },
+            {
+                {4.0, 5.0},
+                {6.0, 7.0},
+            },
+        }),
+        0.0
+    ));
+    REQUIRE(rank3.is_tensor3());
 
     const auto random_a = Tensor::random(
         {2, 3},
@@ -142,6 +170,31 @@ TEST_CASE("Tensor comparison helpers compare payloads and ignore leg labels", "[
     REQUIRE(close_accumulated(lhs, rhs, 1e-6));
     REQUIRE(not close_accumulated(lhs, rhs, 1e-8));
     REQUIRE(not close_per_element(lhs, different_shape, 1e-6));
+}
+
+TEST_CASE("Tensor diag expands a vector into a dense diagonal tensor", "[tensor]")
+{
+    const auto vector = Tensor(NDArray::vector(1.5, -2.0, 4.25), {"i"});
+
+    const auto diagonal_static = Tensor::diag(vector);
+    const auto diagonal_member = vector.diag();
+    const auto expected_legs = std::array<std::string, 2>{"i_row", "i_col"};
+
+    REQUIRE(diagonal_static.is_matrix());
+    REQUIRE(diagonal_static(0, 0) == Catch::Approx(1.5));
+    REQUIRE(diagonal_static(1, 1) == Catch::Approx(-2.0));
+    REQUIRE(diagonal_static(2, 2) == Catch::Approx(4.25));
+    REQUIRE(diagonal_static(0, 1) == Catch::Approx(0.0));
+    REQUIRE(diagonal_static(2, 1) == Catch::Approx(0.0));
+    REQUIRE(
+        std::ranges::equal(
+            diagonal_static.leg_names(), std::span<const std::string>{expected_legs}
+        )
+    );
+    REQUIRE(close_per_element(diagonal_static, diagonal_member, 0.0));
+
+    REQUIRE_THROWS_AS(Tensor::diag(Tensor{}), std::invalid_argument);
+    REQUIRE_THROWS_AS(Tensor::diag(Tensor::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument);
 }
 
 TEST_CASE("Tensor zero check respects tolerance", "[tensor][compare]")

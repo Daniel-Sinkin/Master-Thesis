@@ -1,3 +1,4 @@
+#include "ndarray/compare.hpp"
 #include "ndarray/ndarray.hpp"
 
 #include <array>
@@ -48,7 +49,7 @@ TEST_CASE("NDArray zeros_like copies shape and zero-initializes values", "[ndarr
     REQUIRE(scalar.is_scalar());
     REQUIRE(scalar() == Catch::Approx(0.0));
 
-    auto source = NDArray::tensor3({
+    auto source = NDArray::rank3({
         {
             {0.0, 1.0},
             {2.0, 3.0},
@@ -120,6 +121,26 @@ TEST_CASE("NDArray reshape validates size", "[ndarray]")
     REQUIRE(wrong_total.error() == ReshapeError::wrong_total);
 }
 
+TEST_CASE("NDArray diag expands a vector into a dense diagonal matrix", "[ndarray]")
+{
+    const auto vector = NDArray::vector(1.5, -2.0, 4.25);
+
+    const auto diagonal_static = NDArray::diag(vector);
+    const auto diagonal_member = vector.diag();
+
+    REQUIRE(diagonal_static.same_shape(NDArray({3, 3})));
+    REQUIRE(diagonal_member.same_shape(NDArray({3, 3})));
+    REQUIRE(diagonal_static(0, 0) == Catch::Approx(1.5));
+    REQUIRE(diagonal_static(1, 1) == Catch::Approx(-2.0));
+    REQUIRE(diagonal_static(2, 2) == Catch::Approx(4.25));
+    REQUIRE(diagonal_static(0, 1) == Catch::Approx(0.0));
+    REQUIRE(diagonal_static(2, 1) == Catch::Approx(0.0));
+    REQUIRE(close_per_element(diagonal_static, diagonal_member, 0.0));
+
+    REQUIRE_THROWS_AS(NDArray::diag(NDArray::scalar(1.0)), std::invalid_argument);
+    REQUIRE_THROWS_AS(NDArray::diag(NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument);
+}
+
 TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]")
 {
     auto array = NDArray({2, 3, 4});
@@ -142,7 +163,7 @@ TEST_CASE("NDArray indexing uses row-major strides and supports negative indices
 TEST_CASE("NDArray same_shape distinguishes identical and different shapes", "[ndarray]")
 {
     const auto lhs = NDArray({2, 3, 2});
-    const auto rhs = NDArray::tensor3({
+    const auto rhs = NDArray::rank3({
         {
             {0.0, 1.0},
             {2.0, 3.0},
@@ -164,12 +185,13 @@ TEST_CASE("NDArray same_shape distinguishes identical and different shapes", "[n
 
 TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[ndarray]")
 {
+    const auto iota = NDArray::iota(5);
     const auto vector = NDArray::vector(1.0, 2.0, 3.0);
     const auto matrix = NDArray::matrix({
         {1.0, 2.0, 3.0},
         {4.0, 5.0, 6.0},
     });
-    const auto tensor3 = NDArray::tensor3({
+    const auto tensor3 = NDArray::rank3({
         {
             {0.0, 1.0},
             {2.0, 3.0},
@@ -181,9 +203,23 @@ TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[nda
             {10.0, 11.0},
         },
     });
+    const auto empty_iota_shape = std::array<usize, 1>{0};
     const auto expected_vector_shape = std::array<usize, 1>{3};
     const auto expected_matrix_shape = std::array<usize, 2>{2, 3};
     const auto expected_tensor3_shape = std::array<usize, 3>{2, 3, 2};
+
+    REQUIRE(iota.validity() == NDArrayValidity::valid);
+    REQUIRE(iota.is_vector());
+    REQUIRE(iota.shape(0) == 5zu);
+    REQUIRE(iota(0) == Catch::Approx(1.0));
+    REQUIRE(iota(4) == Catch::Approx(5.0));
+    REQUIRE(close_per_element(iota, NDArray::vector(1.0, 2.0, 3.0, 4.0, 5.0), 0.0));
+
+    const auto empty_iota = NDArray::iota(0);
+    REQUIRE(empty_iota.validity() == NDArrayValidity::valid);
+    REQUIRE(empty_iota.is_vector());
+    REQUIRE(std::ranges::equal(empty_iota.shape(), std::span<const usize>{empty_iota_shape}));
+    REQUIRE(empty_iota.size() == 0zu);
 
     REQUIRE(vector.validity() == NDArrayValidity::valid);
     REQUIRE(vector.is_vector());
@@ -218,7 +254,7 @@ TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[nda
     );
 
     REQUIRE_THROWS_AS(
-        NDArray::tensor3({
+        NDArray::rank3({
             {
                 {1.0, 2.0},
                 {3.0, 4.0},
@@ -231,7 +267,7 @@ TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[nda
     );
 
     REQUIRE_THROWS_AS(
-        NDArray::tensor3({
+        NDArray::rank3({
             {
                 {1.0, 2.0},
                 {3.0},

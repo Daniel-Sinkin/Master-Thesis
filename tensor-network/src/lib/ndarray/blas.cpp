@@ -136,6 +136,105 @@ auto gram_matrix(const NDArray& matrix) -> NDArray
     return out;
 }
 
+auto scale_rows(const NDArray& matrix, const NDArray& scales, NDArray& out) -> void
+{
+    require_valid_array(matrix, "scale_rows", "matrix");
+    require_valid_array(scales, "scale_rows", "scales");
+    require_valid_array(out, "scale_rows", "out");
+
+    if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
+    {
+        throw std::runtime_error("scale_rows requires a rank-2 matrix and a rank-1 scales vector.");
+    }
+    if (scales.shape(0) != matrix.shape(0))
+    {
+        throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
+    }
+    if (not out.same_shape(matrix))
+    {
+        throw std::runtime_error("scale_rows requires out.shape == matrix.shape.");
+    }
+
+    if (&out != &matrix)
+    {
+        std::ranges::copy(matrix.data(), matrix.data() + matrix.size(), out.data());
+    }
+
+    const auto cols = as_blas_int(matrix.shape(1));
+    for (auto row = 0zu; row < matrix.shape(0); ++row)
+    {
+        cblas_dscal(cols, scales(row), out.data() + row * matrix.shape(1), 1);
+    }
+}
+
+auto scale_rows(const NDArray& matrix, const NDArray& scales) -> NDArray
+{
+    require_valid_array(matrix, "scale_rows", "matrix");
+    require_valid_array(scales, "scale_rows", "scales");
+    if (not matrix.is_matrix() or not scales.is_vector())
+    {
+        throw std::runtime_error("scale_rows requires a rank-2 matrix and a rank-1 scales vector.");
+    }
+    if (scales.shape(0) != matrix.shape(0))
+    {
+        throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
+    }
+
+    auto out = matrix.zeros_like();
+    scale_rows(matrix, scales, out);
+    return out;
+}
+
+auto scale_cols(const NDArray& matrix, const NDArray& scales, NDArray& out) -> void
+{
+    require_valid_array(matrix, "scale_cols", "matrix");
+    require_valid_array(scales, "scale_cols", "scales");
+    require_valid_array(out, "scale_cols", "out");
+
+    if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
+    {
+        throw std::runtime_error("scale_cols requires a rank-2 matrix and a rank-1 scales vector.");
+    }
+    if (scales.shape(0) != matrix.shape(1))
+    {
+        throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
+    }
+    if (not out.same_shape(matrix))
+    {
+        throw std::runtime_error("scale_cols requires out.shape == matrix.shape.");
+    }
+
+    if (&out != &matrix)
+    {
+        std::ranges::copy(matrix.data(), matrix.data() + matrix.size(), out.data());
+    }
+
+    const auto rows = as_blas_int(matrix.shape(0));
+    const auto cols = matrix.shape(1);
+    for (auto col = 0zu; col < cols; ++col)
+    {
+        cblas_dscal(rows, scales(col), out.data() + col, as_blas_int(cols));
+    }
+}
+
+auto scale_cols(const NDArray& matrix, const NDArray& scales) -> NDArray
+{
+    require_valid_array(matrix, "scale_cols", "matrix");
+    require_valid_array(scales, "scale_cols", "scales");
+    if (not matrix.is_matrix() or not scales.is_vector())
+    {
+        throw std::runtime_error("scale_cols requires a rank-2 matrix and a rank-1 scales vector.");
+    }
+    if (scales.shape(0) != matrix.shape(1))
+    {
+        throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
+    }
+
+    auto out = matrix.zeros_like();
+    scale_cols(matrix, scales, out);
+    return out;
+}
+
 auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs, NDArray& out) -> void
 {
     require_valid_array(lhs, "matrix_matrix_product", "lhs");

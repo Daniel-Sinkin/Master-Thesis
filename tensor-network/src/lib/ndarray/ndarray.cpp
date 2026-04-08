@@ -147,6 +147,35 @@ auto NDArray::scalar(f64 value) -> NDArray
     return out;
 }
 
+auto NDArray::diag(const NDArray& vector) -> NDArray
+{
+    if (vector.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("NDArray::diag requires a valid NDArray.");
+    }
+    if (!vector.is_vector())
+    {
+        throw std::invalid_argument("NDArray::diag requires a rank-1 NDArray.");
+    }
+
+    auto out = NDArray({vector.shape(0), vector.shape(0)});
+    for (auto i = 0zu; i < vector.shape(0); ++i)
+    {
+        out(i, i) = vector(i);
+    }
+    return out;
+}
+
+auto NDArray::iota(usize size) -> NDArray
+{
+    auto out = NDArray({size});
+    for (auto i = 0zu; i < size; ++i)
+    {
+        out.data(i) = static_cast<f64>(i + 1zu);
+    }
+    return out;
+}
+
 auto NDArray::vector(std::initializer_list<f64> values) -> NDArray
 {
     auto out = NDArray({values.size()});
@@ -233,7 +262,7 @@ auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> 
     return out;
 }
 
-auto NDArray::tensor3(
+auto NDArray::rank3(
     std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
 ) -> NDArray
 {
@@ -249,17 +278,17 @@ auto NDArray::tensor3(
     {
         if (slice.size() != row_count)
         {
-            throw std::invalid_argument(
-                "NDArray::tensor3 requires all slices to have the same number of rows."
-            );
-        }
+                throw std::invalid_argument(
+                    "NDArray::rank3 requires all slices to have the same number of rows."
+                );
+            }
 
         for (const auto& row : slice)
         {
             if (row.size() != col_count)
             {
                 throw std::invalid_argument(
-                    "NDArray::tensor3 requires all rows to have the same length."
+                    "NDArray::rank3 requires all rows to have the same length."
                 );
             }
             cursor = std::ranges::copy(row, cursor).out;
@@ -338,6 +367,11 @@ auto NDArray::normalized() const -> NDArray
 auto NDArray::zeros_like() const -> NDArray
 {
     return NDArray::zeros_like(*this);
+}
+
+auto NDArray::diag() const -> NDArray
+{
+    return NDArray::diag(*this);
 }
 
 auto NDArray::reshape(std::span<const usize> new_shape) const noexcept

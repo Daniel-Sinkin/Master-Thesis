@@ -60,6 +60,66 @@ TEST_CASE("gram_matrix computes A^T A and supports the out overload", "[ndarray]
 }
 
 TEST_CASE(
+    "scale_rows supports return, out, and in-place forms and validates shapes",
+    "[ndarray][blas]"
+)
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {4.0, 5.0, 6.0},
+    });
+    const auto scales = NDArray::vector(10.0, -1.0);
+    const auto expected = NDArray::matrix({
+        {10.0, 20.0, 30.0},
+        {-4.0, -5.0, -6.0},
+    });
+
+    REQUIRE(close_per_element(scale_rows(matrix, scales), expected, 1e-12));
+
+    auto out = NDArray({2, 3});
+    scale_rows(matrix, scales, out);
+    REQUIRE(close_per_element(out, expected, 1e-12));
+
+    auto in_place = matrix;
+    scale_rows(in_place, scales, in_place);
+    REQUIRE(close_per_element(in_place, expected, 1e-12));
+
+    REQUIRE_THROWS_AS(
+        scale_rows(matrix, NDArray::vector(1.0, 2.0, 3.0), out), std::runtime_error
+    );
+    REQUIRE_THROWS_AS(scale_rows(NDArray::vector(1.0, 2.0), scales, out), std::runtime_error);
+}
+
+TEST_CASE(
+    "scale_cols supports return, out, and in-place forms and validates shapes",
+    "[ndarray][blas]"
+)
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {4.0, 5.0, 6.0},
+    });
+    const auto scales = NDArray::vector(10.0, -1.0, 0.5);
+    const auto expected = NDArray::matrix({
+        {10.0, -2.0, 1.5},
+        {40.0, -5.0, 3.0},
+    });
+
+    REQUIRE(close_per_element(scale_cols(matrix, scales), expected, 1e-12));
+
+    auto out = NDArray({2, 3});
+    scale_cols(matrix, scales, out);
+    REQUIRE(close_per_element(out, expected, 1e-12));
+
+    auto in_place = matrix;
+    scale_cols(in_place, scales, in_place);
+    REQUIRE(close_per_element(in_place, expected, 1e-12));
+
+    REQUIRE_THROWS_AS(scale_cols(matrix, NDArray::vector(1.0, 2.0), out), std::runtime_error);
+    REQUIRE_THROWS_AS(scale_cols(NDArray::vector(1.0, 2.0), scales, out), std::runtime_error);
+}
+
+TEST_CASE(
     "matrix-vector product supports return and out overloads and rejects "
     "aliasing",
     "[ndarray][blas]"

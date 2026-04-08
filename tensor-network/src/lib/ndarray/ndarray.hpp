@@ -75,6 +75,8 @@ class NDArray
     explicit NDArray(std::vector<usize> shape);
 
     [[nodiscard]] static auto scalar(f64 value) -> NDArray;
+    [[nodiscard]] static auto diag(const NDArray& vector) -> NDArray;
+    [[nodiscard]] static auto iota(usize size) -> NDArray;
     [[nodiscard]] static auto vector(std::initializer_list<f64> values) -> NDArray;
     [[nodiscard]] static auto random(
         std::vector<usize> shape,
@@ -102,7 +104,7 @@ class NDArray
 
     [[nodiscard]] static auto matrix(std::initializer_list<std::initializer_list<f64>> rows)
         -> NDArray;
-    [[nodiscard]] static auto tensor3(
+    [[nodiscard]] static auto rank3(
         std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
     ) -> NDArray;
     [[nodiscard]] static auto reshape(const NDArray& array, std::span<const usize> new_shape) noexcept
@@ -151,6 +153,7 @@ class NDArray
     [[nodiscard]] auto l2_norm() const -> f64;
     [[nodiscard]] auto normalized() const -> NDArray;
     [[nodiscard]] auto zeros_like() const -> NDArray;
+    [[nodiscard]] auto diag() const -> NDArray;
     [[nodiscard]] auto reshape(std::span<const usize> new_shape) const noexcept
         -> std::expected<NDArray, ReshapeError>;
     [[nodiscard]] auto reshape(std::initializer_list<usize> new_shape) const noexcept
