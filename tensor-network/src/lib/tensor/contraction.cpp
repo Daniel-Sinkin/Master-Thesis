@@ -44,18 +44,6 @@ product_over_selected_axes(std::span<const usize> shape, std::span<const usize> 
     return out;
 }
 
-[[nodiscard]] auto reshape_or_throw(const NDArray& array, std::span<const usize> new_shape) -> NDArray
-{
-    auto reshaped = array.reshape(new_shape);
-    if (!reshaped)
-    {
-        throw std::runtime_error(
-            "contract reshape failed with error = " + std::string{to_string(reshaped.error())}
-        );
-    }
-    return std::move(reshaped).value();
-}
-
 auto require_valid_tensor(const Tensor& tensor, const char* argument_name) -> void
 {
     if (tensor.validity() != TensorValidity::valid)
@@ -232,14 +220,14 @@ auto contract(const Tensor& left, const Tensor& right) -> Tensor
         right, permutation_from_axis_order(concat_indices(right_shared, right_not_shared))
     );
 
-    const auto left_matrix = reshape_or_throw(
+    const auto left_matrix = NDArray::reshape(
         left_transposed.array(),
         std::array{
             product_over_selected_axes(left.shape(), left_not_shared),
             product_over_selected_axes(left.shape(), left_shared),
         }
     );
-    const auto right_matrix = reshape_or_throw(
+    const auto right_matrix = NDArray::reshape(
         right_transposed.array(),
         std::array{
             product_over_selected_axes(right.shape(), right_shared),
@@ -249,7 +237,7 @@ auto contract(const Tensor& left, const Tensor& right) -> Tensor
 
     auto out = contraction_output_tensor(left, right);
     const auto flattened = matrix_matrix_product(left_matrix, right_matrix);
-    out.array() = reshape_or_throw(flattened, out.shape());
+    out.array() = NDArray::reshape(flattened, out.shape());
     return out;
 }
 

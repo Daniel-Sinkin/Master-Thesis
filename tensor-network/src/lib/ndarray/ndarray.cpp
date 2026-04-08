@@ -210,32 +210,23 @@ auto NDArray::zeros_like(const NDArray& other) -> NDArray
     return NDArray(std::vector<usize>{other.shape().begin(), other.shape().end()});
 }
 
-auto NDArray::reshape(const NDArray& array, std::span<const usize> new_shape) noexcept
-    -> std::expected<NDArray, ReshapeError>
+auto NDArray::reshape(const NDArray& array, std::span<const usize> new_shape) -> NDArray
 {
     if (array.validity() != NDArrayValidity::valid)
     {
-        return std::unexpected{ReshapeError::invalid_array};
+        throw std::invalid_argument("NDArray::reshape requires a valid NDArray.");
     }
     if (product<usize>(new_shape) != array.size())
     {
-        return std::unexpected{ReshapeError::wrong_total};
+        throw std::invalid_argument("NDArray::reshape requires product(new_shape) == array.size().");
     }
 
-    try
-    {
-        auto out = NDArray{std::vector<usize>{new_shape.begin(), new_shape.end()}};
-        std::ranges::copy(array.data(), array.data() + array.size(), out.data());
-        return out;
-    }
-    catch (...)
-    {
-        return std::unexpected{ReshapeError::allocation_failed};
-    }
+    auto out = NDArray{std::vector<usize>{new_shape.begin(), new_shape.end()}};
+    std::ranges::copy(array.data(), array.data() + array.size(), out.data());
+    return out;
 }
 
-auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_shape) noexcept
-    -> std::expected<NDArray, ReshapeError>
+auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_shape) -> NDArray
 {
     return NDArray::reshape(array, std::span<const usize>{new_shape.begin(), new_shape.size()});
 }
@@ -374,14 +365,12 @@ auto NDArray::diag() const -> NDArray
     return NDArray::diag(*this);
 }
 
-auto NDArray::reshape(std::span<const usize> new_shape) const noexcept
-    -> std::expected<NDArray, ReshapeError>
+auto NDArray::reshape(std::span<const usize> new_shape) const -> NDArray
 {
     return NDArray::reshape(*this, new_shape);
 }
 
-auto NDArray::reshape(std::initializer_list<usize> new_shape) const noexcept
-    -> std::expected<NDArray, ReshapeError>
+auto NDArray::reshape(std::initializer_list<usize> new_shape) const -> NDArray
 {
     return NDArray::reshape(*this, new_shape);
 }

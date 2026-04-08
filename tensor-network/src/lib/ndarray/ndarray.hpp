@@ -5,7 +5,6 @@
 
 #include <array>
 #include <concepts>
-#include <expected>
 #include <initializer_list>
 #include <iostream>
 #include <limits>
@@ -46,28 +45,6 @@ enum class NDArrayValidity : u8
     data_size_mismatch,
 };
 
-enum class ReshapeError : u8
-{
-    invalid_array,
-    wrong_total,
-    allocation_failed,
-};
-
-[[nodiscard]] constexpr auto to_string(ReshapeError error) noexcept -> std::string_view
-{
-    switch (error)
-    {
-        case ReshapeError::invalid_array:
-            return "invalid_array";
-        case ReshapeError::wrong_total:
-            return "wrong_total";
-        case ReshapeError::allocation_failed:
-            return "allocation_failed";
-    }
-
-    return "unknown_reshape_error";
-}
-
 class NDArray
 {
   public:
@@ -107,12 +84,10 @@ class NDArray
     [[nodiscard]] static auto rank3(
         std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
     ) -> NDArray;
-    [[nodiscard]] static auto reshape(const NDArray& array, std::span<const usize> new_shape) noexcept
-        -> std::expected<NDArray, ReshapeError>;
-    [[nodiscard]] static auto reshape(
-        const NDArray& array, std::initializer_list<usize> new_shape
-    ) noexcept
-        -> std::expected<NDArray, ReshapeError>;
+    [[nodiscard]] static auto reshape(const NDArray& array, std::span<const usize> new_shape)
+        -> NDArray;
+    [[nodiscard]] static auto reshape(const NDArray& array, std::initializer_list<usize> new_shape)
+        -> NDArray;
     [[nodiscard]] static auto same_shape(const NDArray& lhs, const NDArray& rhs) noexcept -> bool;
 
     [[nodiscard]] auto rank() const noexcept -> usize;
@@ -154,10 +129,8 @@ class NDArray
     [[nodiscard]] auto normalized() const -> NDArray;
     [[nodiscard]] auto zeros_like() const -> NDArray;
     [[nodiscard]] auto diag() const -> NDArray;
-    [[nodiscard]] auto reshape(std::span<const usize> new_shape) const noexcept
-        -> std::expected<NDArray, ReshapeError>;
-    [[nodiscard]] auto reshape(std::initializer_list<usize> new_shape) const noexcept
-        -> std::expected<NDArray, ReshapeError>;
+    [[nodiscard]] auto reshape(std::span<const usize> new_shape) const -> NDArray;
+    [[nodiscard]] auto reshape(std::initializer_list<usize> new_shape) const -> NDArray;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto normalize() -> void;
     auto add_scalar(f64 scalar) -> NDArray&;

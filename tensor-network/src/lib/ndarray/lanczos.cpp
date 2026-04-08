@@ -19,18 +19,18 @@ constexpr f64 k_lanczos_termination_eps{1.e-12};
 }  // namespace
 
 auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, LanczosConfig cfg)
-    -> std::expected<LanczosResult, LanczosError>
+    -> LanczosResult
 {
     const auto n = dimension;
     const auto m = cfg.num_iterations;
 
     if (n == 0)
     {
-        return std::unexpected{LanczosError::invalid_dimension};
+        throw std::invalid_argument("lanczos requires dimension >= 1.");
     }
     if (m == 0)
     {
-        return std::unexpected{LanczosError::invalid_iteration_count};
+        throw std::invalid_argument("lanczos requires num_iterations >= 1.");
     }
 
     if (cfg.verbose)
@@ -68,7 +68,9 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
         auto Av = apply_A_operator(v_curr);
         if (!Av.is_vector() || Av.shape(0) != n)
         {
-            return std::unexpected{LanczosError::invalid_operator_output};
+            throw std::invalid_argument(
+                "lanczos requires apply_A_operator(v) to return a rank-1 NDArray of size dimension."
+            );
         }
 
         alphas.push_back(dot_product(Av, v_curr));
@@ -123,12 +125,7 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
         std::println("Lanczos Krylov dimension: {}", krylov_dimension);
     }
 
-    auto eig = sym_tri_eigendecomp({.diagonal = alphas, .off_diagonal = betas});
-    if (!eig)
-    {
-        return std::unexpected{LanczosError::tridiagonal_eigendecomp_failed};
-    }
-    const auto& [evals, evecs] = *eig;
+    const auto [evals, evecs] = sym_tri_eigendecomp({.diagonal = alphas, .off_diagonal = betas});
 
     if (cfg.verbose)
     {
@@ -157,19 +154,19 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
     return result;
 }
 
-auto lanczos(const NDArray& A, LanczosConfig cfg) -> std::expected<LanczosResult, LanczosError>
+auto lanczos(const NDArray& A, LanczosConfig cfg) -> LanczosResult
 {
     if (!A.is_matrix())
     {
-        return std::unexpected{LanczosError::not_matrix};
+        throw std::invalid_argument("lanczos requires a rank-2 NDArray.");
     }
     if (A.shape(0) != A.shape(1))
     {
-        return std::unexpected{LanczosError::matrix_not_square};
+        throw std::invalid_argument("lanczos requires a square matrix.");
     }
     if (cfg.check_symmetric and !is_symmetric(A, cfg.symmetry_tolerance))
     {
-        return std::unexpected{LanczosError::matrix_not_symmetric};
+        throw std::invalid_argument("lanczos requires a symmetric matrix when check_symmetric = true.");
     }
 
     const auto apply_A = [&A](const NDArray& v) -> NDArray { return matrix_vector_product(A, v); };

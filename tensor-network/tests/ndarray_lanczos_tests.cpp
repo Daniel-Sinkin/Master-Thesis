@@ -10,42 +10,35 @@ namespace ds_tn
 
 TEST_CASE("Lanczos validates NDArray preconditions", "[ndarray][lanczos]")
 {
-    REQUIRE(lanczos(NDArray::vector(1.0, 2.0, 3.0)).error() == LanczosError::not_matrix);
+    REQUIRE_THROWS_AS(lanczos(NDArray::vector(1.0, 2.0, 3.0)), std::invalid_argument);
 
-    REQUIRE(
+    REQUIRE_THROWS_AS(
         lanczos(
             NDArray::matrix({
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0},
             })
-        )
-            .error()
-        == LanczosError::matrix_not_square
+        ),
+        std::invalid_argument
     );
 
-    REQUIRE(
+    REQUIRE_THROWS_AS(
         lanczos(
             NDArray::matrix({
                 {1.0, 2.0},
                 {3.0, 4.0},
             }),
             {.check_symmetric = true}
-        )
-            .error()
-        == LanczosError::matrix_not_symmetric
+        ),
+        std::invalid_argument
     );
 
     const auto apply_bad = [](const NDArray&) -> NDArray { return NDArray({2, 2}); };
-    REQUIRE(
-        lanczos(2, apply_bad, {.num_iterations = 1}).error()
-        == LanczosError::invalid_operator_output
-    );
-    REQUIRE(
-        lanczos(0, apply_bad, {.num_iterations = 1}).error() == LanczosError::invalid_dimension
-    );
-    REQUIRE(
-        lanczos(2, [](const NDArray& v) -> NDArray { return v; }, {.num_iterations = 0}).error()
-        == LanczosError::invalid_iteration_count
+    REQUIRE_THROWS_AS(lanczos(2, apply_bad, {.num_iterations = 1}), std::invalid_argument);
+    REQUIRE_THROWS_AS(lanczos(0, apply_bad, {.num_iterations = 1}), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        lanczos(2, [](const NDArray& v) -> NDArray { return v; }, {.num_iterations = 0}),
+        std::invalid_argument
     );
 }
 
@@ -66,14 +59,13 @@ TEST_CASE("Lanczos returns a normalized Ritz pair for a symmetric matrix", "[nda
         }
     );
 
-    REQUIRE(result.has_value());
-    REQUIRE(result->ritz_value == Catch::Approx(1.381966011250105));
-    REQUIRE(result->ritz_vector.l2_norm() == Catch::Approx(1.0));
+    REQUIRE(result.ritz_value == Catch::Approx(1.381966011250105));
+    REQUIRE(result.ritz_vector.l2_norm() == Catch::Approx(1.0));
 
-    auto scaled_ritz_vector = result->ritz_vector;
-    scaled_ritz_vector *= result->ritz_value;
+    auto scaled_ritz_vector = result.ritz_vector;
+    scaled_ritz_vector *= result.ritz_value;
     REQUIRE(close_accumulated(
-        matrix_vector_product(matrix, result->ritz_vector), scaled_ritz_vector, 1e-10
+        matrix_vector_product(matrix, result.ritz_vector), scaled_ritz_vector, 1e-10
     ));
 }
 

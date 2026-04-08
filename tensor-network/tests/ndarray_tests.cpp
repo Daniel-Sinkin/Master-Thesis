@@ -92,20 +92,16 @@ TEST_CASE("NDArray reshape supports static and member call styles", "[ndarray]")
     const auto scalar = NDArray::scalar(42.0);
     const auto reshaped_scalar = scalar.reshape({});
 
-    REQUIRE(reshaped_static.has_value());
-    REQUIRE(reshaped_member.has_value());
-    REQUIRE(reshaped_scalar.has_value());
+    REQUIRE(reshaped_static.same_shape(NDArray({3, 2})));
+    REQUIRE(reshaped_static.data(0) == Catch::Approx(1.0));
+    REQUIRE(reshaped_static.data(5) == Catch::Approx(6.0));
 
-    REQUIRE(reshaped_static->same_shape(NDArray({3, 2})));
-    REQUIRE(reshaped_static->data(0) == Catch::Approx(1.0));
-    REQUIRE(reshaped_static->data(5) == Catch::Approx(6.0));
+    REQUIRE(reshaped_member.same_shape(NDArray({1, 6})));
+    REQUIRE(reshaped_member.data(0) == Catch::Approx(1.0));
+    REQUIRE(reshaped_member.data(5) == Catch::Approx(6.0));
 
-    REQUIRE(reshaped_member->same_shape(NDArray({1, 6})));
-    REQUIRE(reshaped_member->data(0) == Catch::Approx(1.0));
-    REQUIRE(reshaped_member->data(5) == Catch::Approx(6.0));
-
-    REQUIRE(reshaped_scalar->is_scalar());
-    REQUIRE((*reshaped_scalar)() == Catch::Approx(42.0));
+    REQUIRE(reshaped_scalar.is_scalar());
+    REQUIRE(reshaped_scalar() == Catch::Approx(42.0));
 }
 
 TEST_CASE("NDArray reshape validates size", "[ndarray]")
@@ -115,10 +111,7 @@ TEST_CASE("NDArray reshape validates size", "[ndarray]")
         {3.0, 4.0},
     });
 
-    const auto wrong_total = matrix.reshape({3, 3});
-
-    REQUIRE(!wrong_total.has_value());
-    REQUIRE(wrong_total.error() == ReshapeError::wrong_total);
+    REQUIRE_THROWS_AS(matrix.reshape({3, 3}), std::invalid_argument);
 }
 
 TEST_CASE("NDArray diag expands a vector into a dense diagonal matrix", "[ndarray]")
