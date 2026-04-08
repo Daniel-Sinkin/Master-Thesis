@@ -1,27 +1,44 @@
 // app/main.cpp
-#include "ndarray/blas.hpp"
+#include "models/transverse_ising.hpp"
 #include "ndarray/lapack.hpp"
-#include "ndarray/ndarray.hpp"
+#include "tensor/contraction.hpp"
+#include "tensor/mps.hpp"
 
-#include <print>  // IWYU pragma: keep
-
-#define NAMED_PRINT(x)                                                                             \
-    std::print(#x " = ");                                                                          \
-    (x).print();
+#include <algorithm>
+#include <print>
 
 int main()
 {
     using namespace ds_tn;
 
-    auto arr = NDArray::reshape(NDArray::iota(8), {2, 2, 2});  // [2 x 2 x 2]
-    {
-        arr = NDArray::reshape(arr, {2, 4});  // [2 x 4]
-        const auto [u, s, vt] = svd(arr);     // [2 x 2], [2], [2 x 4]
+    const auto mpo = transverse_ising_mpo(4, 1.0, 1.0);
+    (void) mpo;
 
-        const auto A1 = NDArray::reshape(u, {1, 2, 2});
-        NAMED_PRINT(s);
-        NAMED_PRINT(vt);
-        const auto rem = matrix_matrix_product(s.diag(), vt);
-        rem.print();
+    const auto num_sites = mpo.size();
+    const auto max_bond_dim = 5;
+    auto mps = random_mps(
+        num_sites,
+        RandomMPSConfig{
+            .physical_dim = 2,
+            .max_bond_dim = max_bond_dim,
+            .seed = 0zu,
+        }
+    );
+
+    for (auto k = num_sites - 1; k >= 1; --k)
+    {
+        auto& curr = mps(k);
+        auto& next = mps(k - 1);
+
+        const auto bond_left = curr.shape(0);
+        const auto d = curr.shape(1);
+        const auto bond_right = curr.shape(2);
+
+        const auto reshaped = NDArray::reshape(curr.array(), {bond_left, d * bond_right});
+        const auto [Q, R] = qr(reshaped, MatrixTransform::transpose);
+
+        curr.array() = NDArray::reshape(Q, {bond_left, d, bond_right});
+
+        next = contract(next, Tensor{R, {curr.leg_name(0), next.leg_name(2)}});
     }
 }

@@ -99,7 +99,7 @@ TEST_CASE(
 
     REQUIRE(scalar() == Catch::Approx(5.0));
     REQUIRE(iota.is_vector());
-    REQUIRE(close_per_element(iota.array(), NDArray::vector(1.0, 2.0, 3.0, 4.0), 0.0));
+    REQUIRE(close_per_element(iota.array(), NDArray::vector(0.0, 1.0, 2.0, 3.0), 0.0));
     REQUIRE(close_per_element(vector.array(), NDArray::vector(1.0, 2.0, 3.0), 0.0));
     REQUIRE(close_per_element(matrix.array(), NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}}), 0.0));
     REQUIRE(close_per_element(
@@ -246,6 +246,22 @@ TEST_CASE("Tensor printing includes leg metadata and the aligned NDArray body", 
            "[ 40.0000 -15.3000]\n"
            "[-21.0000  21.8900]\n"
     );
+}
+
+TEST_CASE("Tensor print_metadata writes the formatted metadata line", "[tensor][metadata]")
+{
+    const auto tensor = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+
+    auto output = std::ostringstream{};
+    tensor.print_metadata(output);
+
+    REQUIRE(output.str() == "Tensor(shape=[2 x 2], legs=[row, col])\n");
 }
 
 }  // namespace ds_tn

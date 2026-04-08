@@ -22,6 +22,11 @@ namespace ds_tn
 
 using NDArraySeed = std::mt19937_64::result_type;
 
+class NDArray;
+[[nodiscard]] auto truncate_cols(const NDArray& mat, usize cols) -> NDArray;
+[[nodiscard]] auto truncate_rows(const NDArray& mat, usize rows) -> NDArray;
+[[nodiscard]] auto transpose_matrix(const NDArray& matrix) -> NDArray;
+
 struct RandomUniformOptions
 {
     f64 lower{0.0};
@@ -88,6 +93,7 @@ class NDArray
         -> NDArray;
     [[nodiscard]] static auto reshape(const NDArray& array, std::initializer_list<usize> new_shape)
         -> NDArray;
+    [[nodiscard]] static auto squeeze(const NDArray& array) -> NDArray;
     [[nodiscard]] static auto same_shape(const NDArray& lhs, const NDArray& rhs) noexcept -> bool;
 
     [[nodiscard]] auto rank() const noexcept -> usize;
@@ -131,6 +137,7 @@ class NDArray
     [[nodiscard]] auto diag() const -> NDArray;
     [[nodiscard]] auto reshape(std::span<const usize> new_shape) const -> NDArray;
     [[nodiscard]] auto reshape(std::initializer_list<usize> new_shape) const -> NDArray;
+    [[nodiscard]] auto squeeze() const -> NDArray;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto normalize() -> void;
     auto add_scalar(f64 scalar) -> NDArray&;
@@ -155,6 +162,9 @@ class NDArray
   private:
     auto initialize_storage() -> void;
     [[nodiscard]] auto linear_index(std::span<const usize> indices) const -> usize;
+
+    friend auto truncate_cols(const NDArray& mat, usize cols) -> NDArray;
+    friend auto truncate_rows(const NDArray& mat, usize rows) -> NDArray;
 
     template <typename Index>
         requires std::integral<Index>

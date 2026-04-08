@@ -26,6 +26,16 @@ namespace
     return out;
 }
 
+[[nodiscard]] auto identity_matrix(usize size) -> NDArray
+{
+    auto out = NDArray({size, size});
+    for (auto i = 0zu; i < size; ++i)
+    {
+        out(i, i) = 1.0;
+    }
+    return out;
+}
+
 }  // namespace
 
 TEST_CASE(
@@ -136,6 +146,102 @@ TEST_CASE("SVD validates input arrays", "[ndarray][lapack]")
 
     REQUIRE_THROWS_AS(svd(vector), std::invalid_argument);
     REQUIRE_THROWS_AS(svd(bad), std::invalid_argument);
+}
+
+TEST_CASE("Householder QR reconstructs a tall matrix", "[ndarray][lapack]")
+{
+    const auto matrix = NDArray::matrix({
+        {12.0, -51.0},
+        {6.0, 167.0},
+        {-4.0, 24.0},
+    });
+
+    const auto householder = householder_qr(matrix);
+    const auto q_from_householder = householder_build_q(householder);
+    const auto q_from_arrays = householder_build_q(householder.factors, householder.tau);
+    const auto r_from_householder = extract_upper_triangle(householder.factors);
+    const auto [q, r] = qr(matrix);
+    const auto reconstructed = matrix_matrix_product(q, r);
+
+    REQUIRE(householder.factors.same_shape(matrix));
+    REQUIRE(householder.tau.same_shape(NDArray({2})));
+    REQUIRE(q.same_shape(NDArray({3, 2})));
+    REQUIRE(r.same_shape(NDArray({2, 2})));
+    REQUIRE(close_per_element(q, q_from_householder, 0.0));
+    REQUIRE(close_per_element(q, q_from_arrays, 0.0));
+    REQUIRE(close_per_element(r, r_from_householder, 0.0));
+    REQUIRE(close_accumulated(reconstructed, matrix, 1.e-10));
+    REQUIRE(close_accumulated(gram_matrix(q), identity_matrix(2), 1.e-10));
+}
+
+TEST_CASE("Householder QR reconstructs a wide matrix", "[ndarray][lapack]")
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0, 4.0},
+        {5.0, 6.0, 7.0, 8.0},
+    });
+
+    const auto householder = householder_qr(matrix);
+    const auto [q, r] = qr(matrix);
+    const auto reconstructed = matrix_matrix_product(q, r);
+
+    REQUIRE(householder.factors.same_shape(matrix));
+    REQUIRE(householder.tau.same_shape(NDArray({2})));
+    REQUIRE(q.same_shape(NDArray({2, 2})));
+    REQUIRE(r.same_shape(NDArray({2, 4})));
+    REQUIRE(close_per_element(q, householder_build_q(householder), 0.0));
+    REQUIRE(close_per_element(r, extract_upper_triangle(householder.factors), 0.0));
+    REQUIRE(close_accumulated(reconstructed, matrix, 1.e-10));
+    REQUIRE(close_accumulated(gram_matrix(q), identity_matrix(2), 1.e-10));
+}
+
+TEST_CASE("Householder QR supports factoring the transpose view", "[ndarray][lapack]")
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0, 4.0},
+        {5.0, 6.0, 7.0, 8.0},
+    });
+    const auto matrix_t = transpose_matrix(matrix);
+
+    const auto householder = householder_qr(matrix, MatrixTransform::transpose);
+    const auto [q, r] = qr(matrix, MatrixTransform::transpose);
+    const auto reconstructed = matrix_matrix_product(q, r);
+
+    REQUIRE(householder.factors.same_shape(matrix_t));
+    REQUIRE(householder.tau.same_shape(NDArray({2})));
+    REQUIRE(q.same_shape(NDArray({4, 2})));
+    REQUIRE(r.same_shape(NDArray({2, 2})));
+    REQUIRE(close_per_element(q, householder_build_q(householder), 0.0));
+    REQUIRE(close_per_element(r, extract_upper_triangle(householder.factors), 0.0));
+    REQUIRE(close_accumulated(reconstructed, matrix_t, 1.e-10));
+    REQUIRE(close_accumulated(gram_matrix(q), identity_matrix(2), 1.e-10));
+}
+
+TEST_CASE("Householder QR validates input arrays", "[ndarray][lapack]")
+{
+    const auto vector = NDArray::vector({1.0, 2.0, 3.0});
+    const auto bad = NDArray{};
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0},
+        {3.0, 4.0},
+    });
+
+    REQUIRE_THROWS_AS(householder_qr(vector), std::invalid_argument);
+    REQUIRE_THROWS_AS(householder_qr(bad), std::invalid_argument);
+    REQUIRE_THROWS_AS(householder_qr(vector, MatrixTransform::transpose), std::invalid_argument);
+    REQUIRE_THROWS_AS(householder_qr(bad, MatrixTransform::transpose), std::invalid_argument);
+    REQUIRE_THROWS_AS(qr(vector), std::invalid_argument);
+    REQUIRE_THROWS_AS(qr(bad), std::invalid_argument);
+    REQUIRE_THROWS_AS(qr(vector, MatrixTransform::transpose), std::invalid_argument);
+    REQUIRE_THROWS_AS(qr(bad, MatrixTransform::transpose), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        householder_build_q(vector, NDArray::vector({1.0})), std::invalid_argument
+    );
+    REQUIRE_THROWS_AS(
+        householder_build_q(householder_qr(matrix).factors, NDArray::vector({1.0})),
+        std::invalid_argument
+    );
+    REQUIRE_THROWS_AS(extract_upper_triangle(vector), std::invalid_argument);
 }
 
 }  // namespace ds_tn

@@ -103,6 +103,7 @@ class Tensor
     [[nodiscard]] auto validity() const noexcept -> TensorValidity;
     [[nodiscard]] auto diag() const -> Tensor;
     [[nodiscard]] auto format_metadata() const -> std::string;
+    auto print_metadata(std::ostream& out = std::cout) const -> void;
     auto print(usize precision = 4, bool show_metadata = true, std::ostream& out = std::cout) const
         -> void;
 

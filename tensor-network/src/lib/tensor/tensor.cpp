@@ -299,11 +299,16 @@ auto Tensor::format_metadata() const -> std::string
            + ")";
 }
 
+auto Tensor::print_metadata(std::ostream& out) const -> void
+{
+    out << format_metadata() << '\n';
+}
+
 auto Tensor::print(usize precision, bool show_metadata, std::ostream& out) const -> void
 {
     if (show_metadata)
     {
-        out << format_metadata() << '\n';
+        print_metadata(out);
     }
 
     values_.print(precision, false, out);

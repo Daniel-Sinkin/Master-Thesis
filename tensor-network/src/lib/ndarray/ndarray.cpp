@@ -171,7 +171,7 @@ auto NDArray::iota(usize size) -> NDArray
     auto out = NDArray({size});
     for (auto i = 0zu; i < size; ++i)
     {
-        out.data(i) = static_cast<f64>(i + 1zu);
+        out.data(i) = static_cast<f64>(i);
     }
     return out;
 }
@@ -229,6 +229,95 @@ auto NDArray::reshape(const NDArray& array, std::span<const usize> new_shape) ->
 auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_shape) -> NDArray
 {
     return NDArray::reshape(array, std::span<const usize>{new_shape.begin(), new_shape.size()});
+}
+
+auto NDArray::squeeze(const NDArray& array) -> NDArray
+{
+    if (array.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("NDArray::squeeze requires a valid NDArray.");
+    }
+
+    auto squeezed_shape = std::vector<usize>{};
+    squeezed_shape.reserve(array.rank());
+    for (const auto extent : array.shape())
+    {
+        if (extent != 1)
+        {
+            squeezed_shape.push_back(extent);
+        }
+    }
+
+    return NDArray::reshape(array, std::span<const usize>{squeezed_shape});
+}
+
+auto truncate_cols(const NDArray& mat, usize cols) -> NDArray
+{
+    if (mat.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("truncate_cols requires a valid NDArray.");
+    }
+    if (!mat.is_matrix())
+    {
+        throw std::invalid_argument("truncate_cols requires a rank-2 NDArray.");
+    }
+    if (cols > mat.shape_[1])
+    {
+        throw std::invalid_argument("truncate_cols requires cols <= mat.cols.");
+    }
+
+    auto out = NDArray({mat.shape_[0], cols});
+    for (auto row = 0zu; row < mat.shape_[0]; ++row)
+    {
+        for (auto col = 0zu; col < cols; ++col)
+        {
+            out(row, col) = mat(row, col);
+        }
+    }
+    return out;
+}
+
+auto truncate_rows(const NDArray& mat, usize rows) -> NDArray
+{
+    if (mat.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("truncate_rows requires a valid NDArray.");
+    }
+    if (!mat.is_matrix())
+    {
+        throw std::invalid_argument("truncate_rows requires a rank-2 NDArray.");
+    }
+    if (rows > mat.shape_[0])
+    {
+        throw std::invalid_argument("truncate_rows requires rows <= mat.rows.");
+    }
+
+    auto out = mat;
+    out.shape_[0] = rows;
+    out.data_.resize(rows * mat.shape_[1]);
+    return out;
+}
+
+auto transpose_matrix(const NDArray& matrix) -> NDArray
+{
+    if (matrix.validity() != NDArrayValidity::valid)
+    {
+        throw std::invalid_argument("transpose_matrix requires a valid NDArray.");
+    }
+    if (!matrix.is_matrix())
+    {
+        throw std::invalid_argument("transpose_matrix requires a rank-2 NDArray.");
+    }
+
+    auto out = NDArray({matrix.shape(1), matrix.shape(0)});
+    for (auto row = 0zu; row < matrix.shape(0); ++row)
+    {
+        for (auto col = 0zu; col < matrix.shape(1); ++col)
+        {
+            out(col, row) = matrix(row, col);
+        }
+    }
+    return out;
 }
 
 auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> NDArray
@@ -373,6 +462,11 @@ auto NDArray::reshape(std::span<const usize> new_shape) const -> NDArray
 auto NDArray::reshape(std::initializer_list<usize> new_shape) const -> NDArray
 {
     return NDArray::reshape(*this, new_shape);
+}
+
+auto NDArray::squeeze() const -> NDArray
+{
+    return NDArray::squeeze(*this);
 }
 
 auto NDArray::format_metadata() const -> std::string

@@ -114,6 +114,83 @@ TEST_CASE("NDArray reshape validates size", "[ndarray]")
     REQUIRE_THROWS_AS(matrix.reshape({3, 3}), std::invalid_argument);
 }
 
+TEST_CASE("NDArray squeeze removes singleton dimensions", "[ndarray]")
+{
+    const auto array = NDArray::iota(8).reshape({1, 2, 1, 2, 2, 1});
+    const auto squeezed_static = NDArray::squeeze(array);
+    const auto squeezed_member = array.squeeze();
+    const auto scalar = NDArray::scalar(42.0);
+    const auto squeezed_scalar = scalar.squeeze();
+
+    REQUIRE(squeezed_static.same_shape(NDArray({2, 2, 2})));
+    REQUIRE(close_per_element(squeezed_static, NDArray::iota(8).reshape({2, 2, 2}), 0.0));
+    REQUIRE(close_per_element(squeezed_static, squeezed_member, 0.0));
+    REQUIRE(squeezed_scalar.is_scalar());
+    REQUIRE(squeezed_scalar() == Catch::Approx(42.0));
+}
+
+TEST_CASE("NDArray row and column truncation keeps leading rows and columns", "[ndarray]")
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0, 4.0},
+        {5.0, 6.0, 7.0, 8.0},
+        {9.0, 10.0, 11.0, 12.0},
+    });
+
+    const auto fewer_cols = truncate_cols(matrix, 2);
+    const auto fewer_rows = truncate_rows(matrix, 2);
+
+    REQUIRE(fewer_cols.same_shape(NDArray({3, 2})));
+    REQUIRE(close_per_element(
+        fewer_cols,
+        NDArray::matrix({
+            {1.0, 2.0},
+            {5.0, 6.0},
+            {9.0, 10.0},
+        }),
+        0.0
+    ));
+
+    REQUIRE(fewer_rows.same_shape(NDArray({2, 4})));
+    REQUIRE(close_per_element(
+        fewer_rows,
+        NDArray::matrix({
+            {1.0, 2.0, 3.0, 4.0},
+            {5.0, 6.0, 7.0, 8.0},
+        }),
+        0.0
+    ));
+
+    REQUIRE_THROWS_AS(truncate_cols(matrix, 5), std::invalid_argument);
+    REQUIRE_THROWS_AS(truncate_rows(matrix, 4), std::invalid_argument);
+    REQUIRE_THROWS_AS(truncate_cols(NDArray::vector(1.0, 2.0), 1), std::invalid_argument);
+    REQUIRE_THROWS_AS(truncate_rows(NDArray::vector(1.0, 2.0), 1), std::invalid_argument);
+}
+
+TEST_CASE("transpose_matrix swaps rows and columns", "[ndarray]")
+{
+    const auto matrix = NDArray::matrix({
+        {1.0, 2.0, 3.0},
+        {4.0, 5.0, 6.0},
+    });
+
+    const auto transposed = transpose_matrix(matrix);
+
+    REQUIRE(transposed.same_shape(NDArray({3, 2})));
+    REQUIRE(close_per_element(
+        transposed,
+        NDArray::matrix({
+            {1.0, 4.0},
+            {2.0, 5.0},
+            {3.0, 6.0},
+        }),
+        0.0
+    ));
+
+    REQUIRE_THROWS_AS(transpose_matrix(NDArray::vector(1.0, 2.0)), std::invalid_argument);
+    REQUIRE_THROWS_AS(transpose_matrix(NDArray{}), std::invalid_argument);
+}
+
 TEST_CASE("NDArray diag expands a vector into a dense diagonal matrix", "[ndarray]")
 {
     const auto vector = NDArray::vector(1.5, -2.0, 4.25);
@@ -204,9 +281,9 @@ TEST_CASE("NDArray factories build vectors, matrices, and rank-3 tensors", "[nda
     REQUIRE(iota.validity() == NDArrayValidity::valid);
     REQUIRE(iota.is_vector());
     REQUIRE(iota.shape(0) == 5zu);
-    REQUIRE(iota(0) == Catch::Approx(1.0));
-    REQUIRE(iota(4) == Catch::Approx(5.0));
-    REQUIRE(close_per_element(iota, NDArray::vector(1.0, 2.0, 3.0, 4.0, 5.0), 0.0));
+    REQUIRE(iota(0) == Catch::Approx(0.0));
+    REQUIRE(iota(4) == Catch::Approx(4.0));
+    REQUIRE(close_per_element(iota, NDArray::vector(0.0, 1.0, 2.0, 3.0, 4.0), 0.0));
 
     const auto empty_iota = NDArray::iota(0);
     REQUIRE(empty_iota.validity() == NDArrayValidity::valid);
