@@ -1,3 +1,4 @@
+#include "ndarray/blas.hpp"
 #include "ndarray/compare.hpp"
 #include "tensor/compare.hpp"
 #include "tensor/contraction.hpp"
@@ -26,6 +27,30 @@ namespace
         out = contract(out, mps[site]);
     }
     return out;
+}
+
+[[nodiscard]] auto identity_matrix(usize size) -> NDArray
+{
+    auto out = NDArray({size, size});
+    for (auto i = 0zu; i < size; ++i)
+    {
+        out(i, i) = 1.0;
+    }
+    return out;
+}
+
+[[nodiscard]] auto is_left_orthogonal(const Tensor& tensor, f64 tolerance = 1.e-10) -> bool
+{
+    const auto reshaped = tensor.array().reshape({tensor.shape(0) * tensor.shape(1), tensor.shape(2)});
+    return close_accumulated(gram_matrix(reshaped), identity_matrix(tensor.shape(2)), tolerance);
+}
+
+[[nodiscard]] auto is_right_orthogonal(const Tensor& tensor, f64 tolerance = 1.e-10) -> bool
+{
+    const auto reshaped = tensor.array().reshape({tensor.shape(0), tensor.shape(1) * tensor.shape(2)});
+    return close_accumulated(
+        gram_matrix(transpose_matrix(reshaped)), identity_matrix(tensor.shape(0)), tolerance
+    );
 }
 
 }  // namespace
@@ -158,6 +183,64 @@ TEST_CASE("MPS call operator aliases the stored tensor", "[tensor][mps]")
 
     const auto& const_mps = mps;
     REQUIRE(&const_mps(1) == &const_mps[1]);
+}
+
+TEST_CASE("MPS left_orthogonalize preserves the represented tensor", "[tensor][mps]")
+{
+    auto mps = random_mps(
+        4,
+        {
+            .physical_dim = 2,
+            .max_bond_dim = 5,
+            .seed = 7,
+        }
+    );
+    const auto original = contract_all(mps);
+
+    mps.left_orthogonalize();
+
+    REQUIRE(close_accumulated(contract_all(mps), original, 1.e-10));
+    for (auto site = 0zu; site + 1 < mps.size(); ++site)
+    {
+        REQUIRE(is_left_orthogonal(mps(site)));
+    }
+}
+
+TEST_CASE("MPS right_orthogonalize preserves the represented tensor", "[tensor][mps]")
+{
+    auto mps = random_mps(
+        4,
+        {
+            .physical_dim = 2,
+            .max_bond_dim = 5,
+            .seed = 13,
+        }
+    );
+    const auto original = contract_all(mps);
+
+    mps.right_orthogonalize();
+
+    REQUIRE(close_accumulated(contract_all(mps), original, 1.e-10));
+    for (auto site = 1zu; site < mps.size(); ++site)
+    {
+        REQUIRE(is_right_orthogonal(mps(site)));
+    }
+}
+
+TEST_CASE("MPS orthogonalization validates adjacent bond labels", "[tensor][mps]")
+{
+    auto mps = random_mps(
+        3,
+        {
+            .physical_dim = 2,
+            .max_bond_dim = 4,
+            .seed = 19,
+        }
+    );
+    mps(1).rename_leg(mps(1).leg_name(0), "broken_bond");
+
+    REQUIRE_THROWS_AS(mps.left_orthogonalize(), std::invalid_argument);
+    REQUIRE_THROWS_AS(mps.right_orthogonalize(), std::invalid_argument);
 }
 
 }  // namespace ds_tn

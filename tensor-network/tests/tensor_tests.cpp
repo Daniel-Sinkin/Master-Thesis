@@ -227,6 +227,27 @@ TEST_CASE("Tensor metadata formatting reports shape and leg names", "[tensor][me
     );
 }
 
+TEST_CASE("Tensor rename_leg updates a leg name and preserves uniqueness", "[tensor]")
+{
+    auto tensor = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+
+    tensor.rename_leg("row", "left");
+
+    const auto expected_leg_names = std::array<std::string, 2>{"left", "col"};
+    REQUIRE(
+        std::ranges::equal(tensor.leg_names(), std::span<const std::string>{expected_leg_names})
+    );
+    REQUIRE_THROWS_AS(tensor.rename_leg("missing", "right"), std::invalid_argument);
+    REQUIRE_THROWS_AS(tensor.rename_leg("left", "col"), std::invalid_argument);
+    REQUIRE_THROWS_AS(tensor.rename_leg("left", ""), std::invalid_argument);
+}
+
 TEST_CASE("Tensor printing includes leg metadata and the aligned NDArray body", "[tensor]")
 {
     const auto tensor = Tensor(

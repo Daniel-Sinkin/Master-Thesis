@@ -299,6 +299,36 @@ auto Tensor::format_metadata() const -> std::string
            + ")";
 }
 
+auto Tensor::rename_leg(const std::string& old_name, const std::string& new_name) -> void
+{
+    if (new_name.empty())
+    {
+        throw std::invalid_argument("Tensor::rename_leg requires new_name to be non-empty.");
+    }
+
+    auto old_axis = std::optional<usize>{};
+    for (auto axis = 0zu; axis < leg_names_.size(); ++axis)
+    {
+        if (leg_names_[axis] == old_name)
+        {
+            old_axis = axis;
+        }
+        if (leg_names_[axis] == new_name)
+        {
+            throw std::invalid_argument(
+                "Tensor::rename_leg requires new_name to not already exist."
+            );
+        }
+    }
+
+    if (!old_axis.has_value())
+    {
+        throw std::invalid_argument("Tensor::rename_leg requires old_name to exist.");
+    }
+
+    leg_names_[*old_axis] = new_name;
+}
+
 auto Tensor::print_metadata(std::ostream& out) const -> void
 {
     out << format_metadata() << '\n';

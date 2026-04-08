@@ -3,6 +3,7 @@
 
 #include "ndarray/blas.hpp"
 #include "ndarray/lapack.hpp"
+#include "tensor/contraction.hpp"
 
 #include <algorithm>
 #include <array>
@@ -44,6 +45,46 @@ truncated_bond_dim(const SVDResult& svd_result, std::optional<usize> max_bond_di
     }
 
     return *base_seed + static_cast<TensorSeed>(site);
+}
+
+auto require_orthogonalizable_mps(const MPS& mps, const char* function_name) -> void
+{
+    for (auto site = 0zu; site < mps.size(); ++site)
+    {
+        if (mps[site].validity() != TensorValidity::valid)
+        {
+            throw std::invalid_argument(
+                std::string{function_name} + " requires all tensors to be valid."
+            );
+        }
+        if (!mps[site].is_tensor3())
+        {
+            throw std::invalid_argument(
+                std::string{function_name} + " requires all tensors to be rank-3."
+            );
+        }
+    }
+
+    for (auto site = 0zu; site + 1 < mps.size(); ++site)
+    {
+        if (mps[site].leg_name(2) != mps[site + 1].leg_name(0))
+        {
+            throw std::invalid_argument(
+                std::string{function_name}
+                + " requires adjacent tensors to share matching bond leg names."
+            );
+        }
+    }
+}
+
+[[nodiscard]] auto temporary_leg_name(const Tensor& tensor) -> std::string
+{
+    auto candidate = std::string{"tmp"};
+    while (std::ranges::contains(tensor.leg_names(), candidate))
+    {
+        candidate += '_';
+    }
+    return candidate;
 }
 
 }  // namespace
@@ -95,6 +136,59 @@ auto MPS::at(usize site) -> Tensor&
 auto MPS::at(usize site) const -> const Tensor&
 {
     return tensors_.at(site);
+}
+
+auto MPS::left_orthogonalize() -> void
+{
+    require_orthogonalizable_mps(*this, "MPS::left_orthogonalize");
+    if (tensors_.size() <= 1)
+    {
+        return;
+    }
+
+    for (auto site = 0zu; site + 1 < tensors_.size(); ++site)
+    {
+        auto& curr = tensors_[site];
+        auto& next = tensors_[site + 1];
+
+        const auto bond_left = curr.shape(0);
+        const auto d = curr.shape(1);
+
+        const auto [q, r] = qr(curr.array().reshape({bond_left * d, curr.shape(2)}));
+        curr.array() = NDArray::reshape(q, {bond_left, d, q.shape(1)});
+
+        const auto tmp = temporary_leg_name(next);
+        next = contract(Tensor{r, {tmp, curr.leg_name(2)}}, next);
+        next.rename_leg(tmp, curr.leg_name(2));
+    }
+}
+
+auto MPS::right_orthogonalize() -> void
+{
+    require_orthogonalizable_mps(*this, "MPS::right_orthogonalize");
+    if (tensors_.size() <= 1)
+    {
+        return;
+    }
+
+    for (auto site = tensors_.size() - 1; site > 0; --site)
+    {
+        auto& curr = tensors_[site];
+        auto& prev = tensors_[site - 1];
+
+        const auto d = curr.shape(1);
+        const auto bond_right = curr.shape(2);
+
+        const auto [qt, rt] =
+            qr(curr.array().reshape({curr.shape(0), d * bond_right}), MatrixTransform::transpose);
+        const auto q = transpose_matrix(qt);
+        const auto r = transpose_matrix(rt);
+        curr.array() = NDArray::reshape(q, {q.shape(0), d, bond_right});
+
+        const auto tmp = temporary_leg_name(prev);
+        prev = contract(prev, Tensor{r, {prev.leg_name(2), tmp}});
+        prev.rename_leg(tmp, curr.leg_name(0));
+    }
 }
 
 auto to_mps(const NDArray& tensor, std::optional<usize> max_bond_dim) -> MPS

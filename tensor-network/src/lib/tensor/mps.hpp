@@ -25,6 +25,8 @@ class MPS
     [[nodiscard]] auto operator()(usize site) const noexcept -> const Tensor&;
     [[nodiscard]] auto at(usize site) -> Tensor&;
     [[nodiscard]] auto at(usize site) const -> const Tensor&;
+    auto left_orthogonalize() -> void;
+    auto right_orthogonalize() -> void;
 
   private:
     std::vector<Tensor> tensors_{};
