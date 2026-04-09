@@ -329,9 +329,23 @@ auto Tensor::rename_leg(const std::string& old_name, const std::string& new_name
     leg_names_[*old_axis] = new_name;
 }
 
+auto Tensor::print_metadata(LogSettings settings, std::ostream& out) const -> void
+{
+    if (!settings.name.empty())
+    {
+        out << settings.name << " = ";
+    }
+    out << format_metadata() << '\n';
+}
+
+auto Tensor::print_metadata(std::string_view name, std::ostream& out) const -> void
+{
+    print_metadata(LogSettings{.name = name}, out);
+}
+
 auto Tensor::print_metadata(std::ostream& out) const -> void
 {
-    out << format_metadata() << '\n';
+    print_metadata(LogSettings{}, out);
 }
 
 auto Tensor::print(usize precision, bool show_metadata, std::ostream& out) const -> void

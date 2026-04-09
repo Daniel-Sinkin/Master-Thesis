@@ -1,14 +1,15 @@
 // app/main.cpp
 #include "models/transverse_ising.hpp"
+#include "tensor/environment.hpp"
 #include "tensor/mps.hpp"
+
+#include <format>
 
 int main()
 {
     using namespace ds_tn;
 
     const auto mpo = transverse_ising_mpo(4, 1.0, 1.0);
-    (void) mpo;
-
     const auto num_sites = mpo.size();
     const auto max_bond_dim = 5;
     auto mps = random_mps(
@@ -20,4 +21,10 @@ int main()
         }
     );
     mps.right_orthogonalize();
+    const auto envs = right_environments(mps, mpo);
+
+    for (auto site = 0zu; site < envs.size(); ++site)
+    {
+        envs[site].print_metadata(std::format("right_env_{}", site));
+    }
 }

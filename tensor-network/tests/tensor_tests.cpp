@@ -285,4 +285,23 @@ TEST_CASE("Tensor print_metadata writes the formatted metadata line", "[tensor][
     REQUIRE(output.str() == "Tensor(shape=[2 x 2], legs=[row, col])\n");
 }
 
+TEST_CASE("Tensor print_metadata supports named prefixes", "[tensor][metadata]")
+{
+    const auto tensor = Tensor(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+
+    auto settings_output = std::ostringstream{};
+    tensor.print_metadata(LogSettings{.name = "ket"}, settings_output);
+    REQUIRE(settings_output.str() == "ket = Tensor(shape=[2 x 2], legs=[row, col])\n");
+
+    auto string_output = std::ostringstream{};
+    tensor.print_metadata("ket", string_output);
+    REQUIRE(string_output.str() == "ket = Tensor(shape=[2 x 2], legs=[row, col])\n");
+}
+
 }  // namespace ds_tn

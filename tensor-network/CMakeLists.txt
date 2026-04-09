@@ -34,6 +34,7 @@ add_library(tn_lib STATIC
   src/lib/ndarray/stats.cpp
   src/lib/tensor/contraction.cpp
   src/lib/tensor/compare.cpp
+  src/lib/tensor/environment.cpp
   src/lib/tensor/mps.cpp
   src/lib/tensor/tensor.cpp
 )
@@ -135,6 +136,7 @@ if (TN_BUILD_TESTS)
     tests/ndarray_lapack_tests.cpp
     tests/ndarray_blas_tests.cpp
     tests/tensor_contraction_tests.cpp
+    tests/environment_tests.cpp
     tests/mps_tests.cpp
     tests/tensor_tests.cpp
   )

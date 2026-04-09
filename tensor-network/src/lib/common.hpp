@@ -8,6 +8,7 @@
 #include <numeric>
 #include <span>
 #include <stdexcept>
+#include <string_view>
 
 #if __has_include(<stdfloat>)
 #    include <stdfloat>
@@ -42,6 +43,11 @@ using f64 = double;
 #endif
 static_assert(sizeof(f32) == 4);
 static_assert(sizeof(f64) == 8);
+
+struct LogSettings
+{
+    std::string_view name{};
+};
 
 template <std::integral Integer>
 [[nodiscard]] constexpr auto iota_n(Integer end)

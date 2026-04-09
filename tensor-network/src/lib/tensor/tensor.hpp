@@ -104,6 +104,8 @@ class Tensor
     [[nodiscard]] auto diag() const -> Tensor;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto rename_leg(const std::string& old_name, const std::string& new_name) -> void;
+    auto print_metadata(LogSettings settings, std::ostream& out = std::cout) const -> void;
+    auto print_metadata(std::string_view name, std::ostream& out = std::cout) const -> void;
     auto print_metadata(std::ostream& out = std::cout) const -> void;
     auto print(usize precision = 4, bool show_metadata = true, std::ostream& out = std::cout) const
         -> void;
