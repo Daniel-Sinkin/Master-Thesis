@@ -1,5 +1,18 @@
 cmake_minimum_required(VERSION 3.28)
-project(tensor-network LANGUAGES CXX)
+
+if(APPLE)
+  if(NOT DEFINED CMAKE_C_COMPILER AND EXISTS "/opt/homebrew/opt/gcc/bin/gcc-15")
+    set(CMAKE_C_COMPILER "/opt/homebrew/opt/gcc/bin/gcc-15" CACHE FILEPATH "C compiler")
+  endif()
+  if(NOT DEFINED CMAKE_CXX_COMPILER AND EXISTS "/opt/homebrew/opt/gcc/bin/g++-15")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/gcc/bin/g++-15" CACHE FILEPATH "C++ compiler")
+  endif()
+  if(NOT DEFINED OpenBLAS_ROOT AND EXISTS "/opt/homebrew/opt/openblas")
+    set(OpenBLAS_ROOT "/opt/homebrew/opt/openblas" CACHE PATH "OpenBLAS installation root")
+  endif()
+endif()
+
+project(tensor-network LANGUAGES C CXX)
 
 include(CTest)
 
@@ -8,8 +21,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(BLA_VENDOR Apple)
-find_package(BLAS REQUIRED)
+if(OpenBLAS_ROOT)
+  list(PREPEND CMAKE_PREFIX_PATH "${OpenBLAS_ROOT}" "${OpenBLAS_ROOT}/lib/cmake/openblas")
+endif()
+
+find_package(OpenBLAS CONFIG REQUIRED)
 
 file(CREATE_LINK
   "${CMAKE_BINARY_DIR}/compile_commands.json"
@@ -39,13 +55,9 @@ add_library(tn_lib STATIC
   src/lib/tensor/tensor.cpp
 )
 target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
-target_compile_definitions(tn_lib PRIVATE ACCELERATE_NEW_LAPACK)
+target_include_directories(tn_lib SYSTEM PUBLIC ${OpenBLAS_INCLUDE_DIRS})
 target_precompile_headers(tn_lib REUSE_FROM tn_pch)
-if (TARGET BLAS::BLAS)
-  target_link_libraries(tn_lib PUBLIC BLAS::BLAS)
-else()
-  target_link_libraries(tn_lib PUBLIC ${BLAS_LIBRARIES})
-endif()
+target_link_libraries(tn_lib PUBLIC ${OpenBLAS_LIBRARIES})
 
 add_executable(tn_app src/app/main.cpp)
 set_target_properties(tn_app PROPERTIES OUTPUT_NAME tensor-network)
@@ -55,7 +67,7 @@ target_precompile_headers(tn_app REUSE_FROM tn_pch)
 option(TN_BUILD_TESTS "Build the tensor-network test suite" ON)
 
 function(set_strict_warnings target_name)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(${target_name} PRIVATE
       -Wall
       -Wextra
@@ -81,6 +93,29 @@ function(set_strict_warnings target_name)
       -Wimplicit-int-conversion
       -Wmissing-declarations
       -Wnewline-eof
+    )
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(${target_name} PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Werror
+      -Wshadow
+      -Wconversion
+      -Wfloat-conversion
+      -Wsign-conversion
+      -Wcast-qual
+      -Wcast-align
+      -Wformat=2
+      -Wundef
+      -Wnull-dereference
+      -Wnon-virtual-dtor
+      -Woverloaded-virtual
+      -Wold-style-cast
+      -Wzero-as-null-pointer-constant
+      -Wdouble-promotion
+      -Wimplicit-fallthrough
+      -Wreturn-type
     )
   else()
     target_compile_options(${target_name} PRIVATE
