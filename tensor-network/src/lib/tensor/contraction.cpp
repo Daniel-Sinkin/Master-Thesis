@@ -89,82 +89,64 @@ auto partition_indices(IndexNames left, IndexNames right) -> IndexPartition
 
     std::ranges::sort(shared);
 
+    const auto not_shared_indices = [&shared](IndexNames names) -> std::vector<usize>
+    {
+        const auto num_remaining = names.size() - shared.size();
+        if (num_remaining == 0)
+        {
+            return {};
+        }
+
+        auto out = std::vector<usize>{};
+        out.reserve(num_remaining);
+        for (auto i = 0zu; i < names.size(); ++i)
+        {
+            if (std::ranges::contains(shared, names[i]))
+            {
+                continue;
+            }
+            out.push_back(i);
+        }
+        return out;
+    };
+
+    const auto shared_indices = [&shared](IndexNames names) -> std::vector<usize>
+    {
+        auto out = std::vector<usize>{};
+        out.reserve(shared.size());
+        for (const auto& name : shared)
+        {
+            const auto it = std::ranges::find(names, name);
+            out.push_back(static_cast<usize>(std::distance(names.begin(), it)));
+        }
+        return out;
+    };
+
     return {
-        .left_not_shared = [&]() -> std::vector<usize>
-        {
-            const auto num_remaining = left.size() - shared.size();
-            if (num_remaining == 0)
-            {
-                return {};
-            }
-
-            auto out = std::vector<usize>{};
-            out.reserve(num_remaining);
-            for (auto i = 0zu; i < left.size(); ++i)
-            {
-                if (std::ranges::contains(shared, left[i]))
-                {
-                    continue;
-                }
-                out.push_back(i);
-            }
-            return out;
-        }(),
-        .left_shared = [&]() -> std::vector<usize>
-        {
-            auto out = std::vector<usize>{};
-            out.reserve(shared.size());
-            for (const auto& name : shared)
-            {
-                const auto it = std::ranges::find(left, name);
-                out.push_back(static_cast<usize>(std::distance(left.begin(), it)));
-            }
-            return out;
-        }(),
-        .right_shared = [&]() -> std::vector<usize>
-        {
-            auto out = std::vector<usize>{};
-            out.reserve(shared.size());
-            for (const auto& name : shared)
-            {
-                const auto it = std::ranges::find(right, name);
-                out.push_back(static_cast<usize>(std::distance(right.begin(), it)));
-            }
-            return out;
-        }(),
-        .right_not_shared = [&]() -> std::vector<usize>
-        {
-            const auto num_remaining = right.size() - shared.size();
-            if (num_remaining == 0)
-            {
-                return {};
-            }
-
-            auto out = std::vector<usize>{};
-            out.reserve(num_remaining);
-            for (auto i = 0zu; i < right.size(); ++i)
-            {
-                if (std::ranges::contains(shared, right[i]))
-                {
-                    continue;
-                }
-                out.push_back(i);
-            }
-            return out;
-        }(),
+        .left_not_shared = not_shared_indices(left),
+        .left_shared = shared_indices(left),
+        .right_shared = shared_indices(right),
+        .right_not_shared = not_shared_indices(right),
     };
 }
 
 auto partition_indices(const Tensor& left, const Tensor& right) -> IndexPartition
 {
-    require_valid_tensor(left, "left");
-    require_valid_tensor(right, "right");
+    {  // Expects
+        require_valid_tensor(left, "left");
+        require_valid_tensor(right, "right");
+    }
     return partition_indices(left.leg_names(), right.leg_names());
 }
 
 auto contraction_output_legs(const Tensor& left, const Tensor& right) -> std::vector<std::string>
 {
-    const auto partition = partition_indices(left, right);
+    {  // Expects
+        require_valid_tensor(left, "left");
+        require_valid_tensor(right, "right");
+    }
+
+    const auto partition = partition_indices(left.leg_names(), right.leg_names());
     auto legs = std::vector<std::string>{};
     legs.reserve(partition.left_not_shared.size() + partition.right_not_shared.size());
 
@@ -181,8 +163,15 @@ auto contraction_output_legs(const Tensor& left, const Tensor& right) -> std::ve
 
 auto contraction_output_shape(const Tensor& left, const Tensor& right) -> std::vector<usize>
 {
-    const auto partition = partition_indices(left, right);
-    require_matching_shared_extents(left, right, partition.left_shared, partition.right_shared);
+    {  // Expects
+        require_valid_tensor(left, "left");
+        require_valid_tensor(right, "right");
+    }
+
+    const auto partition = partition_indices(left.leg_names(), right.leg_names());
+    {  // Expects
+        require_matching_shared_extents(left, right, partition.left_shared, partition.right_shared);
+    }
 
     auto shape = std::vector<usize>{};
     shape.reserve(partition.left_not_shared.size() + partition.right_not_shared.size());
@@ -199,46 +188,45 @@ auto contraction_output_shape(const Tensor& left, const Tensor& right) -> std::v
     return shape;
 }
 
-auto contraction_output_tensor(const Tensor& left, const Tensor& right) -> Tensor
-{
-    auto legs = contraction_output_legs(left, right);
-    auto shape = contraction_output_shape(left, right);
-    return Tensor{std::move(shape), std::move(legs)};
-}
-
 auto contract(const Tensor& left, const Tensor& right) -> Tensor
 {
-    require_valid_tensor(left, "left");
-    require_valid_tensor(right, "right");
+    {  // Expects
+        require_valid_tensor(left, "left");
+        require_valid_tensor(right, "right");
+    }
 
     const auto [left_not_shared, left_shared, right_shared, right_not_shared] =
-        partition_indices(left, right);
+        partition_indices(left.leg_names(), right.leg_names());
+    {  // Expects
+        require_matching_shared_extents(left, right, left_shared, right_shared);
+    }
+    const auto make_matrix = [](const Tensor& tensor,
+                                std::span<const usize> leading_axes,
+                                std::span<const usize> trailing_axes) -> NDArray
+    {
+        const auto transposed = apply_permutation(
+            tensor,
+            permutation_from_axis_order(concat_indices(leading_axes, trailing_axes))
+        );
+        const auto matrix = NDArray::reshape(
+            transposed.array(),
+            std::array{
+                product_over_selected_axes(tensor.shape(), leading_axes),
+                product_over_selected_axes(tensor.shape(), trailing_axes),
+            }
+        );
+        assert(matrix.shape()[0] * matrix.shape()[1] == tensor.size());
+        return matrix;
+    };
 
-    const auto left_transposed =
-        apply_permutation(left, permutation_from_axis_order(concat_indices(left_not_shared, left_shared)));
-    const auto right_transposed = apply_permutation(
-        right, permutation_from_axis_order(concat_indices(right_shared, right_not_shared))
-    );
+    const auto left_matrix = make_matrix(left, left_not_shared, left_shared);
+    const auto right_matrix = make_matrix(right, right_shared, right_not_shared);
 
-    const auto left_matrix = NDArray::reshape(
-        left_transposed.array(),
-        std::array{
-            product_over_selected_axes(left.shape(), left_not_shared),
-            product_over_selected_axes(left.shape(), left_shared),
-        }
-    );
-    const auto right_matrix = NDArray::reshape(
-        right_transposed.array(),
-        std::array{
-            product_over_selected_axes(right.shape(), right_shared),
-            product_over_selected_axes(right.shape(), right_not_shared),
-        }
-    );
-
-    auto out = contraction_output_tensor(left, right);
     const auto flattened = matrix_matrix_product(left_matrix, right_matrix);
-    out.array() = NDArray::reshape(flattened, out.shape());
-    return out;
+    return {
+        NDArray::reshape(flattened, contraction_output_shape(left, right)),
+        contraction_output_legs(left, right)
+    };
 }
 
 }  // namespace ds_tn

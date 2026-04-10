@@ -24,13 +24,15 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
     const auto n = dimension;
     const auto m = cfg.num_iterations;
 
-    if (n == 0)
-    {
-        throw std::invalid_argument("lanczos requires dimension >= 1.");
-    }
-    if (m == 0)
-    {
-        throw std::invalid_argument("lanczos requires num_iterations >= 1.");
+    {  // Expects
+        if (n == 0)
+        {
+            throw std::invalid_argument("lanczos requires dimension >= 1.");
+        }
+        if (m == 0)
+        {
+            throw std::invalid_argument("lanczos requires num_iterations >= 1.");
+        }
     }
 
     if (cfg.verbose)
@@ -156,17 +158,21 @@ auto lanczos(usize dimension, const LanczosApplyAOperator& apply_A_operator, Lan
 
 auto lanczos(const NDArray& A, LanczosConfig cfg) -> LanczosResult
 {
-    if (!A.is_matrix())
-    {
-        throw std::invalid_argument("lanczos requires a rank-2 NDArray.");
-    }
-    if (A.shape(0) != A.shape(1))
-    {
-        throw std::invalid_argument("lanczos requires a square matrix.");
-    }
-    if (cfg.check_symmetric and !is_symmetric(A, cfg.symmetry_tolerance))
-    {
-        throw std::invalid_argument("lanczos requires a symmetric matrix when check_symmetric = true.");
+    {  // Expects
+        if (!A.is_matrix())
+        {
+            throw std::invalid_argument("lanczos requires a rank-2 NDArray.");
+        }
+        if (A.shape(0) != A.shape(1))
+        {
+            throw std::invalid_argument("lanczos requires a square matrix.");
+        }
+        if (cfg.check_symmetric and !is_symmetric(A, cfg.symmetry_tolerance))
+        {
+            throw std::invalid_argument(
+                "lanczos requires a symmetric matrix when check_symmetric = true."
+            );
+        }
     }
 
     const auto apply_A = [&A](const NDArray& v) -> NDArray { return matrix_vector_product(A, v); };

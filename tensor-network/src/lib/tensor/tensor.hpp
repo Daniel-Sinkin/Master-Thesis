@@ -29,6 +29,8 @@ class Tensor
 {
   public:
     Tensor() = default;
+    Tensor(const Tensor& other);
+    Tensor(Tensor&& other) noexcept;
     explicit Tensor(NDArray array);
     Tensor(NDArray array, std::vector<std::string> leg_names);
     Tensor(NDArray array, std::span<const std::string> leg_names);
@@ -37,6 +39,8 @@ class Tensor
     Tensor(std::vector<usize> shape, std::vector<std::string> leg_names);
     Tensor(std::vector<usize> shape, std::span<const std::string> leg_names);
     Tensor(std::vector<usize> shape, std::initializer_list<std::string> leg_names);
+    auto operator=(const Tensor& other) -> Tensor&;
+    auto operator=(Tensor&& other) noexcept -> Tensor&;
 
     [[nodiscard]] static auto scalar(f64 value) -> Tensor;
     [[nodiscard]] static auto diag(const Tensor& vector) -> Tensor;
@@ -73,6 +77,7 @@ class Tensor
 
     [[nodiscard]] auto rank() const noexcept -> usize;
     [[nodiscard]] auto size() const noexcept -> usize;
+    [[nodiscard]] auto id() const noexcept -> u64;
     [[nodiscard]] auto shape() const noexcept -> std::span<const usize>;
     [[nodiscard]] auto shape(usize axis) const -> usize;
     [[nodiscard]] auto leg_names() const noexcept -> std::span<const std::string>;
@@ -117,8 +122,29 @@ class Tensor
     [[nodiscard]] auto is_tensor3() const noexcept -> bool;
 
   private:
+    [[nodiscard]] static auto next_id() noexcept -> u64;
+
+    u64 id_{next_id()};
     NDArray values_{};
     std::vector<std::string> leg_names_{};
+};
+
+class TensorDebug : public Tensor
+{
+  public:
+    using Tensor::Tensor;
+
+    TensorDebug(const Tensor& tensor, std::ostream& out = std::cout);
+    TensorDebug(Tensor&& tensor, std::ostream& out = std::cout) noexcept;
+
+    auto set_log_output(std::ostream& out) noexcept -> void;
+    auto rename_leg(const std::string& old_name, const std::string& new_name) -> void;
+
+  private:
+    auto log(std::string_view phase, std::string_view operation, std::string_view detail = {}) const
+        -> void;
+
+    std::ostream* out_{&std::cout};
 };
 
 }  // namespace ds_tn

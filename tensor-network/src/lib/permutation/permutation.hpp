@@ -23,9 +23,11 @@ class Permutation
     template <typename T>
     [[nodiscard]] auto apply(std::span<const T> values) const -> std::vector<T>
     {
-        if (values.size() != mapping_.size())
-        {
-            throw std::runtime_error("Permutation must be applied to a span of the same size.");
+        {  // Expects
+            if (values.size() != mapping_.size())
+            {
+                throw std::runtime_error("Permutation must be applied to a span of the same size.");
+            }
         }
 
         std::vector<T> out(values.size());
@@ -45,9 +47,11 @@ class Permutation
     template <typename T>
     [[nodiscard]] auto apply_inverse(std::span<const T> values) const -> std::vector<T>
     {
-        if (values.size() != mapping_.size())
-        {
-            throw std::runtime_error("Permutation must be applied to a span of the same size.");
+        {  // Expects
+            if (values.size() != mapping_.size())
+            {
+                throw std::runtime_error("Permutation must be applied to a span of the same size.");
+            }
         }
 
         std::vector<T> out(values.size());

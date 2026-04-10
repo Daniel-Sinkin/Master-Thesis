@@ -44,11 +44,8 @@ namespace
     return buffer.str();
 }
 
-[[nodiscard]] auto make_default_leg_names(usize rank) -> std::vector<std::string>
+[[nodiscard]] auto make_default_leg_names(u64 tensor_id, usize rank) -> std::vector<std::string>
 {
-    static auto next_tensor_id = std::atomic<u64>{0};
-
-    const auto tensor_id = next_tensor_id.fetch_add(1, std::memory_order_relaxed);
     auto names = std::vector<std::string>{};
     names.reserve(rank);
 
@@ -90,30 +87,50 @@ leg_names_validity(std::span<const usize> shape, std::span<const std::string> le
 
 }  // namespace
 
+auto Tensor::next_id() noexcept -> u64
+{
+    static auto next_tensor_id = std::atomic<u64>{0};
+    return next_tensor_id.fetch_add(1, std::memory_order_relaxed);
+}
+
+Tensor::Tensor(const Tensor& other)
+    : values_(other.values_), leg_names_(other.leg_names_)
+{
+}
+
+Tensor::Tensor(Tensor&& other) noexcept
+    : values_(std::move(other.values_)), leg_names_(std::move(other.leg_names_))
+{
+}
+
 Tensor::Tensor(NDArray array)
-    : values_(std::move(array)), leg_names_(make_default_leg_names(values_.rank()))
+    : values_(std::move(array)), leg_names_(make_default_leg_names(id_, values_.rank()))
 {
 }
 
 Tensor::Tensor(NDArray array, std::vector<std::string> leg_names)
     : values_(std::move(array)), leg_names_(std::move(leg_names))
 {
-    if (leg_names_validity(values_.shape(), leg_names_) != TensorValidity::valid)
-    {
-        throw std::invalid_argument(
-            "Tensor leg names must match rank, be non-empty, and be unique."
-        );
+    {  // Expects
+        if (leg_names_validity(values_.shape(), leg_names_) != TensorValidity::valid)
+        {
+            throw std::invalid_argument(
+                "Tensor leg names must match rank, be non-empty, and be unique."
+            );
+        }
     }
 }
 
 Tensor::Tensor(NDArray array, std::span<const std::string> leg_names)
     : values_(std::move(array)), leg_names_(leg_names.begin(), leg_names.end())
 {
-    if (leg_names_validity(values_.shape(), leg_names_) != TensorValidity::valid)
-    {
-        throw std::invalid_argument(
-            "Tensor leg names must match rank, be non-empty, and be unique."
-        );
+    {  // Expects
+        if (leg_names_validity(values_.shape(), leg_names_) != TensorValidity::valid)
+        {
+            throw std::invalid_argument(
+                "Tensor leg names must match rank, be non-empty, and be unique."
+            );
+        }
     }
 }
 
@@ -141,6 +158,30 @@ Tensor::Tensor(std::vector<usize> shape, std::initializer_list<std::string> leg_
 {
 }
 
+auto Tensor::operator=(const Tensor& other) -> Tensor&
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    values_ = other.values_;
+    leg_names_ = other.leg_names_;
+    return *this;
+}
+
+auto Tensor::operator=(Tensor&& other) noexcept -> Tensor&
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    values_ = std::move(other.values_);
+    leg_names_ = std::move(other.leg_names_);
+    return *this;
+}
+
 auto Tensor::scalar(f64 value) -> Tensor
 {
     return Tensor{NDArray::scalar(value)};
@@ -148,13 +189,15 @@ auto Tensor::scalar(f64 value) -> Tensor
 
 auto Tensor::diag(const Tensor& vector) -> Tensor
 {
-    if (vector.validity() != TensorValidity::valid)
-    {
-        throw std::invalid_argument("Tensor::diag requires a valid Tensor.");
-    }
-    if (!vector.is_vector())
-    {
-        throw std::invalid_argument("Tensor::diag requires a rank-1 Tensor.");
+    {  // Expects
+        if (vector.validity() != TensorValidity::valid)
+        {
+            throw std::invalid_argument("Tensor::diag requires a valid Tensor.");
+        }
+        if (!vector.is_vector())
+        {
+            throw std::invalid_argument("Tensor::diag requires a rank-1 Tensor.");
+        }
     }
 
     const auto base = vector.leg_name(0);
@@ -219,6 +262,11 @@ auto Tensor::size() const noexcept -> usize
     return values_.size();
 }
 
+auto Tensor::id() const noexcept -> u64
+{
+    return id_;
+}
+
 auto Tensor::shape() const noexcept -> std::span<const usize>
 {
     return values_.shape();
@@ -236,9 +284,11 @@ auto Tensor::leg_names() const noexcept -> std::span<const std::string>
 
 auto Tensor::leg_name(usize axis) const -> const std::string&
 {
-    if (axis >= leg_names_.size())
-    {
-        throw std::out_of_range("Tensor leg index exceeds tensor rank.");
+    {  // Expects
+        if (axis >= leg_names_.size())
+        {
+            throw std::out_of_range("Tensor leg index exceeds tensor rank.");
+        }
     }
     return leg_names_[axis];
 }
@@ -301,29 +351,33 @@ auto Tensor::format_metadata() const -> std::string
 
 auto Tensor::rename_leg(const std::string& old_name, const std::string& new_name) -> void
 {
-    if (new_name.empty())
-    {
-        throw std::invalid_argument("Tensor::rename_leg requires new_name to be non-empty.");
+    {  // Expects
+        if (new_name.empty())
+        {
+            throw std::invalid_argument("Tensor::rename_leg requires new_name to be non-empty.");
+        }
     }
 
     auto old_axis = std::optional<usize>{};
-    for (auto axis = 0zu; axis < leg_names_.size(); ++axis)
     {
-        if (leg_names_[axis] == old_name)
+        for (auto axis = 0zu; axis < leg_names_.size(); ++axis)
         {
-            old_axis = axis;
+            if (leg_names_[axis] == old_name)
+            {
+                old_axis = axis;
+            }
+            if (leg_names_[axis] == new_name)
+            {
+                throw std::invalid_argument(
+                    "Tensor::rename_leg requires new_name to not already exist."
+                );
+            }
         }
-        if (leg_names_[axis] == new_name)
-        {
-            throw std::invalid_argument(
-                "Tensor::rename_leg requires new_name to not already exist."
-            );
-        }
-    }
 
-    if (!old_axis.has_value())
-    {
-        throw std::invalid_argument("Tensor::rename_leg requires old_name to exist.");
+        if (!old_axis.has_value())
+        {
+            throw std::invalid_argument("Tensor::rename_leg requires old_name to exist.");
+        }
     }
 
     leg_names_[*old_axis] = new_name;
@@ -381,6 +435,51 @@ auto Tensor::is_matrix() const noexcept -> bool
 auto Tensor::is_tensor3() const noexcept -> bool
 {
     return values_.is_tensor3();
+}
+
+TensorDebug::TensorDebug(const Tensor& tensor, std::ostream& out) : Tensor(tensor), out_(&out)
+{
+}
+
+TensorDebug::TensorDebug(Tensor&& tensor, std::ostream& out) noexcept
+    : Tensor(std::move(tensor)), out_(&out)
+{
+}
+
+auto TensorDebug::set_log_output(std::ostream& out) noexcept -> void
+{
+    out_ = &out;
+}
+
+auto TensorDebug::rename_leg(const std::string& old_name, const std::string& new_name) -> void
+{
+    log("before", "rename_leg", std::format("old_name={}, new_name={}", old_name, new_name));
+    try
+    {
+        Tensor::rename_leg(old_name, new_name);
+    }
+    catch (const std::exception& error)
+    {
+        log("error", "rename_leg", error.what());
+        throw;
+    }
+    log("after", "rename_leg", std::format("old_name={}, new_name={}", old_name, new_name));
+}
+
+auto TensorDebug::log(std::string_view phase, std::string_view operation, std::string_view detail) const
+    -> void
+{
+    if (out_ == nullptr)
+    {
+        return;
+    }
+
+    *out_ << "[TensorDebug] " << phase << ' ' << operation << " tensor_id=" << id();
+    if (!detail.empty())
+    {
+        *out_ << " (" << detail << ')';
+    }
+    *out_ << " " << format_metadata() << '\n';
 }
 
 }  // namespace ds_tn

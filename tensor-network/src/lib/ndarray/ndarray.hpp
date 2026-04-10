@@ -170,9 +170,11 @@ class NDArray
         requires std::integral<Index>
     [[nodiscard]] auto normalize_integral_index(Index index, usize axis) const -> usize
     {
-        if (axis >= shape_.size())
-        {
-            throw std::invalid_argument("NDArray index rank does not match array rank.");
+        {  // Expects
+            if (axis >= shape_.size())
+            {
+                throw std::invalid_argument("NDArray index rank does not match array rank.");
+            }
         }
 
         if constexpr (std::signed_integral<Index>)

@@ -26,7 +26,6 @@ struct IndexPartition
     -> std::vector<std::string>;
 [[nodiscard]] auto contraction_output_shape(const Tensor& left, const Tensor& right)
     -> std::vector<usize>;
-[[nodiscard]] auto contraction_output_tensor(const Tensor& left, const Tensor& right) -> Tensor;
 [[nodiscard]] auto contract(const Tensor& left, const Tensor& right) -> Tensor;
 
 }  // namespace ds_tn

@@ -193,13 +193,15 @@ auto require_compatible_mps_mpo(const MPS& mps, std::span<const Tensor> mpo, con
 
 auto right_boundary_environment(const Tensor& mps_tensor, const Tensor& mpo_tensor) -> Tensor
 {
-    require_compatible_site_tensors(mps_tensor, mpo_tensor, "right_boundary_environment");
+    {  // Expects
+        require_compatible_site_tensors(mps_tensor, mpo_tensor, "right_boundary_environment");
 
-    if (mps_tensor.shape(2) != 1 or mpo_tensor.shape(3) != 1)
-    {
-        throw std::invalid_argument(
-            "right_boundary_environment requires trivial right boundary bond dimensions."
-        );
+        if (mps_tensor.shape(2) != 1 or mpo_tensor.shape(3) != 1)
+        {
+            throw std::invalid_argument(
+                "right_boundary_environment requires trivial right boundary bond dimensions."
+            );
+        }
     }
 
     auto out = Tensor{
@@ -214,8 +216,10 @@ auto
 update_right_environment(const Tensor& right_environment, const Tensor& mps_tensor, const Tensor& mpo_tensor)
     -> Tensor
 {
-    require_compatible_site_tensors(mps_tensor, mpo_tensor, "update_right_environment");
-    require_compatible_right_environment(right_environment, mps_tensor, mpo_tensor);
+    {  // Expects
+        require_compatible_site_tensors(mps_tensor, mpo_tensor, "update_right_environment");
+        require_compatible_right_environment(right_environment, mps_tensor, mpo_tensor);
+    }
 
     const auto tmp = contract(mpo_tensor, environment_ket_tensor(mps_tensor, mpo_tensor));
     const auto local = contract(environment_bra_tensor(mps_tensor, mpo_tensor), tmp);
@@ -224,7 +228,9 @@ update_right_environment(const Tensor& right_environment, const Tensor& mps_tens
 
 auto right_environments(const MPS& mps, std::span<const Tensor> mpo) -> std::vector<Tensor>
 {
-    require_compatible_mps_mpo(mps, mpo, "right_environments");
+    {  // Expects
+        require_compatible_mps_mpo(mps, mpo, "right_environments");
+    }
 
     auto out = std::vector<Tensor>(mps.size());
     out.back() = right_boundary_environment(mps[mps.size() - 1], mpo[mpo.size() - 1]);

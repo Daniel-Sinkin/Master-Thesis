@@ -1,24 +1,23 @@
 // lib/ndarray/blas.cpp
 #include "ndarray/blas.hpp"
 
+#include <cblas.h>
 #include <limits>
-#include <ranges>
 #include <stdexcept>
 #include <string>
-#include <vecLib/cblas_new.h>
 
 namespace ds_tn
 {
 namespace
 {
 
-[[nodiscard]] auto as_blas_int(usize value) -> __LAPACK_int
+[[nodiscard]] auto as_blas_int(usize value) -> blasint
 {
-    if (value > static_cast<usize>(std::numeric_limits<__LAPACK_int>::max()))
+    if (value > static_cast<usize>(std::numeric_limits<blasint>::max()))
     {
         throw std::overflow_error("NDArray extent exceeds BLAS integer range.");
     }
-    return static_cast<__LAPACK_int>(value);
+    return static_cast<blasint>(value);
 }
 
 auto require_valid_array(const NDArray& array, const char* function_name, const char* argument_name)
@@ -46,26 +45,28 @@ auto require_same_shape(const NDArray& lhs, const NDArray& rhs, const char* func
 
 auto axpy(f64 alpha, const NDArray& x, NDArray& y) -> void
 {
-    require_valid_array(y, "axpy", "y");
-    require_valid_array(x, "axpy", "x");
-    require_same_shape(y, x, "axpy");
-
+    {  // Expects
+        require_valid_array(y, "axpy", "y");
+        require_valid_array(x, "axpy", "x");
+        require_same_shape(y, x, "axpy");
+    }
     if (&y == &x)
     {
         y.multiply_scalar(1.0 + alpha);
         return;
     }
-
     cblas_daxpy(as_blas_int(y.size()), alpha, x.data(), 1, y.data(), 1);
 }
 
 auto axpy(f64 alpha, const NDArray& x, const NDArray& y, NDArray& out) -> void
 {
-    require_valid_array(y, "axpy", "y");
-    require_valid_array(x, "axpy", "x");
-    require_valid_array(out, "axpy", "out");
-    require_same_shape(y, x, "axpy");
-    require_same_shape(y, out, "axpy");
+    {  // Expects
+        require_valid_array(y, "axpy", "y");
+        require_valid_array(x, "axpy", "x");
+        require_valid_array(out, "axpy", "out");
+        require_same_shape(y, x, "axpy");
+        require_same_shape(y, out, "axpy");
+    }
 
     if (&out == &y)
     {
@@ -86,24 +87,30 @@ auto axpy(f64 alpha, const NDArray& x, const NDArray& y, NDArray& out) -> void
 
 auto gram_matrix(const NDArray& matrix, NDArray& out) -> void
 {
-    require_valid_array(matrix, "gram_matrix", "matrix");
-    require_valid_array(out, "gram_matrix", "out");
+    {  // Expects
+        require_valid_array(matrix, "gram_matrix", "matrix");
+        require_valid_array(out, "gram_matrix", "out");
 
-    if (!matrix.is_matrix() or !out.is_matrix())
-    {
-        throw std::runtime_error("gram_matrix requires rank-2 NDArrays.");
+        if (!matrix.is_matrix() or !out.is_matrix())
+        {
+            throw std::runtime_error("gram_matrix requires rank-2 NDArrays.");
+        }
+        if (out.shape(0) != matrix.shape(1) or out.shape(1) != matrix.shape(1))
+        {
+            throw std::runtime_error(
+                "gram_matrix requires out.shape == {matrix.cols, matrix.cols}."
+            );
+        }
+        if (&out == &matrix)
+        {
+            throw std::runtime_error("gram_matrix does not support aliasing out with matrix.");
+        }
     }
-    if (out.shape(0) != matrix.shape(1) or out.shape(1) != matrix.shape(1))
-    {
-        throw std::runtime_error("gram_matrix requires out.shape == {matrix.cols, matrix.cols}.");
-    }
-    if (&out == &matrix)
-    {
-        throw std::runtime_error("gram_matrix does not support aliasing out with matrix.");
-    }
-
     const auto rows = as_blas_int(matrix.shape(0));
     const auto cols = as_blas_int(matrix.shape(1));
+
+    const auto alpha = 1.0;
+    const auto beta = 0.0;
 
     cblas_dgemm(
         CblasRowMajor,
@@ -112,12 +119,12 @@ auto gram_matrix(const NDArray& matrix, NDArray& out) -> void
         cols,
         cols,
         rows,
-        1.0,
+        alpha,
         matrix.data(),
         cols,
         matrix.data(),
         cols,
-        0.0,
+        beta,
         out.data(),
         cols
     );
@@ -125,10 +132,12 @@ auto gram_matrix(const NDArray& matrix, NDArray& out) -> void
 
 auto gram_matrix(const NDArray& matrix) -> NDArray
 {
-    require_valid_array(matrix, "gram_matrix", "matrix");
-    if (!matrix.is_matrix())
-    {
-        throw std::runtime_error("gram_matrix requires a rank-2 NDArray.");
+    {  // Expects
+        require_valid_array(matrix, "gram_matrix", "matrix");
+        if (!matrix.is_matrix())
+        {
+            throw std::runtime_error("gram_matrix requires a rank-2 NDArray.");
+        }
     }
 
     auto out = NDArray({matrix.shape(1), matrix.shape(1)});
@@ -138,26 +147,28 @@ auto gram_matrix(const NDArray& matrix) -> NDArray
 
 auto scale_rows(const NDArray& matrix, const NDArray& scales, NDArray& out) -> void
 {
-    require_valid_array(matrix, "scale_rows", "matrix");
-    require_valid_array(scales, "scale_rows", "scales");
-    require_valid_array(out, "scale_rows", "out");
-
-    if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
-    {
-        throw std::runtime_error("scale_rows requires a rank-2 matrix and a rank-1 scales vector.");
-    }
-    if (scales.shape(0) != matrix.shape(0))
-    {
-        throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
-    }
-    if (not out.same_shape(matrix))
-    {
-        throw std::runtime_error("scale_rows requires out.shape == matrix.shape.");
-    }
-
-    if (&out != &matrix)
-    {
-        std::ranges::copy(matrix.data(), matrix.data() + matrix.size(), out.data());
+    {  // Expects
+        require_valid_array(matrix, "scale_rows", "matrix");
+        require_valid_array(scales, "scale_rows", "scales");
+        require_valid_array(out, "scale_rows", "out");
+        if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
+        {
+            throw std::runtime_error(
+                "scale_rows requires a rank-2 matrix and a rank-1 scales vector."
+            );
+        }
+        if (scales.shape(0) != matrix.shape(0))
+        {
+            throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
+        }
+        if (not out.same_shape(matrix))
+        {
+            throw std::runtime_error("scale_rows requires out.shape == matrix.shape.");
+        }
+        if (&out != &matrix)
+        {
+            std::ranges::copy(matrix.data(), matrix.data() + matrix.size(), out.data());
+        }
     }
 
     const auto cols = as_blas_int(matrix.shape(1));
@@ -169,15 +180,19 @@ auto scale_rows(const NDArray& matrix, const NDArray& scales, NDArray& out) -> v
 
 auto scale_rows(const NDArray& matrix, const NDArray& scales) -> NDArray
 {
-    require_valid_array(matrix, "scale_rows", "matrix");
-    require_valid_array(scales, "scale_rows", "scales");
-    if (not matrix.is_matrix() or not scales.is_vector())
-    {
-        throw std::runtime_error("scale_rows requires a rank-2 matrix and a rank-1 scales vector.");
-    }
-    if (scales.shape(0) != matrix.shape(0))
-    {
-        throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
+    {  // Expects
+        require_valid_array(matrix, "scale_rows", "matrix");
+        require_valid_array(scales, "scale_rows", "scales");
+        if (not matrix.is_matrix() or not scales.is_vector())
+        {
+            throw std::runtime_error(
+                "scale_rows requires a rank-2 matrix and a rank-1 scales vector."
+            );
+        }
+        if (scales.shape(0) != matrix.shape(0))
+        {
+            throw std::runtime_error("scale_rows requires scales.size == matrix.rows.");
+        }
     }
 
     auto out = matrix.zeros_like();
@@ -187,21 +202,25 @@ auto scale_rows(const NDArray& matrix, const NDArray& scales) -> NDArray
 
 auto scale_cols(const NDArray& matrix, const NDArray& scales, NDArray& out) -> void
 {
-    require_valid_array(matrix, "scale_cols", "matrix");
-    require_valid_array(scales, "scale_cols", "scales");
-    require_valid_array(out, "scale_cols", "out");
+    {  // Expects
+        require_valid_array(matrix, "scale_cols", "matrix");
+        require_valid_array(scales, "scale_cols", "scales");
+        require_valid_array(out, "scale_cols", "out");
 
-    if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
-    {
-        throw std::runtime_error("scale_cols requires a rank-2 matrix and a rank-1 scales vector.");
-    }
-    if (scales.shape(0) != matrix.shape(1))
-    {
-        throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
-    }
-    if (not out.same_shape(matrix))
-    {
-        throw std::runtime_error("scale_cols requires out.shape == matrix.shape.");
+        if (not matrix.is_matrix() or not scales.is_vector() or not out.is_matrix())
+        {
+            throw std::runtime_error(
+                "scale_cols requires a rank-2 matrix and a rank-1 scales vector."
+            );
+        }
+        if (scales.shape(0) != matrix.shape(1))
+        {
+            throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
+        }
+        if (not out.same_shape(matrix))
+        {
+            throw std::runtime_error("scale_cols requires out.shape == matrix.shape.");
+        }
     }
 
     if (&out != &matrix)
@@ -219,15 +238,19 @@ auto scale_cols(const NDArray& matrix, const NDArray& scales, NDArray& out) -> v
 
 auto scale_cols(const NDArray& matrix, const NDArray& scales) -> NDArray
 {
-    require_valid_array(matrix, "scale_cols", "matrix");
-    require_valid_array(scales, "scale_cols", "scales");
-    if (not matrix.is_matrix() or not scales.is_vector())
-    {
-        throw std::runtime_error("scale_cols requires a rank-2 matrix and a rank-1 scales vector.");
-    }
-    if (scales.shape(0) != matrix.shape(1))
-    {
-        throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
+    {  // Expects
+        require_valid_array(matrix, "scale_cols", "matrix");
+        require_valid_array(scales, "scale_cols", "scales");
+        if (not matrix.is_matrix() or not scales.is_vector())
+        {
+            throw std::runtime_error(
+                "scale_cols requires a rank-2 matrix and a rank-1 scales vector."
+            );
+        }
+        if (scales.shape(0) != matrix.shape(1))
+        {
+            throw std::runtime_error("scale_cols requires scales.size == matrix.cols.");
+        }
     }
 
     auto out = matrix.zeros_like();
@@ -237,35 +260,39 @@ auto scale_cols(const NDArray& matrix, const NDArray& scales) -> NDArray
 
 auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs, NDArray& out) -> void
 {
-    require_valid_array(lhs, "matrix_matrix_product", "lhs");
-    require_valid_array(rhs, "matrix_matrix_product", "rhs");
-    require_valid_array(out, "matrix_matrix_product", "out");
-
-    if (not lhs.is_matrix() or not rhs.is_matrix() or not out.is_matrix())
-    {
-        throw std::runtime_error("matrix_matrix_product requires two rank-2 NDArrays.");
-    }
-    if (lhs.shape(1) != rhs.shape(0))
-    {
-        throw std::runtime_error("matrix_matrix_product requires lhs.cols == rhs.rows.");
-    }
-    if (out.shape(0) != lhs.shape(0) or out.shape(1) != rhs.shape(1))
-    {
-        throw std::runtime_error(
-            "matrix_matrix_product requires out.shape == {lhs.rows, rhs.cols}."
-        );
-    }
-    if (&out == &lhs or &out == &rhs)
-    {
-        throw std::runtime_error(
-            "matrix_matrix_product does not support aliasing "
-            "out with an input NDArray."
-        );
+    {  // Expects
+        require_valid_array(lhs, "matrix_matrix_product", "lhs");
+        require_valid_array(rhs, "matrix_matrix_product", "rhs");
+        require_valid_array(out, "matrix_matrix_product", "out");
+        if (not lhs.is_matrix() or not rhs.is_matrix() or not out.is_matrix())
+        {
+            throw std::runtime_error("matrix_matrix_product requires two rank-2 NDArrays.");
+        }
+        if (lhs.shape(1) != rhs.shape(0))
+        {
+            throw std::runtime_error("matrix_matrix_product requires lhs.cols == rhs.rows.");
+        }
+        if (out.shape(0) != lhs.shape(0) or out.shape(1) != rhs.shape(1))
+        {
+            throw std::runtime_error(
+                "matrix_matrix_product requires out.shape == {lhs.rows, rhs.cols}."
+            );
+        }
+        if (&out == &lhs or &out == &rhs)
+        {
+            throw std::runtime_error(
+                "matrix_matrix_product does not support aliasing "
+                "out with an input NDArray."
+            );
+        }
     }
 
     const auto m = as_blas_int(lhs.shape(0));
     const auto k = as_blas_int(lhs.shape(1));
     const auto n = as_blas_int(rhs.shape(1));
+
+    const auto alpha = 1.0;
+    const auto beta = 0.0;
 
     cblas_dgemm(
         CblasRowMajor,
@@ -274,12 +301,12 @@ auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs, NDArray& out)
         m,
         n,
         k,
-        1.0,
+        alpha,
         lhs.data(),
         k,
         rhs.data(),
         n,
-        0.0,
+        beta,
         out.data(),
         n
     );
@@ -287,15 +314,17 @@ auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs, NDArray& out)
 
 auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs) -> NDArray
 {
-    require_valid_array(lhs, "matrix_matrix_product", "lhs");
-    require_valid_array(rhs, "matrix_matrix_product", "rhs");
-    if (not lhs.is_matrix() or not rhs.is_matrix())
-    {
-        throw std::runtime_error("matrix_matrix_product requires two rank-2 NDArrays.");
-    }
-    if (lhs.shape(1) != rhs.shape(0))
-    {
-        throw std::runtime_error("matrix_matrix_product requires lhs.cols == rhs.rows.");
+    {  // Expects
+        require_valid_array(lhs, "matrix_matrix_product", "lhs");
+        require_valid_array(rhs, "matrix_matrix_product", "rhs");
+        if (not lhs.is_matrix() or not rhs.is_matrix())
+        {
+            throw std::runtime_error("matrix_matrix_product requires two rank-2 NDArrays.");
+        }
+        if (lhs.shape(1) != rhs.shape(0))
+        {
+            throw std::runtime_error("matrix_matrix_product requires lhs.cols == rhs.rows.");
+        }
     }
 
     auto out = NDArray({lhs.shape(0), rhs.shape(1)});
@@ -305,47 +334,51 @@ auto matrix_matrix_product(const NDArray& lhs, const NDArray& rhs) -> NDArray
 
 auto matrix_vector_product(const NDArray& matrix, const NDArray& vector, NDArray& out) -> void
 {
-    require_valid_array(matrix, "matrix_vector_product", "matrix");
-    require_valid_array(vector, "matrix_vector_product", "vector");
-    require_valid_array(out, "matrix_vector_product", "out");
-
-    if (not matrix.is_matrix() or not vector.is_vector() or not out.is_vector())
-    {
-        throw std::runtime_error(
-            "matrix_vector_product requires a rank-2 NDArray "
-            "and a rank-1 NDArray."
-        );
-    }
-    if (matrix.shape(1) != vector.shape(0))
-    {
-        throw std::runtime_error("matrix_vector_product requires matrix.cols == vector.size.");
-    }
-    if (out.shape(0) != matrix.shape(0))
-    {
-        throw std::runtime_error("matrix_vector_product requires out.shape == {matrix.rows}.");
-    }
-    if (&out == &matrix or &out == &vector)
-    {
-        throw std::runtime_error(
-            "matrix_vector_product does not support aliasing "
-            "out with an input NDArray."
-        );
+    {  // Expects
+        require_valid_array(matrix, "matrix_vector_product", "matrix");
+        require_valid_array(vector, "matrix_vector_product", "vector");
+        require_valid_array(out, "matrix_vector_product", "out");
+        if (not matrix.is_matrix() or not vector.is_vector() or not out.is_vector())
+        {
+            throw std::runtime_error(
+                "matrix_vector_product requires a rank-2 NDArray "
+                "and a rank-1 NDArray."
+            );
+        }
+        if (matrix.shape(1) != vector.shape(0))
+        {
+            throw std::runtime_error("matrix_vector_product requires matrix.cols == vector.size.");
+        }
+        if (out.shape(0) != matrix.shape(0))
+        {
+            throw std::runtime_error("matrix_vector_product requires out.shape == {matrix.rows}.");
+        }
+        if (&out == &matrix or &out == &vector)
+        {
+            throw std::runtime_error(
+                "matrix_vector_product does not support aliasing "
+                "out with an input NDArray."
+            );
+        }
     }
 
     const auto m = as_blas_int(matrix.shape(0));
     const auto n = as_blas_int(matrix.shape(1));
+
+    const auto alpha = 1.0;
+    const auto beta = 0.0;
 
     cblas_dgemv(
         CblasRowMajor,
         CblasNoTrans,
         m,
         n,
-        1.0,
+        alpha,
         matrix.data(),
         n,
         vector.data(),
         1,
-        0.0,
+        beta,
         out.data(),
         1
     );
@@ -353,18 +386,20 @@ auto matrix_vector_product(const NDArray& matrix, const NDArray& vector, NDArray
 
 auto matrix_vector_product(const NDArray& matrix, const NDArray& vector) -> NDArray
 {
-    require_valid_array(matrix, "matrix_vector_product", "matrix");
-    require_valid_array(vector, "matrix_vector_product", "vector");
-    if (not matrix.is_matrix() or not vector.is_vector())
-    {
-        throw std::runtime_error(
-            "matrix_vector_product requires a rank-2 NDArray "
-            "and a rank-1 NDArray."
-        );
-    }
-    if (matrix.shape(1) != vector.shape(0))
-    {
-        throw std::runtime_error("matrix_vector_product requires matrix.cols == vector.size.");
+    {  // Expects
+        require_valid_array(matrix, "matrix_vector_product", "matrix");
+        require_valid_array(vector, "matrix_vector_product", "vector");
+        if (not matrix.is_matrix() or not vector.is_vector())
+        {
+            throw std::runtime_error(
+                "matrix_vector_product requires a rank-2 NDArray "
+                "and a rank-1 NDArray."
+            );
+        }
+        if (matrix.shape(1) != vector.shape(0))
+        {
+            throw std::runtime_error("matrix_vector_product requires matrix.cols == vector.size.");
+        }
     }
 
     auto out = NDArray({matrix.shape(0)});
@@ -374,9 +409,11 @@ auto matrix_vector_product(const NDArray& matrix, const NDArray& vector) -> NDAr
 
 auto dot_product(const NDArray& lhs, const NDArray& rhs) -> f64
 {
-    require_valid_array(lhs, "dot_product", "lhs");
-    require_valid_array(rhs, "dot_product", "rhs");
-    require_same_shape(lhs, rhs, "dot_product");
+    {  // Expects
+        require_valid_array(lhs, "dot_product", "lhs");
+        require_valid_array(rhs, "dot_product", "rhs");
+        require_same_shape(lhs, rhs, "dot_product");
+    }
 
     return cblas_ddot(as_blas_int(lhs.size()), lhs.data(), 1, rhs.data(), 1);
 }

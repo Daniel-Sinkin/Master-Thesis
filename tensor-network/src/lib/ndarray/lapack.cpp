@@ -8,7 +8,7 @@
 #include <new>
 #include <stdexcept>
 #include <string>
-#include <vecLib/lapack.h>
+#include <lapack.h>
 #include <vector>
 
 namespace ds_tn
@@ -16,13 +16,13 @@ namespace ds_tn
 namespace
 {
 
-[[nodiscard]] auto as_lapack_int(usize value) -> __LAPACK_int
+[[nodiscard]] auto as_lapack_int(usize value) -> lapack_int
 {
-    if (value > static_cast<usize>(std::numeric_limits<__LAPACK_int>::max()))
+    if (value > static_cast<usize>(std::numeric_limits<lapack_int>::max()))
     {
         throw std::overflow_error("NDArray extent exceeds LAPACK integer range.");
     }
-    return static_cast<__LAPACK_int>(value);
+    return static_cast<lapack_int>(value);
 }
 
 auto require_valid_matrix(const NDArray& array, const char* function_name) -> void
@@ -93,17 +93,19 @@ auto sym_tri_eigendecomp(SymmetricTridiagonalMatrix matrix) -> EigenDecompositio
     const auto diagonal = matrix.diagonal;
     const auto off_diagonal = matrix.off_diagonal;
 
-    if (diagonal.empty())
-    {
-        throw std::invalid_argument(
-            "sym_tri_eigendecomp requires diagonal.size() >= 1."
-        );
-    }
-    if (off_diagonal.size() + 1 != diagonal.size())
-    {
-        throw std::invalid_argument(
-            "sym_tri_eigendecomp requires off_diagonal.size() + 1 == diagonal.size()."
-        );
+    {  // Expects
+        if (diagonal.empty())
+        {
+            throw std::invalid_argument(
+                "sym_tri_eigendecomp requires diagonal.size() >= 1."
+            );
+        }
+        if (off_diagonal.size() + 1 != diagonal.size())
+        {
+            throw std::invalid_argument(
+                "sym_tri_eigendecomp requires off_diagonal.size() + 1 == diagonal.size()."
+            );
+        }
     }
 
     auto eigenvalues_storage = std::vector<f64>(diagonal.begin(), diagonal.end());
@@ -114,9 +116,9 @@ auto sym_tri_eigendecomp(SymmetricTridiagonalMatrix matrix) -> EigenDecompositio
     const auto n = as_lapack_int(diagonal.size());
     const auto ldz = n;
     const auto jobz = 'V';
-    auto info = __LAPACK_int{0};
+    auto info = lapack_int{0};
 
-    dstev_(
+    LAPACK_dstev(
         &jobz,
         &n,
         eigenvalues_storage.data(),
@@ -156,7 +158,9 @@ auto sym_tri_eigendecomp(SymmetricTridiagonalMatrix matrix) -> EigenDecompositio
 
 auto svd(const NDArray& array) -> SVDResult
 {
-    require_valid_matrix(array, "svd");
+    {  // Expects
+        require_valid_matrix(array, "svd");
+    }
 
     const auto rows = array.shape(0);
     const auto cols = array.shape(1);
@@ -171,16 +175,16 @@ auto svd(const NDArray& array) -> SVDResult
     const auto m = as_lapack_int(rows);
     const auto n = as_lapack_int(cols);
     const auto k = as_lapack_int(rank);
-    const auto lda = std::max<__LAPACK_int>(1, m);
-    const auto ldu = std::max<__LAPACK_int>(1, m);
-    const auto ldvt = std::max<__LAPACK_int>(1, k);
+    const auto lda = std::max<lapack_int>(1, m);
+    const auto ldu = std::max<lapack_int>(1, m);
+    const auto ldvt = std::max<lapack_int>(1, k);
     const auto jobu = 'S';
     const auto jobvt = 'S';
-    auto info = __LAPACK_int{0};
+    auto info = lapack_int{0};
     auto work_size_query = std::array<f64, 1>{0.0};
-    auto lwork = __LAPACK_int{-1};
+    auto lwork = lapack_int{-1};
 
-    dgesvd_(
+    LAPACK_dgesvd(
         &jobu,
         &jobvt,
         &m,
@@ -206,10 +210,10 @@ auto svd(const NDArray& array) -> SVDResult
         throw std::runtime_error("svd LAPACK dgesvd_ failed to converge.");
     }
 
-    lwork = static_cast<__LAPACK_int>(std::max(1.0, std::ceil(work_size_query[0])));
+    lwork = static_cast<lapack_int>(std::max(1.0, std::ceil(work_size_query[0])));
     auto work = std::vector<f64>(static_cast<usize>(lwork));
 
-    dgesvd_(
+    LAPACK_dgesvd(
         &jobu,
         &jobvt,
         &m,
@@ -251,7 +255,9 @@ auto svd(const NDArray& array) -> SVDResult
 
 auto householder_qr(const NDArray& array, MatrixTransform transform) -> HouseholderQR
 {
-    require_valid_matrix(array, "householder_qr");
+    {  // Expects
+        require_valid_matrix(array, "householder_qr");
+    }
 
     const auto transformed = apply_matrix_transform(array, transform);
     const auto rows = transformed.shape(0);
@@ -263,12 +269,12 @@ auto householder_qr(const NDArray& array, MatrixTransform transform) -> Househol
 
     const auto m = as_lapack_int(rows);
     const auto n = as_lapack_int(cols);
-    const auto lda = std::max<__LAPACK_int>(1, m);
-    auto info = __LAPACK_int{0};
+    const auto lda = std::max<lapack_int>(1, m);
+    auto info = lapack_int{0};
     auto work_size_query = std::array<f64, 1>{0.0};
-    auto lwork = __LAPACK_int{-1};
+    auto lwork = lapack_int{-1};
 
-    dgeqrf_(
+    LAPACK_dgeqrf(
         &m,
         &n,
         factors_column_major.data(),
@@ -286,10 +292,10 @@ auto householder_qr(const NDArray& array, MatrixTransform transform) -> Househol
         );
     }
 
-    lwork = static_cast<__LAPACK_int>(std::max(1.0, std::ceil(work_size_query[0])));
+    lwork = static_cast<lapack_int>(std::max(1.0, std::ceil(work_size_query[0])));
     auto work = std::vector<f64>(static_cast<usize>(lwork));
 
-    dgeqrf_(
+    LAPACK_dgeqrf(
         &m,
         &n,
         factors_column_major.data(),
@@ -319,7 +325,9 @@ auto householder_qr(const NDArray& array, MatrixTransform transform) -> Househol
 
 auto extract_upper_triangle(const NDArray& factors) -> NDArray
 {
-    require_valid_matrix(factors, "extract_upper_triangle");
+    {  // Expects
+        require_valid_matrix(factors, "extract_upper_triangle");
+    }
 
     const auto rows = factors.shape(0);
     const auto cols = factors.shape(1);
@@ -339,22 +347,28 @@ auto extract_upper_triangle(const NDArray& factors) -> NDArray
 
 auto householder_build_q(const NDArray& factors, const NDArray& tau) -> NDArray
 {
-    require_valid_matrix(factors, "householder_build_q");
-    if (tau.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("householder_build_q requires tau to be a valid NDArray.");
-    }
-    if (!tau.is_vector())
-    {
-        throw std::invalid_argument("householder_build_q requires tau to be a rank-1 NDArray.");
+    {  // Expects
+        require_valid_matrix(factors, "householder_build_q");
+        if (tau.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("householder_build_q requires tau to be a valid NDArray.");
+        }
+        if (!tau.is_vector())
+        {
+            throw std::invalid_argument(
+                "householder_build_q requires tau to be a rank-1 NDArray."
+            );
+        }
     }
 
     const auto rows = factors.shape(0);
     const auto cols = factors.shape(1);
     const auto rank = std::min(rows, cols);
-    require_valid_tau(
-        std::span<const f64>{tau.data(), tau.shape(0)}, rank, "householder_build_q"
-    );
+    {  // Expects
+        require_valid_tau(
+            std::span<const f64>{tau.data(), tau.shape(0)}, rank, "householder_build_q"
+        );
+    }
 
     auto q_column_major = std::vector<f64>(rows * rank);
     for (auto row = 0zu; row < rows; ++row)
@@ -368,12 +382,12 @@ auto householder_build_q(const NDArray& factors, const NDArray& tau) -> NDArray
     const auto m = as_lapack_int(rows);
     const auto n = as_lapack_int(rank);
     const auto k = as_lapack_int(rank);
-    const auto lda = std::max<__LAPACK_int>(1, m);
-    auto info = __LAPACK_int{0};
+    const auto lda = std::max<lapack_int>(1, m);
+    auto info = lapack_int{0};
     auto work_size_query = std::array<f64, 1>{0.0};
-    auto lwork = __LAPACK_int{-1};
+    auto lwork = lapack_int{-1};
 
-    dorgqr_(
+    LAPACK_dorgqr(
         &m,
         &n,
         &k,
@@ -392,10 +406,10 @@ auto householder_build_q(const NDArray& factors, const NDArray& tau) -> NDArray
         );
     }
 
-    lwork = static_cast<__LAPACK_int>(std::max(1.0, std::ceil(work_size_query[0])));
+    lwork = static_cast<lapack_int>(std::max(1.0, std::ceil(work_size_query[0])));
     auto work = std::vector<f64>(static_cast<usize>(lwork));
 
-    dorgqr_(
+    LAPACK_dorgqr(
         &m,
         &n,
         &k,

@@ -3,10 +3,14 @@
 
 #include "ndarray/blas.hpp"
 #include "ndarray/lapack.hpp"
+#include "ndarray/ndarray.hpp"
 #include "tensor/contraction.hpp"
+#include "tensor/tensor.hpp"
 
 #include <algorithm>
 #include <array>
+#include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -19,55 +23,47 @@ namespace
 
 [[nodiscard]] auto mps_leg_names(usize site, usize num_sites) -> std::array<std::string, 3>
 {
-    return {
-        site == 0 ? "edge_left" : "bond_" + std::to_string(site - 1) + std::to_string(site),
-        "physical_" + std::to_string(site),
-        site + 1 == num_sites
-            ? "edge_right"
-            : "bond_" + std::to_string(site) + std::to_string(site + 1),
+    const auto left = [&]
+    {
+        if (site == 0) return std::string{"edge_left"};
+        return std::format("bond_{}{}", site - 1, site);
     };
-}
-
-[[nodiscard]] auto
-truncated_bond_dim(const SVDResult& svd_result, std::optional<usize> max_bond_dim) -> usize
-{
-    return max_bond_dim.has_value()
-        ? std::min(svd_result.s.shape(0), *max_bond_dim)
-        : svd_result.s.shape(0);
+    const auto right = [&]
+    {
+        if (site + 1 == num_sites) return std::string{"edge_right"};
+        return std::format("bond_{}{}", site, site + 1);
+    };
+    return {left(), std::format("physical_{}", site), right()};
 }
 
 [[nodiscard]] auto derived_seed(std::optional<TensorSeed> base_seed, usize site)
     -> std::optional<TensorSeed>
 {
-    if (!base_seed.has_value())
-    {
-        return std::nullopt;
-    }
-
+    if (!base_seed) return std::nullopt;
     return *base_seed + static_cast<TensorSeed>(site);
 }
 
 auto require_orthogonalizable_mps(const MPS& mps, const char* function_name) -> void
 {
-    for (auto site = 0zu; site < mps.size(); ++site)
+    namespace rv = std::ranges::views;
+    for (const auto& tensor : mps.tensors())
     {
-        if (mps[site].validity() != TensorValidity::valid)
+        if (tensor.validity() != TensorValidity::valid)
         {
-            throw std::invalid_argument(
-                std::string{function_name} + " requires all tensors to be valid."
+            throw std::runtime_error(
+                std::format("{} requires all tensors to be valid", function_name)
             );
         }
-        if (!mps[site].is_tensor3())
+        if (!tensor.is_tensor3())
         {
-            throw std::invalid_argument(
-                std::string{function_name} + " requires all tensors to be rank-3."
+            throw std::runtime_error(
+                std::format("{} requires all tensors to be rank-3", function_name)
             );
         }
     }
-
-    for (auto site = 0zu; site + 1 < mps.size(); ++site)
+    for (const auto& [left, right] : mps.tensors() | rv::pairwise | rv::reverse)
     {
-        if (mps[site].leg_name(2) != mps[site + 1].leg_name(0))
+        if (left.leg_name(2) != right.leg_name(0))
         {
             throw std::invalid_argument(
                 std::string{function_name}
@@ -140,7 +136,9 @@ auto MPS::at(usize site) const -> const Tensor&
 
 auto MPS::left_orthogonalize() -> void
 {
-    require_orthogonalizable_mps(*this, "MPS::left_orthogonalize");
+    {  // Expects
+        require_orthogonalizable_mps(*this, "MPS::left_orthogonalize");
+    }
     if (tensors_.size() <= 1)
     {
         return;
@@ -165,22 +163,21 @@ auto MPS::left_orthogonalize() -> void
 
 auto MPS::right_orthogonalize() -> void
 {
-    require_orthogonalizable_mps(*this, "MPS::right_orthogonalize");
-    if (tensors_.size() <= 1)
-    {
-        return;
+    namespace sv = std::ranges::views;
+
+    {  // Expects
+        require_orthogonalizable_mps(*this, "MPS::right_orthogonalize");
     }
+    if (tensors_.size() <= 1) return;
 
-    for (auto site = tensors_.size() - 1; site > 0; --site)
+    for (const auto& [prev, curr] : tensors_ | sv::pairwise | sv::reverse)
     {
-        auto& curr = tensors_[site];
-        auto& prev = tensors_[site - 1];
-
+        const auto bond_left = curr.shape(0);
         const auto d = curr.shape(1);
         const auto bond_right = curr.shape(2);
 
-        const auto [qt, rt] =
-            qr(curr.array().reshape({curr.shape(0), d * bond_right}), MatrixTransform::transpose);
+        const auto reshaped = curr.array().reshape({bond_left, d * bond_right});
+        const auto [qt, rt] = qr(reshaped, MatrixTransform::transpose);
         const auto q = transpose_matrix(qt);
         const auto r = transpose_matrix(rt);
         curr.array() = NDArray::reshape(q, {q.shape(0), d, bond_right});
@@ -193,17 +190,19 @@ auto MPS::right_orthogonalize() -> void
 
 auto to_mps(const NDArray& tensor, std::optional<usize> max_bond_dim) -> MPS
 {
-    if (tensor.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("to_mps requires a valid NDArray.");
-    }
-    if (tensor.rank() == 0)
-    {
-        throw std::invalid_argument("to_mps requires a non-scalar NDArray.");
-    }
-    if (max_bond_dim.has_value() and *max_bond_dim == 0)
-    {
-        throw std::invalid_argument("to_mps requires max_bond_dim >= 1 when provided.");
+    {  // Expects
+        if (tensor.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("to_mps requires a valid NDArray.");
+        }
+        if (tensor.rank() == 0)
+        {
+            throw std::invalid_argument("to_mps requires a non-scalar NDArray.");
+        }
+        if (max_bond_dim.has_value() and *max_bond_dim == 0)
+        {
+            throw std::invalid_argument("to_mps requires max_bond_dim >= 1 when provided.");
+        }
     }
 
     const auto num_sites = tensor.rank();
@@ -220,10 +219,15 @@ auto to_mps(const NDArray& tensor, std::optional<usize> max_bond_dim) -> MPS
         const auto physical_dim = remainder.shape(1);
         const auto remainder_cols = remainder.size() / (left_bond_dim * physical_dim);
 
-        const auto svd_result =
-            svd(remainder.reshape({left_bond_dim * physical_dim, remainder_cols}));
+        const auto reshaped = remainder.reshape({left_bond_dim * physical_dim, remainder_cols});
+
+        const auto svd_result = svd(reshaped);
         const auto& [u, s, vt] = svd_result;
-        const auto bond_dim = truncated_bond_dim(svd_result, max_bond_dim);
+        const auto bond_dim = [&s, &max_bond_dim]
+        {
+            const auto full_bond_dim = s.shape(0);
+            return (max_bond_dim) ? std::min(full_bond_dim, *max_bond_dim) : full_bond_dim;
+        }();
 
         tensors.emplace_back(
             truncate_cols(u, bond_dim).reshape({left_bond_dim, physical_dim, bond_dim}),
@@ -248,38 +252,48 @@ auto to_mps(const NDArray& tensor, std::optional<usize> max_bond_dim) -> MPS
 
 auto random_mps(usize num_sites, RandomMPSConfig cfg) -> MPS
 {
-    if (num_sites == 0)
-    {
-        throw std::invalid_argument("random_mps requires num_sites >= 1.");
-    }
-    if (cfg.physical_dim == 0)
-    {
-        throw std::invalid_argument("random_mps requires physical_dim >= 1.");
-    }
-    if (cfg.max_bond_dim == 0)
-    {
-        throw std::invalid_argument("random_mps requires max_bond_dim >= 1.");
-    }
+    constexpr usize k_edge_bond_dim{1zu};
 
-    auto tensors = std::vector<Tensor>{};
-    tensors.reserve(num_sites);
-
-    for (auto site = 0zu; site < num_sites; ++site)
+    {  // Expects
+        if (num_sites == 0)
+        {
+            throw std::invalid_argument("random_mps requires num_sites >= 1.");
+        }
+        if (cfg.physical_dim == 0)
+        {
+            throw std::invalid_argument("random_mps requires physical_dim >= 1.");
+        }
+        if (cfg.max_bond_dim == 0)
+        {
+            throw std::invalid_argument("random_mps requires max_bond_dim >= 1.");
+        }
+    }
+    const auto bond_dims = [&](usize site) -> std::pair<usize, usize>
     {
-        const auto left_bond_dim = site == 0 ? 1zu : cfg.max_bond_dim;
-        const auto right_bond_dim = site + 1 == num_sites ? 1zu : cfg.max_bond_dim;
-
-        tensors.emplace_back(
-            NDArray::random(
-                {left_bond_dim, cfg.physical_dim, right_bond_dim},
-                cfg.random_options,
-                derived_seed(cfg.seed, site)
-            ),
-            mps_leg_names(site, num_sites)
+        if (site == 0) return {k_edge_bond_dim, cfg.max_bond_dim};
+        if (site + 1 == num_sites) return {cfg.max_bond_dim, k_edge_bond_dim};
+        return {cfg.max_bond_dim, cfg.max_bond_dim};
+    };
+    const auto random_data = [&](usize site) -> NDArray
+    {
+        const auto [bond_left, bond_right] = bond_dims(site);
+        return NDArray::random(
+            {bond_left, cfg.physical_dim, bond_right},
+            cfg.random_options,
+            derived_seed(cfg.seed, site)
         );
-    }
-
-    return MPS{std::move(tensors)};
+    };
+    const auto create_tensors = [&]
+    {
+        auto tensors = std::vector<Tensor>{};
+        tensors.reserve(num_sites);
+        for (auto site = 0zu; site < num_sites; ++site)
+        {
+            tensors.emplace_back(random_data(site), mps_leg_names(site, num_sites));
+        }
+        return tensors;
+    };
+    return MPS{create_tensors()};
 }
 
 }  // namespace ds_tn

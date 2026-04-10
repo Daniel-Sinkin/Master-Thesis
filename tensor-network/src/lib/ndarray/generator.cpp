@@ -59,13 +59,17 @@ auto NDArrayGenerator::generate(std::vector<usize> shape, RandomOptions options)
 
 auto NDArrayGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -> NDArray
 {
-    if (not std::isfinite(lower) or not std::isfinite(upper))
-    {
-        throw std::invalid_argument("NDArrayGenerator::uniform requires finite range endpoints.");
-    }
-    if (lower > upper)
-    {
-        throw std::invalid_argument("NDArrayGenerator::uniform requires lower <= upper.");
+    {  // Expects
+        if (not std::isfinite(lower) or not std::isfinite(upper))
+        {
+            throw std::invalid_argument(
+                "NDArrayGenerator::uniform requires finite range endpoints."
+            );
+        }
+        if (lower > upper)
+        {
+            throw std::invalid_argument("NDArrayGenerator::uniform requires lower <= upper.");
+        }
     }
 
     auto out = NDArray(std::move(shape));
@@ -86,15 +90,17 @@ auto NDArrayGenerator::uniform(std::vector<usize> shape, f64 lower, f64 upper) -
 
 auto NDArrayGenerator::normal(std::vector<usize> shape, f64 mu, f64 sigma) -> NDArray
 {
-    if (not std::isfinite(mu) or not std::isfinite(sigma))
-    {
-        throw std::invalid_argument(
-            "NDArrayGenerator::normal requires finite distribution parameters."
-        );
-    }
-    if (sigma < 0.0)
-    {
-        throw std::invalid_argument("NDArrayGenerator::normal requires sigma >= 0.");
+    {  // Expects
+        if (not std::isfinite(mu) or not std::isfinite(sigma))
+        {
+            throw std::invalid_argument(
+                "NDArrayGenerator::normal requires finite distribution parameters."
+            );
+        }
+        if (sigma < 0.0)
+        {
+            throw std::invalid_argument("NDArrayGenerator::normal requires sigma >= 0.");
+        }
     }
 
     auto out = NDArray(std::move(shape));

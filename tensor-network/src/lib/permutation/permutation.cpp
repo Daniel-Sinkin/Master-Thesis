@@ -10,11 +10,13 @@ namespace ds_tn
 
 Permutation::Permutation(std::vector<usize> mapping) : mapping_(std::move(mapping))
 {
-    if (!is_valid_mapping(mapping_))
-    {
-        throw std::invalid_argument(
-            "Permutation requires each index in [0, size) to appear exactly once."
-        );
+    {  // Expects
+        if (!is_valid_mapping(mapping_))
+        {
+            throw std::invalid_argument(
+                "Permutation requires each index in [0, size) to appear exactly once."
+            );
+        }
     }
 }
 
@@ -54,15 +56,17 @@ auto Permutation::is_valid_mapping(std::span<const usize> mapping) noexcept -> b
 
 auto apply_permutation(const NDArray& array, const Permutation& permutation) -> NDArray
 {
-    if (array.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("apply_permutation requires a valid NDArray.");
-    }
-    if (array.rank() != permutation.size())
-    {
-        throw std::invalid_argument(
-            "apply_permutation requires permutation size to match NDArray rank."
-        );
+    {  // Expects
+        if (array.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("apply_permutation requires a valid NDArray.");
+        }
+        if (array.rank() != permutation.size())
+        {
+            throw std::invalid_argument(
+                "apply_permutation requires permutation size to match NDArray rank."
+            );
+        }
     }
 
     auto out = NDArray(permutation.apply(array.shape()));
@@ -78,15 +82,17 @@ auto apply_permutation(const NDArray& array, const Permutation& permutation) -> 
 
 auto apply_permutation(const Tensor& tensor, const Permutation& permutation) -> Tensor
 {
-    if (tensor.validity() != TensorValidity::valid)
-    {
-        throw std::invalid_argument("apply_permutation requires a valid Tensor.");
-    }
-    if (tensor.rank() != permutation.size())
-    {
-        throw std::invalid_argument(
-            "apply_permutation requires permutation size to match Tensor rank."
-        );
+    {  // Expects
+        if (tensor.validity() != TensorValidity::valid)
+        {
+            throw std::invalid_argument("apply_permutation requires a valid Tensor.");
+        }
+        if (tensor.rank() != permutation.size())
+        {
+            throw std::invalid_argument(
+                "apply_permutation requires permutation size to match Tensor rank."
+            );
+        }
     }
 
     const auto permuted_array = apply_permutation(tensor.array(), permutation);

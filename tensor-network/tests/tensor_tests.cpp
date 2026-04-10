@@ -19,9 +19,30 @@ TEST_CASE("Tensor wraps NDArray data and auto-generates unique readable leg name
 
     REQUIRE(first.validity() == TensorValidity::valid);
     REQUIRE(first.is_vector());
+    REQUIRE(first.id() != second.id());
     REQUIRE(first.leg_names().size() == 1zu);
     REQUIRE(not first.leg_name(0).empty());
+    REQUIRE(first.leg_name(0) == std::format("t{}_l0", first.id()));
+    REQUIRE(second.leg_name(0) == std::format("t{}_l0", second.id()));
     REQUIRE(first.leg_name(0) != second.leg_name(0));
+}
+
+TEST_CASE("Tensor copies get new ids while assignment preserves the target id", "[tensor]")
+{
+    const auto source = Tensor(NDArray::vector(1.0, 2.0, 3.0), {"i"});
+
+    const auto copied = source;
+    REQUIRE(copied.id() != source.id());
+    REQUIRE(std::ranges::equal(copied.leg_names(), source.leg_names()));
+    REQUIRE(close_per_element(copied, source, 0.0));
+
+    auto assigned = Tensor(NDArray::vector(9.0, 8.0, 7.0), {"j"});
+    const auto assigned_id = assigned.id();
+    assigned = source;
+
+    REQUIRE(assigned.id() == assigned_id);
+    REQUIRE(close_per_element(assigned, source, 0.0));
+    REQUIRE(std::ranges::equal(assigned.leg_names(), source.leg_names()));
 }
 
 TEST_CASE("Tensor default construction yields a zero scalar tensor", "[tensor]")
@@ -302,6 +323,33 @@ TEST_CASE("Tensor print_metadata supports named prefixes", "[tensor][metadata]")
     auto string_output = std::ostringstream{};
     tensor.print_metadata("ket", string_output);
     REQUIRE(string_output.str() == "ket = Tensor(shape=[2 x 2], legs=[row, col])\n");
+}
+
+TEST_CASE("TensorDebug logs before and after rename_leg", "[tensor][debug]")
+{
+    auto output = std::ostringstream{};
+    auto tensor = TensorDebug(
+        NDArray::matrix({
+            {1.0, 2.0},
+            {3.0, 4.0},
+        }),
+        {"row", "col"}
+    );
+    tensor.set_log_output(output);
+
+    tensor.rename_leg("row", "left");
+
+    REQUIRE(
+        output.str()
+        == std::format(
+            "[TensorDebug] before rename_leg tensor_id={} (old_name=row, new_name=left) "
+            "Tensor(shape=[2 x 2], legs=[row, col])\n"
+            "[TensorDebug] after rename_leg tensor_id={} (old_name=row, new_name=left) "
+            "Tensor(shape=[2 x 2], legs=[left, col])\n",
+            tensor.id(),
+            tensor.id()
+        )
+    );
 }
 
 }  // namespace ds_tn

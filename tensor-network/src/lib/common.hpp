@@ -71,10 +71,13 @@ template <typename T, usize LeftExtent, usize RightExtent>
 [[nodiscard]] constexpr auto
 inner_product(std::span<const T, LeftExtent> lhs, std::span<const T, RightExtent> rhs) -> T
 {
-    if (lhs.size() != rhs.size())
-    {
-        throw std::invalid_argument("inner_product requires spans of the same size.");
+    {  // Expects
+        if (lhs.size() != rhs.size())
+        {
+            throw std::invalid_argument("inner_product requires spans of the same size.");
+        }
     }
+
     return std::transform_reduce(
         lhs.begin(), lhs.end(), rhs.begin(), T{0}, std::plus<T>{}, std::multiplies<T>{}
     );

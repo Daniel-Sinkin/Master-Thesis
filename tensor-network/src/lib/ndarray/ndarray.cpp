@@ -14,7 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <vecLib/cblas_new.h>
+#include <cblas.h>
 
 namespace ds_tn
 {
@@ -31,13 +31,13 @@ template <typename T>
     return std::accumulate(values.begin(), values.end(), T{1}, std::multiplies<>{});
 }
 
-[[nodiscard]] auto as_blas_int(usize value) -> __LAPACK_int
+[[nodiscard]] auto as_blas_int(usize value) -> blasint
 {
-    if (value > static_cast<usize>(std::numeric_limits<__LAPACK_int>::max()))
+    if (value > static_cast<usize>(std::numeric_limits<blasint>::max()))
     {
         throw std::overflow_error("NDArray extent exceeds BLAS integer range.");
     }
-    return static_cast<__LAPACK_int>(value);
+    return static_cast<blasint>(value);
 }
 
 [[nodiscard]] auto shape_to_string(std::span<const usize> shape) -> std::string
@@ -149,13 +149,15 @@ auto NDArray::scalar(f64 value) -> NDArray
 
 auto NDArray::diag(const NDArray& vector) -> NDArray
 {
-    if (vector.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("NDArray::diag requires a valid NDArray.");
-    }
-    if (!vector.is_vector())
-    {
-        throw std::invalid_argument("NDArray::diag requires a rank-1 NDArray.");
+    {  // Expects
+        if (vector.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray::diag requires a valid NDArray.");
+        }
+        if (!vector.is_vector())
+        {
+            throw std::invalid_argument("NDArray::diag requires a rank-1 NDArray.");
+        }
     }
 
     auto out = NDArray({vector.shape(0), vector.shape(0)});
@@ -212,13 +214,17 @@ auto NDArray::zeros_like(const NDArray& other) -> NDArray
 
 auto NDArray::reshape(const NDArray& array, std::span<const usize> new_shape) -> NDArray
 {
-    if (array.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("NDArray::reshape requires a valid NDArray.");
-    }
-    if (product<usize>(new_shape) != array.size())
-    {
-        throw std::invalid_argument("NDArray::reshape requires product(new_shape) == array.size().");
+    {  // Expects
+        if (array.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray::reshape requires a valid NDArray.");
+        }
+        if (product<usize>(new_shape) != array.size())
+        {
+            throw std::invalid_argument(
+                "NDArray::reshape requires product(new_shape) == array.size()."
+            );
+        }
     }
 
     auto out = NDArray{std::vector<usize>{new_shape.begin(), new_shape.end()}};
@@ -233,9 +239,11 @@ auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_sha
 
 auto NDArray::squeeze(const NDArray& array) -> NDArray
 {
-    if (array.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("NDArray::squeeze requires a valid NDArray.");
+    {  // Expects
+        if (array.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray::squeeze requires a valid NDArray.");
+        }
     }
 
     auto squeezed_shape = std::vector<usize>{};
@@ -253,17 +261,19 @@ auto NDArray::squeeze(const NDArray& array) -> NDArray
 
 auto truncate_cols(const NDArray& mat, usize cols) -> NDArray
 {
-    if (mat.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("truncate_cols requires a valid NDArray.");
-    }
-    if (!mat.is_matrix())
-    {
-        throw std::invalid_argument("truncate_cols requires a rank-2 NDArray.");
-    }
-    if (cols > mat.shape_[1])
-    {
-        throw std::invalid_argument("truncate_cols requires cols <= mat.cols.");
+    {  // Expects
+        if (mat.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("truncate_cols requires a valid NDArray.");
+        }
+        if (!mat.is_matrix())
+        {
+            throw std::invalid_argument("truncate_cols requires a rank-2 NDArray.");
+        }
+        if (cols > mat.shape_[1])
+        {
+            throw std::invalid_argument("truncate_cols requires cols <= mat.cols.");
+        }
     }
 
     auto out = NDArray({mat.shape_[0], cols});
@@ -279,17 +289,19 @@ auto truncate_cols(const NDArray& mat, usize cols) -> NDArray
 
 auto truncate_rows(const NDArray& mat, usize rows) -> NDArray
 {
-    if (mat.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("truncate_rows requires a valid NDArray.");
-    }
-    if (!mat.is_matrix())
-    {
-        throw std::invalid_argument("truncate_rows requires a rank-2 NDArray.");
-    }
-    if (rows > mat.shape_[0])
-    {
-        throw std::invalid_argument("truncate_rows requires rows <= mat.rows.");
+    {  // Expects
+        if (mat.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("truncate_rows requires a valid NDArray.");
+        }
+        if (!mat.is_matrix())
+        {
+            throw std::invalid_argument("truncate_rows requires a rank-2 NDArray.");
+        }
+        if (rows > mat.shape_[0])
+        {
+            throw std::invalid_argument("truncate_rows requires rows <= mat.rows.");
+        }
     }
 
     auto out = mat;
@@ -300,13 +312,15 @@ auto truncate_rows(const NDArray& mat, usize rows) -> NDArray
 
 auto transpose_matrix(const NDArray& matrix) -> NDArray
 {
-    if (matrix.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("transpose_matrix requires a valid NDArray.");
-    }
-    if (!matrix.is_matrix())
-    {
-        throw std::invalid_argument("transpose_matrix requires a rank-2 NDArray.");
+    {  // Expects
+        if (matrix.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("transpose_matrix requires a valid NDArray.");
+        }
+        if (!matrix.is_matrix())
+        {
+            throw std::invalid_argument("transpose_matrix requires a rank-2 NDArray.");
+        }
     }
 
     auto out = NDArray({matrix.shape(1), matrix.shape(0)});
@@ -325,17 +339,23 @@ auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> 
     const auto row_count = rows.size();
     const auto col_count = row_count == 0 ? usize{0} : rows.begin()->size();
 
+    {  // Expects
+        for (const auto& row : rows)
+        {
+            if (row.size() != col_count)
+            {
+                throw std::invalid_argument(
+                    "NDArray::matrix requires all rows to have the same length."
+                );
+            }
+        }
+    }
+
     auto out = NDArray({row_count, col_count});
     auto* cursor = out.data();
 
     for (const auto& row : rows)
     {
-        if (row.size() != col_count)
-        {
-            throw std::invalid_argument(
-                "NDArray::matrix requires all rows to have the same length."
-            );
-        }
         cursor = std::ranges::copy(row, cursor).out;
     }
 
@@ -351,26 +371,35 @@ auto NDArray::rank3(
     const auto col_count =
         row_count == 0 ? usize{0} : slices.begin()->begin()->size();
 
-    auto out = NDArray({slice_count, row_count, col_count});
-    auto* cursor = out.data();
-
-    for (const auto& slice : slices)
-    {
-        if (slice.size() != row_count)
+    {  // Expects
+        for (const auto& slice : slices)
         {
+            if (slice.size() != row_count)
+            {
                 throw std::invalid_argument(
                     "NDArray::rank3 requires all slices to have the same number of rows."
                 );
             }
 
+            for (const auto& row : slice)
+            {
+                if (row.size() != col_count)
+                {
+                    throw std::invalid_argument(
+                        "NDArray::rank3 requires all rows to have the same length."
+                    );
+                }
+            }
+        }
+    }
+
+    auto out = NDArray({slice_count, row_count, col_count});
+    auto* cursor = out.data();
+
+    for (const auto& slice : slices)
+    {
         for (const auto& row : slice)
         {
-            if (row.size() != col_count)
-            {
-                throw std::invalid_argument(
-                    "NDArray::rank3 requires all rows to have the same length."
-                );
-            }
             cursor = std::ranges::copy(row, cursor).out;
         }
     }
@@ -400,9 +429,11 @@ auto NDArray::shape() const noexcept -> std::span<const usize>
 
 auto NDArray::shape(usize axis) const -> usize
 {
-    if (axis >= shape_.size())
-    {
-        throw std::out_of_range("NDArray shape axis exceeds array rank.");
+    {  // Expects
+        if (axis >= shape_.size())
+        {
+            throw std::out_of_range("NDArray shape axis exceeds array rank.");
+        }
     }
     return shape_[axis];
 }
@@ -476,9 +507,11 @@ auto NDArray::format_metadata() const -> std::string
 
 auto NDArray::normalize() -> void
 {
-    if (validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("normalize requires a valid NDArray.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("normalize requires a valid NDArray.");
+        }
     }
 
     const auto norm = l2_norm();
@@ -492,9 +525,11 @@ auto NDArray::normalize() -> void
 
 auto NDArray::add_scalar(f64 scalar) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("add_scalar requires a valid NDArray.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("add_scalar requires a valid NDArray.");
+        }
     }
 
     for (auto& value : data_)
@@ -506,9 +541,11 @@ auto NDArray::add_scalar(f64 scalar) -> NDArray&
 
 auto NDArray::subtract_scalar(f64 scalar) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("subtract_scalar requires a valid NDArray.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("subtract_scalar requires a valid NDArray.");
+        }
     }
 
     for (auto& value : data_)
@@ -520,9 +557,11 @@ auto NDArray::subtract_scalar(f64 scalar) -> NDArray&
 
 auto NDArray::multiply_scalar(f64 scalar) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("multiply_scalar requires a valid NDArray.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("multiply_scalar requires a valid NDArray.");
+        }
     }
 
     cblas_dscal(as_blas_int(size()), scalar, data(), 1);
@@ -531,13 +570,15 @@ auto NDArray::multiply_scalar(f64 scalar) -> NDArray&
 
 auto NDArray::divide_scalar(f64 scalar) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("divide_scalar requires a valid NDArray.");
-    }
-    if (scalar == 0.0)
-    {
-        throw std::invalid_argument("divide_scalar requires a non-zero scalar.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("divide_scalar requires a valid NDArray.");
+        }
+        if (scalar == 0.0)
+        {
+            throw std::invalid_argument("divide_scalar requires a non-zero scalar.");
+        }
     }
 
     cblas_dscal(as_blas_int(size()), f64{1.0} / scalar, data(), 1);
@@ -546,13 +587,15 @@ auto NDArray::divide_scalar(f64 scalar) -> NDArray&
 
 auto NDArray::operator+=(const NDArray& rhs) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("NDArray array addition requires valid NDArrays.");
-    }
-    if (shape_ != rhs.shape_)
-    {
-        throw std::invalid_argument("NDArray array addition requires matching shapes.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray array addition requires valid NDArrays.");
+        }
+        if (shape_ != rhs.shape_)
+        {
+            throw std::invalid_argument("NDArray array addition requires matching shapes.");
+        }
     }
 
     cblas_daxpy(as_blas_int(size()), 1.0, rhs.data(), 1, data(), 1);
@@ -561,13 +604,15 @@ auto NDArray::operator+=(const NDArray& rhs) -> NDArray&
 
 auto NDArray::operator-=(const NDArray& rhs) -> NDArray&
 {
-    if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
-    {
-        throw std::invalid_argument("NDArray array subtraction requires valid NDArrays.");
-    }
-    if (shape_ != rhs.shape_)
-    {
-        throw std::invalid_argument("NDArray array subtraction requires matching shapes.");
+    {  // Expects
+        if (validity() != NDArrayValidity::valid or rhs.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray array subtraction requires valid NDArrays.");
+        }
+        if (shape_ != rhs.shape_)
+        {
+            throw std::invalid_argument("NDArray array subtraction requires matching shapes.");
+        }
     }
 
     cblas_daxpy(as_blas_int(size()), -1.0, rhs.data(), 1, data(), 1);
@@ -596,15 +641,17 @@ auto NDArray::operator/=(f64 scalar) -> NDArray&
 
 auto NDArray::linear_index(std::span<const usize> indices) const -> usize
 {
-    if (indices.size() != shape_.size())
-    {
-        throw std::invalid_argument("NDArray index rank does not match array rank.");
-    }
-    for (auto i = 0zu; i < indices.size(); ++i)
-    {
-        if (indices[i] >= shape_[i])
+    {  // Expects
+        if (indices.size() != shape_.size())
         {
-            throw std::out_of_range("NDArray index exceeds array extent.");
+            throw std::invalid_argument("NDArray index rank does not match array rank.");
+        }
+        for (auto i = 0zu; i < indices.size(); ++i)
+        {
+            if (indices[i] >= shape_[i])
+            {
+                throw std::out_of_range("NDArray index exceeds array extent.");
+            }
         }
     }
 
@@ -623,9 +670,11 @@ auto NDArray::operator()(std::span<const usize> indices) const -> const f64&
 
 auto NDArray::indices_from_linear(usize linear_index) const -> std::vector<usize>
 {
-    if (linear_index >= data_.size())
-    {
-        throw std::out_of_range("Linear index exceeds NDArray storage.");
+    {  // Expects
+        if (linear_index >= data_.size())
+        {
+            throw std::out_of_range("Linear index exceeds NDArray storage.");
+        }
     }
 
     auto indices = std::vector<usize>(shape_.size(), 0);

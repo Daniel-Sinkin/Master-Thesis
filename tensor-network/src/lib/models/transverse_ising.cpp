@@ -48,9 +48,11 @@ auto set_block(Tensor& tensor, usize left_bond, usize right_bond, const NDArray&
 
 auto transverse_ising_mpo(usize num_sites, f64 J, f64 h) -> std::vector<Tensor>
 {
-    if (num_sites == 0)
-    {
-        throw std::invalid_argument("transverse_ising_mpo requires num_sites >= 1.");
+    {  // Expects
+        if (num_sites == 0)
+        {
+            throw std::invalid_argument("transverse_ising_mpo requires num_sites >= 1.");
+        }
     }
 
     const auto I = NDArray::matrix({

@@ -33,7 +33,7 @@ shape_over_selected_axes(std::span<const usize> shape, std::span<const usize> in
 [[nodiscard]] auto contract_reference(const Tensor& left, const Tensor& right) -> Tensor
 {
     const auto partition = partition_indices(left, right);
-    auto out = contraction_output_tensor(left, right);
+    auto out = Tensor{contraction_output_shape(left, right), contraction_output_legs(left, right)};
     auto left_indices = std::vector<usize>(left.rank());
     auto right_indices = std::vector<usize>(right.rank());
     const auto shared_shape = shape_over_selected_axes(left.shape(), partition.left_shared);
@@ -242,32 +242,30 @@ TEST_CASE("partition_indices separates shared and unshared legs with stable orde
     REQUIRE(partition.right_not_shared == std::vector<usize>{0, 1});
 }
 
-TEST_CASE("contraction_output_tensor preserves left then right leg ordering", "[tensor]")
+TEST_CASE("contraction_output_shape and legs preserve left then right ordering", "[tensor]")
 {
     const auto left = Tensor({2, 3, 5, 7}, {"j", "i", "a", "b"});
     const auto right = Tensor({11, 13, 3, 2}, {"c", "d", "i", "j"});
 
-    const auto output = contraction_output_tensor(left, right);
     const std::array<std::string, 4> expected_legs{"a", "b", "c", "d"};
+    const std::array<usize, 4> expected_shape{5, 7, 11, 13};
 
-    REQUIRE(output.shape(0) == 5zu);
-    REQUIRE(output.shape(1) == 7zu);
-    REQUIRE(output.shape(2) == 11zu);
-    REQUIRE(output.shape(3) == 13zu);
-    REQUIRE(std::ranges::equal(output.leg_names(), std::span<const std::string>{expected_legs}));
-
-    for (auto index = 0zu; index < output.size(); ++index)
-    {
-        REQUIRE(output.array().data(index) == Catch::Approx(0.0));
-    }
+    REQUIRE(std::ranges::equal(
+        contraction_output_shape(left, right),
+        std::span<const usize>{expected_shape}
+    ));
+    REQUIRE(std::ranges::equal(
+        contraction_output_legs(left, right),
+        std::span<const std::string>{expected_legs}
+    ));
 }
 
-TEST_CASE("contraction_output_tensor rejects mismatched shared extents", "[tensor]")
+TEST_CASE("contraction_output_shape rejects mismatched shared extents", "[tensor]")
 {
     const auto left = Tensor({2, 3, 5, 7}, {"j", "i", "a", "b"});
     const auto right = Tensor({11, 13, 4, 2}, {"c", "d", "i", "j"});
 
-    REQUIRE_THROWS_AS(contraction_output_tensor(left, right), std::invalid_argument);
+    REQUIRE_THROWS_AS(contraction_output_shape(left, right), std::invalid_argument);
     REQUIRE_THROWS_AS(contract(left, right), std::invalid_argument);
 }
 
