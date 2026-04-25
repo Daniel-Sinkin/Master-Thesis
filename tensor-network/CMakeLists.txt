@@ -52,6 +52,7 @@ add_library(tn_lib STATIC
   src/lib/tensor/compare.cpp
   src/lib/tensor/environment.cpp
   src/lib/tensor/mps.cpp
+  src/lib/tensor/peps.cpp
   src/lib/tensor/tensor.cpp
 )
 target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
@@ -173,6 +174,7 @@ if (TN_BUILD_TESTS)
     tests/tensor_contraction_tests.cpp
     tests/environment_tests.cpp
     tests/mps_tests.cpp
+    tests/peps_tests.cpp
     tests/tensor_tests.cpp
   )
   set_target_properties(tn_tests PROPERTIES OUTPUT_NAME tensor-network-tests)

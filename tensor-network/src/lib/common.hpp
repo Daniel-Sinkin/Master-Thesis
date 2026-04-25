@@ -1,13 +1,17 @@
 // lib/common.hpp
 #pragma once
 
+#include <array>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iomanip>
 #include <numeric>
 #include <span>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 #if __has_include(<stdfloat>)
@@ -48,6 +52,29 @@ struct LogSettings
 {
     std::string_view name{};
 };
+
+[[nodiscard]] inline auto format_bytes(usize bytes, usize digits = 2) -> std::string
+{
+    constexpr auto units = std::array<std::string_view, 5>{"B", "KiB", "MiB", "GiB", "TiB"};
+
+    auto unit_index = 0zu;
+    auto value = static_cast<long double>(bytes);
+    while (value >= 1024.0L and unit_index + 1 < units.size())
+    {
+        value /= 1024.0L;
+        ++unit_index;
+    }
+
+    if (unit_index == 0)
+    {
+        return std::to_string(bytes) + " B";
+    }
+
+    auto buffer = std::ostringstream{};
+    buffer << std::fixed << std::setprecision(static_cast<int>(digits)) << value << ' '
+           << units[unit_index];
+    return buffer.str();
+}
 
 template <std::integral Integer>
 [[nodiscard]] constexpr auto iota_n(Integer end)
@@ -99,6 +126,16 @@ namespace literals
 [[nodiscard]] constexpr auto operator""_mib(unsigned long long value) noexcept -> usize
 {
     return static_cast<usize>(value * 1024ULL * 1024ULL);
+}
+
+[[nodiscard]] constexpr auto operator""_gib(unsigned long long value) noexcept -> usize
+{
+    return static_cast<usize>(value * 1024ULL * 1024ULL * 1024ULL);
+}
+
+[[nodiscard]] constexpr auto operator""_tib(unsigned long long value) noexcept -> usize
+{
+    return static_cast<usize>(value * 1024ULL * 1024ULL * 1024ULL * 1024ULL);
 }
 
 }  // namespace literals

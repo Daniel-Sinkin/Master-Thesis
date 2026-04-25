@@ -9,6 +9,8 @@ namespace ds_tn
 namespace
 {
 
+using namespace literals;
+
 template <typename Range>
 [[nodiscard]] auto collect(Range&& range)
 {
@@ -40,6 +42,15 @@ TEST_CASE("inner_product helper computes the explicit transform reduce form", "[
 
     const auto shorter = std::array<usize, 2>{1, 2};
     REQUIRE_THROWS_AS(inner_product(std::span{lhs}, std::span{shorter}), std::invalid_argument);
+}
+
+TEST_CASE("format_bytes selects binary units and honours precision", "[common]")
+{
+    REQUIRE(format_bytes(999) == "999 B");
+    REQUIRE(format_bytes(1024) == "1.00 KiB");
+    REQUIRE(format_bytes(1536) == "1.50 KiB");
+    REQUIRE(format_bytes(1536, 1) == "1.5 KiB");
+    REQUIRE(format_bytes(1_tib) == "1.00 TiB");
 }
 
 }  // namespace ds_tn
