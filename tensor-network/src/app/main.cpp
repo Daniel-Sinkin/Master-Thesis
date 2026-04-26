@@ -1,4 +1,5 @@
 // app/main.cpp
+#include "permutation/permutation.hpp"
 #include "tensor/contraction.hpp"
 #include "tensor/peps.hpp"
 
@@ -17,30 +18,14 @@ int main()
         }
     );
 
-    std::println("PEPS metadata:");
-    peps.print_metadata({.include_memory = true});
+    // Copying
+    auto _0_0 = peps(0, 0);
+    auto _1_0 = peps(1, 0);
 
-    auto top_left = peps(0, 0);
-    auto top_left_neighbor = peps(0, 1);
-
-    std::println("\nCopied tensors before contraction:");
-    top_left.print_metadata("top_left_copy");
-    top_left_neighbor.print_metadata("top_left_neighbor_copy");
-
-    top_left.rename_leg(
-        top_left.leg_name(Peps::k_leg_right),
-        top_left_neighbor.leg_name(Peps::k_leg_left)
-    );
-
-    std::println("\nCopied tensors after aligning the shared bond:");
-    top_left.print_metadata("top_left_copy_aligned");
-    top_left_neighbor.print_metadata("top_left_neighbor_copy");
-
-    const auto contracted = contract(top_left, top_left_neighbor);
-
-    std::println("\nContracted tensor metadata:");
-    contracted.print_metadata("contracted_top_left_pair");
-
-    std::println("\nPEPS metadata after the local contraction demo (network unchanged):");
-    peps.print_metadata({.include_memory = true});
+    _0_0.rename_leg("b0,0", "t1,0");
+    const auto top_left = contract(_0_0, _1_0);
+    top_left.print_metadata({.name = "top_left after contraction"});
+    // got r0,0; t0,0; l0,0; p0,0; r1,0; l1,0; b1,0; p1,0
+    const auto grouped = apply_permutation(top_left, Permutation{6, 2, 0, 3, 7, 1, 4, 5});
+    grouped.print_metadata({.name = "top_left grouped for boundary MPS"});
 }
