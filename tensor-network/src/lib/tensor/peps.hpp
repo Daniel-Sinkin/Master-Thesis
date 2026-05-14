@@ -30,6 +30,7 @@ class Peps
         usize n_cols{3};
         usize bond_dim{2};
         usize physical_dim{2};
+        bool fully_padded{false};
 
         [[nodiscard]] auto check_validity() const -> ConfigValidity;
         [[nodiscard]] auto to_string() const -> std::string;
@@ -61,6 +62,7 @@ class Peps
     [[nodiscard]] auto n_cols() const noexcept -> usize;
     [[nodiscard]] auto bond_dim() const noexcept -> usize;
     [[nodiscard]] auto physical_dim() const noexcept -> usize;
+    [[nodiscard]] auto fully_padded() const noexcept -> bool;
     [[nodiscard]] auto size() const noexcept -> usize;
     [[nodiscard]] auto tensors() noexcept -> std::span<Tensor>;
     [[nodiscard]] auto tensors() const noexcept -> std::span<const Tensor>;
@@ -84,6 +86,7 @@ struct RandomPepsConfig
 {
     usize physical_dim{2};
     usize bond_dim{2};
+    bool fully_padded{false};
 
     RandomOptions random_options{RandomNormalOptions{.mu = 0.0, .sigma = 0.1}};
     std::optional<TensorSeed> seed{};

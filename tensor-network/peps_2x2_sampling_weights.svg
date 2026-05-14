@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172026}.axis{stroke:#263238;stroke-width:1.2}.grid{stroke:#d7dde2;stroke-width:1}.bar{fill:#2f7f9f}.value{font-size:12px;text-anchor:middle}.label{font-size:12px;text-anchor:end}.tick{font-size:12px;text-anchor:end}.title{font-size:22px;font-weight:700;text-anchor:middle}</style>
+<text class="title" x="600.0" y="28">2x2 PEPS sampling weights p_Psi(S)</text>
+<line class="grid" x1="72" y1="544.00" x2="1172" y2="544.00"/>
+<text class="tick" x="62" y="548.00">0.0%</text>
+<line class="grid" x1="72" y1="444.00" x2="1172" y2="444.00"/>
+<text class="tick" x="62" y="448.00">12.2%</text>
+<line class="grid" x1="72" y1="344.00" x2="1172" y2="344.00"/>
+<text class="tick" x="62" y="348.00">24.3%</text>
+<line class="grid" x1="72" y1="244.00" x2="1172" y2="244.00"/>
+<text class="tick" x="62" y="248.00">36.5%</text>
+<line class="grid" x1="72" y1="144.00" x2="1172" y2="144.00"/>
+<text class="tick" x="62" y="148.00">48.7%</text>
+<line class="grid" x1="72" y1="44.00" x2="1172" y2="44.00"/>
+<text class="tick" x="62" y="48.00">60.8%</text>
+<line class="axis" x1="72" y1="44" x2="72" y2="544"/>
+<line class="axis" x1="72" y1="544" x2="1172" y2="544"/>
+<rect class="bar" x="81.62" y="543.93" width="49.50" height="0.07"/>
+<text class="value" x="106.38" y="537.93">0.01%</text>
+<text class="label" transform="rotate(-45 110.38 596.00)" x="110.38" y="596.00">0000</text>
+<rect class="bar" x="150.38" y="541.59" width="49.50" height="2.41"/>
+<text class="value" x="175.12" y="535.59">0.29%</text>
+<text class="label" transform="rotate(-45 179.12 596.00)" x="179.12" y="596.00">0001</text>
+<rect class="bar" x="219.12" y="532.39" width="49.50" height="11.61"/>
+<text class="value" x="243.88" y="526.39">1.41%</text>
+<text class="label" transform="rotate(-45 247.88 596.00)" x="247.88" y="596.00">0010</text>
+<rect class="bar" x="287.88" y="456.39" width="49.50" height="87.61"/>
+<text class="value" x="312.62" y="450.39">10.66%</text>
+<text class="label" transform="rotate(-45 316.62 596.00)" x="316.62" y="596.00">0011</text>
+<rect class="bar" x="356.62" y="540.87" width="49.50" height="3.13"/>
+<text class="value" x="381.38" y="534.87">0.38%</text>
+<text class="label" transform="rotate(-45 385.38 596.00)" x="385.38" y="596.00">0100</text>
+<rect class="bar" x="425.38" y="542.94" width="49.50" height="1.06"/>
+<text class="value" x="450.12" y="536.94">0.13%</text>
+<text class="label" transform="rotate(-45 454.12 596.00)" x="454.12" y="596.00">0101</text>
+<rect class="bar" x="494.12" y="109.22" width="49.50" height="434.78"/>
+<text class="value" x="518.88" y="103.22">52.90%</text>
+<text class="label" transform="rotate(-45 522.88 596.00)" x="522.88" y="596.00">0110</text>
+<rect class="bar" x="562.88" y="519.78" width="49.50" height="24.22"/>
+<text class="value" x="587.62" y="513.78">2.95%</text>
+<text class="label" transform="rotate(-45 591.62 596.00)" x="591.62" y="596.00">0111</text>
+<rect class="bar" x="631.62" y="541.90" width="49.50" height="2.10"/>
+<text class="value" x="656.38" y="535.90">0.26%</text>
+<text class="label" transform="rotate(-45 660.38 596.00)" x="660.38" y="596.00">1000</text>
+<rect class="bar" x="700.38" y="498.33" width="49.50" height="45.67"/>
+<text class="value" x="725.12" y="492.33">5.56%</text>
+<text class="label" transform="rotate(-45 729.12 596.00)" x="729.12" y="596.00">1001</text>
+<rect class="bar" x="769.12" y="486.95" width="49.50" height="57.05"/>
+<text class="value" x="793.88" y="480.95">6.94%</text>
+<text class="label" transform="rotate(-45 797.88 596.00)" x="797.88" y="596.00">1010</text>
+<rect class="bar" x="837.88" y="532.73" width="49.50" height="11.27"/>
+<text class="value" x="862.62" y="526.73">1.37%</text>
+<text class="label" transform="rotate(-45 866.62 596.00)" x="866.62" y="596.00">1011</text>
+<rect class="bar" x="906.62" y="542.70" width="49.50" height="1.30"/>
+<text class="value" x="931.38" y="536.70">0.16%</text>
+<text class="label" transform="rotate(-45 935.38 596.00)" x="935.38" y="596.00">1100</text>
+<rect class="bar" x="975.38" y="476.89" width="49.50" height="67.11"/>
+<text class="value" x="1000.12" y="470.89">8.17%</text>
+<text class="label" transform="rotate(-45 1004.12 596.00)" x="1004.12" y="596.00">1101</text>
+<rect class="bar" x="1044.12" y="516.47" width="49.50" height="27.53"/>
+<text class="value" x="1068.88" y="510.47">3.35%</text>
+<text class="label" transform="rotate(-45 1072.88 596.00)" x="1072.88" y="596.00">1110</text>
+<rect class="bar" x="1112.88" y="499.04" width="49.50" height="44.96"/>
+<text class="value" x="1137.62" y="493.04">5.47%</text>
+<text class="label" transform="rotate(-45 1141.62 596.00)" x="1141.62" y="596.00">1111</text>
+<text x="600.0" y="626" text-anchor="middle" font-size="13">basis configuration S</text>
+<text transform="rotate(-90 18 320.0)" x="18" y="320.0" text-anchor="middle" font-size="13">relative sampling weight</text>
+</svg>

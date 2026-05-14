@@ -22,6 +22,12 @@ namespace ds_tn
 
 using NDArraySeed = std::mt19937_64::result_type;
 
+struct IndexSlice
+{
+    usize begin{};
+    usize end{};
+};
+
 class NDArray;
 [[nodiscard]] auto truncate_cols(const NDArray& mat, usize cols) -> NDArray;
 [[nodiscard]] auto truncate_rows(const NDArray& mat, usize rows) -> NDArray;
@@ -86,12 +92,16 @@ class NDArray
 
     [[nodiscard]] static auto matrix(std::initializer_list<std::initializer_list<f64>> rows)
         -> NDArray;
-    [[nodiscard]] static auto rank3(
-        std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
-    ) -> NDArray;
+    [[nodiscard]] static auto
+    rank3(std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices)
+        -> NDArray;
     [[nodiscard]] static auto reshape(const NDArray& array, std::span<const usize> new_shape)
         -> NDArray;
     [[nodiscard]] static auto reshape(const NDArray& array, std::initializer_list<usize> new_shape)
+        -> NDArray;
+    [[nodiscard]] static auto slice(const NDArray& array, std::span<const IndexSlice> slices)
+        -> NDArray;
+    [[nodiscard]] static auto slice(const NDArray& array, std::initializer_list<IndexSlice> slices)
         -> NDArray;
     [[nodiscard]] static auto squeeze(const NDArray& array) -> NDArray;
     [[nodiscard]] static auto same_shape(const NDArray& lhs, const NDArray& rhs) noexcept -> bool;
@@ -137,6 +147,8 @@ class NDArray
     [[nodiscard]] auto diag() const -> NDArray;
     [[nodiscard]] auto reshape(std::span<const usize> new_shape) const -> NDArray;
     [[nodiscard]] auto reshape(std::initializer_list<usize> new_shape) const -> NDArray;
+    [[nodiscard]] auto slice(std::span<const IndexSlice> slices) const -> NDArray;
+    [[nodiscard]] auto slice(std::initializer_list<IndexSlice> slices) const -> NDArray;
     [[nodiscard]] auto squeeze() const -> NDArray;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto normalize() -> void;

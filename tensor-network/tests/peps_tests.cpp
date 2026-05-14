@@ -2,28 +2,26 @@
 #include "tensor/contraction.hpp"
 #include "tensor/peps.hpp"
 
-#include <catch2/catch_test_macros.hpp>
-
 #include <array>
+#include <catch2/catch_test_macros.hpp>
 
 namespace ds_tn
 {
 
 TEST_CASE("Peps constructor creates the expected grid topology", "[tensor][peps]")
 {
-    const auto peps = Peps{
-        Peps::Config{
-            .n_rows = 3,
-            .n_cols = 4,
-            .bond_dim = 5,
-            .physical_dim = 3,
-        }
-    };
+    const auto peps = Peps{Peps::Config{
+        .n_rows = 3,
+        .n_cols = 4,
+        .bond_dim = 5,
+        .physical_dim = 3,
+    }};
 
     REQUIRE(peps.n_rows() == 3zu);
     REQUIRE(peps.n_cols() == 4zu);
     REQUIRE(peps.bond_dim() == 5zu);
     REQUIRE(peps.physical_dim() == 3zu);
+    REQUIRE_FALSE(peps.fully_padded());
     REQUIRE(peps.size() == 12zu);
 
     REQUIRE(std::ranges::equal(peps(0, 0).shape(), std::array<usize, 5>{5, 1, 1, 5, 3}));
@@ -39,6 +37,24 @@ TEST_CASE("Peps constructor creates the expected grid topology", "[tensor][peps]
     REQUIRE(peps(0, 0).leg_name(Peps::k_leg_right) != peps(0, 1).leg_name(Peps::k_leg_left));
 
     REQUIRE(peps.total_entries() == 6300zu);
+}
+
+TEST_CASE("Peps constructor can keep full virtual padding on boundaries", "[tensor][peps]")
+{
+    const auto peps = Peps{Peps::Config{
+        .n_rows = 3,
+        .n_cols = 4,
+        .bond_dim = 5,
+        .physical_dim = 3,
+        .fully_padded = true,
+    }};
+
+    REQUIRE(peps.fully_padded());
+    REQUIRE(std::ranges::equal(peps(0, 0).shape(), std::array<usize, 5>{5, 5, 5, 5, 3}));
+    REQUIRE(std::ranges::equal(peps(0, 1).shape(), std::array<usize, 5>{5, 5, 5, 5, 3}));
+    REQUIRE(std::ranges::equal(peps(1, 1).shape(), std::array<usize, 5>{5, 5, 5, 5, 3}));
+    REQUIRE(std::ranges::equal(peps(2, 3).shape(), std::array<usize, 5>{5, 5, 5, 5, 3}));
+    REQUIRE(peps.total_entries() == 22500zu);
 }
 
 TEST_CASE("Peps indexing validates bounds", "[tensor][peps]")
@@ -85,15 +101,13 @@ TEST_CASE("random_peps is deterministic when seeded", "[tensor][peps]")
 
 TEST_CASE("random_peps validates inputs and reports unimplemented suppression", "[tensor][peps]")
 {
-    REQUIRE_THROWS_AS(random_peps(2, 3), std::invalid_argument);
-    REQUIRE_THROWS_AS(random_peps(3, 2), std::invalid_argument);
+    REQUIRE_THROWS_AS(random_peps(0, 3), std::invalid_argument);
+    REQUIRE_THROWS_AS(random_peps(3, 0), std::invalid_argument);
     REQUIRE_THROWS_AS(
-        random_peps(3, 3, RandomPepsConfig{.physical_dim = 0, .bond_dim = 2}),
-        std::invalid_argument
+        random_peps(3, 3, RandomPepsConfig{.physical_dim = 0, .bond_dim = 2}), std::invalid_argument
     );
     REQUIRE_THROWS_AS(
-        random_peps(3, 3, RandomPepsConfig{.physical_dim = 2, .bond_dim = 0}),
-        std::invalid_argument
+        random_peps(3, 3, RandomPepsConfig{.physical_dim = 2, .bond_dim = 0}), std::invalid_argument
     );
     REQUIRE_THROWS_AS(
         random_peps(
@@ -107,7 +121,10 @@ TEST_CASE("random_peps validates inputs and reports unimplemented suppression", 
     );
 }
 
-TEST_CASE("Contracting copied neighbouring PEPS tensors leaves the original PEPS unchanged", "[tensor][peps]")
+TEST_CASE(
+    "Contracting copied neighbouring PEPS tensors leaves the original PEPS unchanged",
+    "[tensor][peps]"
+)
 {
     const auto peps = random_peps(
         3,
@@ -132,9 +149,7 @@ TEST_CASE("Contracting copied neighbouring PEPS tensors leaves the original PEPS
     REQUIRE(std::ranges::equal(peps(0, 1).leg_names(), original_right.leg_names()));
 
     REQUIRE(contracted.validity() == TensorValidity::valid);
-    REQUIRE(
-        std::ranges::equal(contracted.shape(), std::array<usize, 8>{1, 1, 3, 2, 3, 1, 3, 2})
-    );
+    REQUIRE(std::ranges::equal(contracted.shape(), std::array<usize, 8>{1, 1, 3, 2, 3, 1, 3, 2}));
     REQUIRE(
         std::ranges::equal(
             contracted.leg_names(),

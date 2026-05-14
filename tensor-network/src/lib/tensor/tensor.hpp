@@ -71,9 +71,13 @@ class Tensor
 
     [[nodiscard]] static auto matrix(std::initializer_list<std::initializer_list<f64>> rows)
         -> Tensor;
-    [[nodiscard]] static auto rank3(
-        std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
-    ) -> Tensor;
+    [[nodiscard]] static auto
+    rank3(std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices)
+        -> Tensor;
+    [[nodiscard]] static auto slice(const Tensor& tensor, std::span<const IndexSlice> slices)
+        -> Tensor;
+    [[nodiscard]] static auto slice(const Tensor& tensor, std::initializer_list<IndexSlice> slices)
+        -> Tensor;
 
     [[nodiscard]] auto rank() const noexcept -> usize;
     [[nodiscard]] auto size() const noexcept -> usize;
@@ -107,6 +111,8 @@ class Tensor
     [[nodiscard]] auto indices_from_linear(usize linear_index) const -> std::vector<usize>;
     [[nodiscard]] auto validity() const noexcept -> TensorValidity;
     [[nodiscard]] auto diag() const -> Tensor;
+    [[nodiscard]] auto slice(std::span<const IndexSlice> slices) const -> Tensor;
+    [[nodiscard]] auto slice(std::initializer_list<IndexSlice> slices) const -> Tensor;
     [[nodiscard]] auto format_metadata() const -> std::string;
     auto rename_leg(const std::string& old_name, const std::string& new_name) -> void;
     auto print_metadata(LogSettings settings, std::ostream& out = std::cout) const -> void;

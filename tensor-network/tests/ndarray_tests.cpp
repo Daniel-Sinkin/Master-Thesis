@@ -114,6 +114,48 @@ TEST_CASE("NDArray reshape validates size", "[ndarray]")
     REQUIRE_THROWS_AS(matrix.reshape({3, 3}), std::invalid_argument);
 }
 
+TEST_CASE("NDArray slice copies half-open index blocks", "[ndarray]")
+{
+    const auto matrix = NDArray::iota(20).reshape({4, 5});
+
+    const auto block = matrix.slice({{1, 3}, {2, 5}});
+
+    REQUIRE(block.same_shape(NDArray({2, 3})));
+    REQUIRE(close_per_element(
+        block,
+        NDArray::matrix({
+            {7.0, 8.0, 9.0},
+            {12.0, 13.0, 14.0},
+        }),
+        0.0
+    ));
+}
+
+TEST_CASE("NDArray slice supports empty slices and higher-rank tensors", "[ndarray]")
+{
+    const auto matrix = NDArray::iota(20).reshape({4, 5});
+    const auto empty = matrix.slice({{2, 2}, {1, 4}});
+
+    REQUIRE(empty.same_shape(NDArray({0, 3})));
+    REQUIRE(empty.size() == 0zu);
+
+    const auto tensor = NDArray::iota(24).reshape({2, 3, 4});
+    const auto block = tensor.slice({{1, 2}, {0, 2}, {1, 4}});
+
+    REQUIRE(block.same_shape(NDArray({1, 2, 3})));
+    REQUIRE(block(0, 0, 0) == Catch::Approx(13.0));
+    REQUIRE(block(0, 1, 2) == Catch::Approx(19.0));
+}
+
+TEST_CASE("NDArray slice validates rank and slice bounds", "[ndarray]")
+{
+    const auto matrix = NDArray::iota(20).reshape({4, 5});
+
+    REQUIRE_THROWS_AS(matrix.slice({{0, 2}}), std::invalid_argument);
+    REQUIRE_THROWS_AS(matrix.slice({{0, 2}, {4, 3}}), std::invalid_argument);
+    REQUIRE_THROWS_AS(matrix.slice({{0, 5}, {0, 1}}), std::out_of_range);
+}
+
 TEST_CASE("NDArray squeeze removes singleton dimensions", "[ndarray]")
 {
     const auto array = NDArray::iota(8).reshape({1, 2, 1, 2, 2, 1});
@@ -208,7 +250,9 @@ TEST_CASE("NDArray diag expands a vector into a dense diagonal matrix", "[ndarra
     REQUIRE(close_per_element(diagonal_static, diagonal_member, 0.0));
 
     REQUIRE_THROWS_AS(NDArray::diag(NDArray::scalar(1.0)), std::invalid_argument);
-    REQUIRE_THROWS_AS(NDArray::diag(NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        NDArray::diag(NDArray::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument
+    );
 }
 
 TEST_CASE("NDArray indexing uses row-major strides and supports negative indices", "[ndarray]")

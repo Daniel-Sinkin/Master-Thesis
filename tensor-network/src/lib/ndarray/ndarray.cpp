@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cblas.h>
 #include <cmath>
 #include <functional>
 #include <iomanip>
@@ -14,7 +15,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <cblas.h>
 
 namespace ds_tn
 {
@@ -237,6 +237,55 @@ auto NDArray::reshape(const NDArray& array, std::initializer_list<usize> new_sha
     return NDArray::reshape(array, std::span<const usize>{new_shape.begin(), new_shape.size()});
 }
 
+auto NDArray::slice(const NDArray& array, std::span<const IndexSlice> slices) -> NDArray
+{
+    {  // Expects
+        if (array.validity() != NDArrayValidity::valid)
+        {
+            throw std::invalid_argument("NDArray::slice requires a valid NDArray.");
+        }
+        if (slices.size() != array.rank())
+        {
+            throw std::invalid_argument("NDArray::slice requires one slice per array axis.");
+        }
+    }
+
+    auto out_shape = std::vector<usize>{};
+    out_shape.reserve(array.rank());
+    for (auto axis = 0zu; axis < array.rank(); ++axis)
+    {
+        const auto slice = slices[axis];
+        if (slice.begin > slice.end)
+        {
+            throw std::invalid_argument("NDArray::slice requires begin <= end for every axis.");
+        }
+        if (slice.end > array.shape(axis))
+        {
+            throw std::out_of_range("NDArray::slice end exceeds array extent.");
+        }
+        out_shape.push_back(slice.end - slice.begin);
+    }
+
+    auto out = NDArray{std::move(out_shape)};
+    auto source_indices = std::vector<usize>(array.rank());
+    for (auto linear_index = 0zu; linear_index < out.size(); ++linear_index)
+    {
+        const auto out_indices = out.indices_from_linear(linear_index);
+        for (auto axis = 0zu; axis < array.rank(); ++axis)
+        {
+            source_indices[axis] = slices[axis].begin + out_indices[axis];
+        }
+        out.data(linear_index) = array(std::span<const usize>{source_indices});
+    }
+
+    return out;
+}
+
+auto NDArray::slice(const NDArray& array, std::initializer_list<IndexSlice> slices) -> NDArray
+{
+    return NDArray::slice(array, std::span<const IndexSlice>{slices.begin(), slices.size()});
+}
+
 auto NDArray::squeeze(const NDArray& array) -> NDArray
 {
     {  // Expects
@@ -362,14 +411,12 @@ auto NDArray::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> 
     return out;
 }
 
-auto NDArray::rank3(
-    std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
-) -> NDArray
+auto NDArray::rank3(std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices)
+    -> NDArray
 {
     const auto slice_count = slices.size();
     const auto row_count = slice_count == 0 ? usize{0} : slices.begin()->size();
-    const auto col_count =
-        row_count == 0 ? usize{0} : slices.begin()->begin()->size();
+    const auto col_count = row_count == 0 ? usize{0} : slices.begin()->begin()->size();
 
     {  // Expects
         for (const auto& slice : slices)
@@ -493,6 +540,16 @@ auto NDArray::reshape(std::span<const usize> new_shape) const -> NDArray
 auto NDArray::reshape(std::initializer_list<usize> new_shape) const -> NDArray
 {
     return NDArray::reshape(*this, new_shape);
+}
+
+auto NDArray::slice(std::span<const IndexSlice> slices) const -> NDArray
+{
+    return NDArray::slice(*this, slices);
+}
+
+auto NDArray::slice(std::initializer_list<IndexSlice> slices) const -> NDArray
+{
+    return NDArray::slice(*this, slices);
 }
 
 auto NDArray::squeeze() const -> NDArray

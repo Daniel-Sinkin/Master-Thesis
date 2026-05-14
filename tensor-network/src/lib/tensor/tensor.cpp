@@ -93,8 +93,7 @@ auto Tensor::next_id() noexcept -> u64
     return next_tensor_id.fetch_add(1, std::memory_order_relaxed);
 }
 
-Tensor::Tensor(const Tensor& other)
-    : values_(other.values_), leg_names_(other.leg_names_)
+Tensor::Tensor(const Tensor& other) : values_(other.values_), leg_names_(other.leg_names_)
 {
 }
 
@@ -245,11 +244,27 @@ auto Tensor::matrix(std::initializer_list<std::initializer_list<f64>> rows) -> T
     return Tensor{NDArray::matrix(rows)};
 }
 
-auto Tensor::rank3(
-    std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices
-) -> Tensor
+auto Tensor::rank3(std::initializer_list<std::initializer_list<std::initializer_list<f64>>> slices)
+    -> Tensor
 {
     return Tensor{NDArray::rank3(slices)};
+}
+
+auto Tensor::slice(const Tensor& tensor, std::span<const IndexSlice> slices) -> Tensor
+{
+    {  // Expects
+        if (tensor.validity() != TensorValidity::valid)
+        {
+            throw std::invalid_argument("Tensor::slice requires a valid Tensor.");
+        }
+    }
+
+    return Tensor{NDArray::slice(tensor.array(), slices), tensor.leg_names()};
+}
+
+auto Tensor::slice(const Tensor& tensor, std::initializer_list<IndexSlice> slices) -> Tensor
+{
+    return Tensor::slice(tensor, std::span<const IndexSlice>{slices.begin(), slices.size()});
 }
 
 auto Tensor::rank() const noexcept -> usize
@@ -341,6 +356,16 @@ auto Tensor::validity() const noexcept -> TensorValidity
 auto Tensor::diag() const -> Tensor
 {
     return Tensor::diag(*this);
+}
+
+auto Tensor::slice(std::span<const IndexSlice> slices) const -> Tensor
+{
+    return Tensor::slice(*this, slices);
+}
+
+auto Tensor::slice(std::initializer_list<IndexSlice> slices) const -> Tensor
+{
+    return Tensor::slice(*this, slices);
 }
 
 auto Tensor::format_metadata() const -> std::string
@@ -466,8 +491,9 @@ auto TensorDebug::rename_leg(const std::string& old_name, const std::string& new
     log("after", "rename_leg", std::format("old_name={}, new_name={}", old_name, new_name));
 }
 
-auto TensorDebug::log(std::string_view phase, std::string_view operation, std::string_view detail) const
-    -> void
+auto TensorDebug::log(
+    std::string_view phase, std::string_view operation, std::string_view detail
+) const -> void
 {
     if (out_ == nullptr)
     {

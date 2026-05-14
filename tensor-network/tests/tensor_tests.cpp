@@ -82,6 +82,29 @@ TEST_CASE("Tensor accepts explicit leg names and delegates indexing to its NDArr
     REQUIRE(tensor.indices_from_linear(3) == std::vector<usize>{1, 1});
 }
 
+TEST_CASE("Tensor slice copies payload blocks and preserves leg names", "[tensor]")
+{
+    const auto tensor = Tensor(NDArray::iota(12).reshape({3, 4}), {"row", "col"});
+
+    const auto block = tensor.slice({{1, 3}, {1, 4}});
+    const auto expected_leg_names = std::array<std::string, 2>{"row", "col"};
+
+    REQUIRE(block.validity() == TensorValidity::valid);
+    REQUIRE(block.shape(0) == 2zu);
+    REQUIRE(block.shape(1) == 3zu);
+    REQUIRE(
+        std::ranges::equal(block.leg_names(), std::span<const std::string>{expected_leg_names})
+    );
+    REQUIRE(close_per_element(
+        block.array(),
+        NDArray::matrix({
+            {5.0, 6.0, 7.0},
+            {9.0, 10.0, 11.0},
+        }),
+        0.0
+    ));
+}
+
 TEST_CASE("Tensor constructors reject bad leg metadata", "[tensor]")
 {
     const auto matrix = NDArray::matrix({
@@ -208,14 +231,14 @@ TEST_CASE("Tensor diag expands a vector into a dense diagonal tensor", "[tensor]
     REQUIRE(diagonal_static(0, 1) == Catch::Approx(0.0));
     REQUIRE(diagonal_static(2, 1) == Catch::Approx(0.0));
     REQUIRE(
-        std::ranges::equal(
-            diagonal_static.leg_names(), std::span<const std::string>{expected_legs}
-        )
+        std::ranges::equal(diagonal_static.leg_names(), std::span<const std::string>{expected_legs})
     );
     REQUIRE(close_per_element(diagonal_static, diagonal_member, 0.0));
 
     REQUIRE_THROWS_AS(Tensor::diag(Tensor{}), std::invalid_argument);
-    REQUIRE_THROWS_AS(Tensor::diag(Tensor::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        Tensor::diag(Tensor::matrix({{1.0, 2.0}, {3.0, 4.0}})), std::invalid_argument
+    );
 }
 
 TEST_CASE("Tensor zero check respects tolerance", "[tensor][compare]")
@@ -243,9 +266,7 @@ TEST_CASE("Tensor metadata formatting reports shape and leg names", "[tensor][me
         {"row", "col"}
     );
 
-    REQUIRE(
-        tensor.format_metadata() == "Tensor(shape=[2 x 2], legs=[row, col])"
-    );
+    REQUIRE(tensor.format_metadata() == "Tensor(shape=[2 x 2], legs=[row, col])");
 }
 
 TEST_CASE("Tensor rename_leg updates a leg name and preserves uniqueness", "[tensor]")

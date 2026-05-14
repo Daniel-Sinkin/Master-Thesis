@@ -39,6 +39,7 @@ target_include_directories(tn_pch PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
 target_precompile_headers(tn_pch PUBLIC src/lib/pch.hpp)
 
 add_library(tn_lib STATIC
+  src/lib/models/heisenberg.cpp
   src/lib/models/transverse_ising.cpp
   src/lib/permutation/permutation.cpp
   src/lib/ndarray/ndarray.cpp
@@ -53,6 +54,7 @@ add_library(tn_lib STATIC
   src/lib/tensor/environment.cpp
   src/lib/tensor/mps.cpp
   src/lib/tensor/peps.cpp
+  src/lib/tensor/sampling.cpp
   src/lib/tensor/tensor.cpp
 )
 target_include_directories(tn_lib PUBLIC ${CMAKE_SOURCE_DIR}/src/lib)
@@ -164,6 +166,7 @@ if (TN_BUILD_TESTS)
 
   add_executable(tn_tests
     tests/common_tests.cpp
+    tests/heisenberg_tests.cpp
     tests/model_tests.cpp
     tests/permutation_tests.cpp
     tests/ndarray_tests.cpp
@@ -175,6 +178,7 @@ if (TN_BUILD_TESTS)
     tests/environment_tests.cpp
     tests/mps_tests.cpp
     tests/peps_tests.cpp
+    tests/sampling_tests.cpp
     tests/tensor_tests.cpp
   )
   set_target_properties(tn_tests PROPERTIES OUTPUT_NAME tensor-network-tests)

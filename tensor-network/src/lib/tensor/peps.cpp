@@ -18,6 +18,11 @@ namespace
         cfg.bond_dim, cfg.bond_dim, cfg.bond_dim, cfg.bond_dim, cfg.physical_dim
     };
 
+    if (cfg.fully_padded)
+    {
+        return shape;
+    }
+
     if (row == 0zu)
     {
         shape[Peps::k_leg_top] = Peps::k_dummy_dim;
@@ -41,12 +46,8 @@ namespace
 [[nodiscard]] auto node_leg_names(usize row, usize col) -> std::array<std::string, 5>
 {
     const auto format_leg = [row, col](std::string_view symbol)
-    {
-        return std::format("{}{},{}", symbol, row, col);
-    };
-    return {
-        format_leg("r"), format_leg("t"), format_leg("l"), format_leg("b"), format_leg("p")
-    };
+    { return std::format("{}{},{}", symbol, row, col); };
+    return {format_leg("r"), format_leg("t"), format_leg("l"), format_leg("b"), format_leg("p")};
 }
 
 [[nodiscard]] auto derived_seed(std::optional<TensorSeed> base_seed, usize linear_index)
@@ -79,11 +80,11 @@ auto require_valid_config(const Peps::Config& cfg, const char* function_name) ->
 
 auto Peps::Config::check_validity() const -> ConfigValidity
 {
-    if (n_rows < 3)
+    if (n_rows < 1)
     {
         return ConfigValidity::too_few_rows;
     }
-    if (n_cols < 3)
+    if (n_cols < 1)
     {
         return ConfigValidity::too_few_cols;
     }
@@ -101,11 +102,12 @@ auto Peps::Config::check_validity() const -> ConfigValidity
 auto Peps::Config::to_string() const -> std::string
 {
     return std::format(
-        "Peps::Config(n_rows={},n_cols={},bond_dim={},physical_dim={})",
+        "Peps::Config(n_rows={},n_cols={},bond_dim={},physical_dim={},fully_padded={})",
         n_rows,
         n_cols,
         bond_dim,
-        physical_dim
+        physical_dim,
+        fully_padded
     );
 }
 
@@ -168,6 +170,11 @@ auto Peps::physical_dim() const noexcept -> usize
     return cfg_.physical_dim;
 }
 
+auto Peps::fully_padded() const noexcept -> bool
+{
+    return cfg_.fully_padded;
+}
+
 auto Peps::size() const noexcept -> usize
 {
     return nodes_.size();
@@ -217,11 +224,12 @@ auto Peps::total_entries() const noexcept -> usize
 auto Peps::print_metadata(MetadataConfig cfg) const -> void
 {
     const auto inner = std::format(
-        "n_rows={},n_cols={},bond_dim={},physical_dim={}",
+        "n_rows={},n_cols={},bond_dim={},physical_dim={},fully_padded={}",
         n_rows(),
         n_cols(),
         bond_dim(),
-        physical_dim()
+        physical_dim(),
+        fully_padded()
     );
     if (cfg.include_classname)
     {
@@ -278,6 +286,7 @@ auto random_peps(usize n_rows, usize n_cols, RandomPepsConfig cfg) -> Peps
         .n_cols = n_cols,
         .bond_dim = cfg.bond_dim,
         .physical_dim = cfg.physical_dim,
+        .fully_padded = cfg.fully_padded,
     };
 
     {  // Expects
