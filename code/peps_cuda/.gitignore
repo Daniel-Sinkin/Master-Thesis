@@ -1,0 +1,9 @@
+build*/
+__pycache__/
+tools/__pycache__/
+*.nsys-rep
+*.sqlite
+*.ncu-rep
+peps_cuda_*_[0-9]*
+peps-cuda-*.out
+peps-cuda-*.err

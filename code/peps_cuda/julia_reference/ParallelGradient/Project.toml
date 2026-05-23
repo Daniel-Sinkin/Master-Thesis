@@ -1,0 +1,7 @@
+name = "ParallelGradient"
+uuid = "2abb11c0-4451-46e5-9056-fbb582a36d1b"
+authors = ["Reference harness compatibility stub"]
+version = "0.0.0"
+
+[deps]
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"

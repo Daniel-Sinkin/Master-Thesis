@@ -1,0 +1,9 @@
+timestamp=2026-05-15T20:03:25.339
+julia_version=1.11.5
+threads=1
+blas_threads=1
+scenario=real_3x3
+samples=16
+sample_seed=777
+regularization=multiply_algebraic_spectrum!(alpha=3.0)
+compiled_modules_note=run with --compiled-modules=no for this reference harness

@@ -1,0 +1,15 @@
+name = "PEPSCudaJuliaReference"
+uuid = "7772d308-3cd2-42fd-a8d8-55d6d73f81ea"
+authors = ["Daniel Sinkin", "Codex"]
+version = "0.1.0"
+
+[deps]
+ITensorMPS = "0d1a4710-d33b-49a5-8f18-73bdf49b47e2"
+ITensors = "9136182c-28ba-11e9-034c-db9fb085ebd5"
+ParallelGradient = "2abb11c0-4451-46e5-9056-fbb582a36d1b"
+QuantumNaturalGradient = "8d03283f-5cc1-4355-9ceb-601ddb1c7e78"
+QuantumNaturalfPEPS = "8cccb88f-824b-4ada-bd77-4bd123faaa4e"
+
+[compat]
+ITensorMPS = "0.2.2"
+ITensors = "0.6.23"

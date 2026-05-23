@@ -1,0 +1,22 @@
+──────────────────────────────────────────────────────────────────────────────
+                                     Time                    Allocations      
+                            ───────────────────────   ────────────────────────
+     Tot / % measured:           11.9s /  48.2%           22.6GiB /  50.1%    
+
+Section             ncalls     time    %tot     avg     alloc    %tot      avg
+──────────────────────────────────────────────────────────────────────────────
+sampling             1.02k    2.80s   48.9%  2.74ms   6.08GiB   53.5%  6.08MiB
+  env_sample         4.10k    1.29s   22.5%   314μs   2.99GiB   26.3%   765KiB
+  env_top            3.07k    699ms   12.2%   227μs   1.72GiB   15.1%   586KiB
+  env_row            4.10k   97.2ms    1.7%  23.7μs    221MiB    1.9%  55.3KiB
+energy               1.02k    935ms   16.3%   913μs   1.56GiB   13.8%  1.56MiB
+  fourbody_envs      1.02k    388ms    6.8%   379μs    792MiB    6.8%   792KiB
+  fourbody           1.02k    250ms    4.4%   244μs    382MiB    3.3%   382KiB
+  horizontal         1.02k    239ms    4.2%   233μs    401MiB    3.5%   401KiB
+vertical_envs        1.02k    859ms   15.0%   839μs   2.09GiB   18.4%  2.09MiB
+log_gradients        1.02k    425ms    7.4%   415μs    711MiB    6.1%   711KiB
+horizontal_envs      1.02k    275ms    4.8%   268μs    564MiB    4.8%   564KiB
+solver                   1    233ms    4.1%   233ms   32.6MiB    0.3%  32.6MiB
+precomp_sHψ_elems    1.02k    198ms    3.5%   193μs    353MiB    3.0%   353KiB
+jacobi_mean              1   2.27ms    0.0%  2.27ms    614KiB    0.0%   614KiB
+──────────────────────────────────────────────────────────────────────────────

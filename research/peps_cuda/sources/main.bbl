@@ -1,0 +1,1242 @@
+%apsrev4-2.bst 2019-01-14 (MD) hand-edited version of apsrev4-1.bst
+%Control: key (0)
+%Control: author (8) initials jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (0) allowed
+%Control: page (0) single
+%Control: year (1) truncated
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{96}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{https://doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{\citenamefont {Orús}(2014)}]{ORUS2014practical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Orús}},\ }\bibfield  {title} {\bibinfo {title} {A practical introduction to
+  tensor networks: Matrix product states and projected entangled pair states},\
+  }\href {https://doi.org/https://doi.org/10.1016/j.aop.2014.06.013} {\bibfield
+   {journal} {\bibinfo  {journal} {Annals of Physics}\ }\textbf {\bibinfo
+  {volume} {349}},\ \bibinfo {pages} {117} (\bibinfo {year}
+  {2014})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Cirac}\ \emph {et~al.}(2021)\citenamefont {Cirac},
+  \citenamefont {P\'erez-Garc\'{\i}a}, \citenamefont {Schuch},\ and\
+  \citenamefont {Verstraete}}]{Cirac21RevModPhys}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont
+  {Cirac}}, \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {P\'erez-Garc\'{\i}a}}, \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
+  {Schuch}},\ and\ \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
+  {Verstraete}},\ }\bibfield  {title} {\bibinfo {title} {Matrix product states
+  and projected entangled pair states: Concepts, symmetries, theorems},\ }\href
+  {https://doi.org/10.1103/RevModPhys.93.045003} {\bibfield  {journal}
+  {\bibinfo  {journal} {Rev. Mod. Phys.}\ }\textbf {\bibinfo {volume} {93}},\
+  \bibinfo {pages} {045003} (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Silvi}\ \emph {et~al.}(2019)\citenamefont {Silvi},
+  \citenamefont {Tschirsich}, \citenamefont {Gerster}, \citenamefont
+  {Jünemann}, \citenamefont {Jaschke}, \citenamefont {Rizzi},\ and\
+  \citenamefont {Montangero}}]{Rizzi19_anthology}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Silvi}}, \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Tschirsich}},
+  \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Gerster}}, \bibinfo
+  {author} {\bibfnamefont {J.}~\bibnamefont {Jünemann}}, \bibinfo {author}
+  {\bibfnamefont {D.}~\bibnamefont {Jaschke}}, \bibinfo {author} {\bibfnamefont
+  {M.}~\bibnamefont {Rizzi}},\ and\ \bibinfo {author} {\bibfnamefont
+  {S.}~\bibnamefont {Montangero}},\ }\bibfield  {title} {\bibinfo {title} {{The
+  Tensor Networks Anthology: Simulation techniques for many-body quantum
+  lattice systems}},\ }\href {https://doi.org/10.21468/SciPostPhysLectNotes.8}
+  {\bibfield  {journal} {\bibinfo  {journal} {SciPost Phys. Lect. Notes}\ ,\
+  \bibinfo {pages} {8}} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {White}(1992)}]{White92_DMRG}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~R.}\ \bibnamefont
+  {White}},\ }\bibfield  {title} {\bibinfo {title} {Density matrix formulation
+  for quantum renormalization groups},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.69.2863} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {69}},\ \bibinfo
+  {pages} {2863} (\bibinfo {year} {1992})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schollwöck}(2011)}]{SCHOLLWOCK2011_DMRG_MPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
+  {Schollwöck}},\ }\bibfield  {title} {\bibinfo {title} {The density-matrix
+  renormalization group in the age of matrix product states},\ }\href
+  {https://doi.org/https://doi.org/10.1016/j.aop.2010.09.012} {\bibfield
+  {journal} {\bibinfo  {journal} {Annals of Physics}\ }\textbf {\bibinfo
+  {volume} {326}},\ \bibinfo {pages} {96} (\bibinfo {year} {2011})},\ \bibinfo
+  {note} {january 2011 Special Issue}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Eisert}\ \emph {et~al.}(2010)\citenamefont {Eisert},
+  \citenamefont {Cramer},\ and\ \citenamefont {Plenio}}]{Eisert2010RevModPhys}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Eisert}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Cramer}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.~B.}\ \bibnamefont {Plenio}},\
+  }\bibfield  {title} {\bibinfo {title} {Colloquium: Area laws for the
+  entanglement entropy},\ }\href {https://doi.org/10.1103/RevModPhys.82.277}
+  {\bibfield  {journal} {\bibinfo  {journal} {Rev. Mod. Phys.}\ }\textbf
+  {\bibinfo {volume} {82}},\ \bibinfo {pages} {277} (\bibinfo {year}
+  {2010})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Laflorencie}(2016)}]{LAFLORENCIE20161}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
+  {Laflorencie}},\ }\bibfield  {title} {\bibinfo {title} {Quantum entanglement
+  in condensed matter systems},\ }\href
+  {https://doi.org/https://doi.org/10.1016/j.physrep.2016.06.008} {\bibfield
+  {journal} {\bibinfo  {journal} {Physics Reports}\ }\textbf {\bibinfo {volume}
+  {646}},\ \bibinfo {pages} {1} (\bibinfo {year} {2016})},\ \bibinfo {note}
+  {quantum entanglement in condensed matter systems}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Verstraete}\ and\ \citenamefont
+  {Cirac}(2004)}]{verstraete2004PEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
+  {Verstraete}}\ and\ \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont
+  {Cirac}},\ }\href {https://arxiv.org/abs/cond-mat/0407066} {\bibinfo {title}
+  {Renormalization algorithms for quantum-many body systems in two and higher
+  dimensions}} (\bibinfo {year} {2004}),\ \Eprint
+  {https://arxiv.org/abs/cond-mat/0407066} {arXiv:cond-mat/0407066
+  [cond-mat.str-el]} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Jordan}\ \emph {et~al.}(2008)\citenamefont {Jordan},
+  \citenamefont {Or\'us}, \citenamefont {Vidal}, \citenamefont {Verstraete},\
+  and\ \citenamefont {Cirac}}]{Jordan08_iPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Jordan}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Or\'us}},
+  \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Vidal}}, \bibinfo
+  {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\ and\ \bibinfo
+  {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\ }\bibfield  {title}
+  {\bibinfo {title} {Classical simulation of infinite-size quantum lattice
+  systems in two spatial dimensions},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.101.250602} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {101}},\
+  \bibinfo {pages} {250602} (\bibinfo {year} {2008})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Corboz}\ \emph {et~al.}(2014)\citenamefont {Corboz},
+  \citenamefont {Rice},\ and\ \citenamefont {Troyer}}]{Corboz14_iPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}}, \bibinfo {author} {\bibfnamefont {T.~M.}\ \bibnamefont {Rice}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Troyer}},\
+  }\bibfield  {title} {\bibinfo {title} {Competing states in the $t$-$j$ model:
+  Uniform $d$-wave state versus stripe state},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.113.046402} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {113}},\
+  \bibinfo {pages} {046402} (\bibinfo {year} {2014})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Corboz}(2016)}]{Corboz16_variational}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}},\ }\bibfield  {title} {\bibinfo {title} {Variational optimization
+  with infinite projected entangled-pair states},\ }\href
+  {https://doi.org/10.1103/PhysRevB.94.035133} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {94}},\ \bibinfo
+  {pages} {035133} (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vanderstraeten}\ \emph {et~al.}(2016)\citenamefont
+  {Vanderstraeten}, \citenamefont {Haegeman}, \citenamefont {Corboz},\ and\
+  \citenamefont {Verstraete}}]{Vanderstraeten16_gradient}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Vanderstraeten}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Haegeman}}, \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Corboz}},\
+  and\ \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\
+  }\bibfield  {title} {\bibinfo {title} {Gradient methods for variational
+  optimization of projected entangled-pair states},\ }\href
+  {https://doi.org/10.1103/PhysRevB.94.155123} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {94}},\ \bibinfo
+  {pages} {155123} (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liao}\ \emph {et~al.}(2019)\citenamefont {Liao},
+  \citenamefont {Liu}, \citenamefont {Wang},\ and\ \citenamefont
+  {Xiang}}]{Liao19_AD_PEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.-J.}\ \bibnamefont
+  {Liao}}, \bibinfo {author} {\bibfnamefont {J.-G.}\ \bibnamefont {Liu}},
+  \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont {Wang}},\ and\ \bibinfo
+  {author} {\bibfnamefont {T.}~\bibnamefont {Xiang}},\ }\bibfield  {title}
+  {\bibinfo {title} {Differentiable programming tensor networks},\ }\href
+  {https://doi.org/10.1103/PhysRevX.9.031041} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. X}\ }\textbf {\bibinfo {volume} {9}},\ \bibinfo {pages}
+  {031041} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liao}\ \emph {et~al.}(2017)\citenamefont {Liao},
+  \citenamefont {Xie}, \citenamefont {Chen}, \citenamefont {Liu}, \citenamefont
+  {Xie}, \citenamefont {Huang}, \citenamefont {Normand},\ and\ \citenamefont
+  {Xiang}}]{Liao17_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.~J.}\ \bibnamefont
+  {Liao}}, \bibinfo {author} {\bibfnamefont {Z.~Y.}\ \bibnamefont {Xie}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Chen}}, \bibinfo {author}
+  {\bibfnamefont {Z.~Y.}\ \bibnamefont {Liu}}, \bibinfo {author} {\bibfnamefont
+  {H.~D.}\ \bibnamefont {Xie}}, \bibinfo {author} {\bibfnamefont {R.~Z.}\
+  \bibnamefont {Huang}}, \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Normand}},\ and\ \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Xiang}},\ }\bibfield  {title} {\bibinfo {title} {Gapless spin-liquid ground
+  state in the $s=1/2$ kagome antiferromagnet},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.118.137202} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {118}},\
+  \bibinfo {pages} {137202} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Niesen}\ and\ \citenamefont
+  {Corboz}(2017)}]{Niesen17_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {I.}~\bibnamefont
+  {Niesen}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}},\ }\bibfield  {title} {\bibinfo {title} {Emergent haldane phase in
+  the $s=1$ bilinear-biquadratic heisenberg model on the square lattice},\
+  }\href {https://doi.org/10.1103/PhysRevB.95.180404} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {95}},\
+  \bibinfo {pages} {180404} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chen}\ \emph {et~al.}(2018)\citenamefont {Chen},
+  \citenamefont {Vanderstraeten}, \citenamefont {Capponi},\ and\ \citenamefont
+  {Poilblanc}}]{Chen18_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.-Y.}\ \bibnamefont
+  {Chen}}, \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Vanderstraeten}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Capponi}},\ and\ \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Poilblanc}},\ }\bibfield  {title} {\bibinfo {title} {Non-abelian chiral spin
+  liquid in a quantum antiferromagnet revealed by an ipeps study},\ }\href
+  {https://doi.org/10.1103/PhysRevB.98.184409} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {98}},\ \bibinfo
+  {pages} {184409} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chung}\ and\ \citenamefont
+  {Corboz}(2019)}]{Chung19_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont
+  {Chung}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Corboz}},\
+  }\bibfield  {title} {\bibinfo {title} {Su(3) fermions on the honeycomb
+  lattice at $\frac{1}{3}$ filling},\ }\href
+  {https://doi.org/10.1103/PhysRevB.100.035134} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {100}},\ \bibinfo
+  {pages} {035134} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ponsioen}\ \emph {et~al.}(2019)\citenamefont
+  {Ponsioen}, \citenamefont {Chung},\ and\ \citenamefont
+  {Corboz}}]{Ponsioen19_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Ponsioen}}, \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont
+  {Chung}},\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}},\ }\bibfield  {title} {\bibinfo {title} {Period 4 stripe in the
+  extended two-dimensional hubbard model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.100.195141} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {100}},\ \bibinfo
+  {pages} {195141} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lee}\ \emph {et~al.}(2020)\citenamefont {Lee},
+  \citenamefont {Kaneko}, \citenamefont {Chern}, \citenamefont {Okubo},
+  \citenamefont {Yamaji}, \citenamefont {Kawashima},\ and\ \citenamefont
+  {Kim}}]{lee2020_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.-Y.}\ \bibnamefont
+  {Lee}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Kaneko}},
+  \bibinfo {author} {\bibfnamefont {L.~E.}\ \bibnamefont {Chern}}, \bibinfo
+  {author} {\bibfnamefont {T.}~\bibnamefont {Okubo}}, \bibinfo {author}
+  {\bibfnamefont {Y.}~\bibnamefont {Yamaji}}, \bibinfo {author} {\bibfnamefont
+  {N.}~\bibnamefont {Kawashima}},\ and\ \bibinfo {author} {\bibfnamefont
+  {Y.~B.}\ \bibnamefont {Kim}},\ }\bibfield  {title} {\bibinfo {title}
+  {Magnetic field induced quantum phases in a tensor network study of kitaev
+  magnets},\ }\href
+  {https://doi.org/https://doi.org/10.1038/s41467-020-15320-x} {\bibfield
+  {journal} {\bibinfo  {journal} {Nature communications}\ }\textbf {\bibinfo
+  {volume} {11}},\ \bibinfo {pages} {1639} (\bibinfo {year}
+  {2020})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gauth\'e}\ \emph {et~al.}(2020)\citenamefont
+  {Gauth\'e}, \citenamefont {Capponi}, \citenamefont {Mambrini},\ and\
+  \citenamefont {Poilblanc}}]{Gauthe20_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {O.}~\bibnamefont
+  {Gauth\'e}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Capponi}},
+  \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Mambrini}},\ and\
+  \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Poilblanc}},\ }\bibfield
+  {title} {\bibinfo {title} {Quantum spin liquid phases in the
+  bilinear-biquadratic two-su(4)-fermion hamiltonian on the square lattice},\
+  }\href {https://doi.org/10.1103/PhysRevB.101.205144} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {101}},\
+  \bibinfo {pages} {205144} (\bibinfo {year} {2020})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hasik}\ \emph {et~al.}(2022)\citenamefont {Hasik},
+  \citenamefont {Van~Damme}, \citenamefont {Poilblanc},\ and\ \citenamefont
+  {Vanderstraeten}}]{Hasik22_CSL}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Hasik}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Van~Damme}},
+  \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Poilblanc}},\ and\
+  \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont {Vanderstraeten}},\
+  }\bibfield  {title} {\bibinfo {title} {Simulating chiral spin liquids with
+  projected entangled-pair states},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.129.177201} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {129}},\
+  \bibinfo {pages} {177201} (\bibinfo {year} {2022})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Peschke}\ \emph {et~al.}(2022)\citenamefont
+  {Peschke}, \citenamefont {Ponsioen},\ and\ \citenamefont
+  {Corboz}}]{Peschke22_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Peschke}}, \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Ponsioen}},\
+  and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Corboz}},\
+  }\bibfield  {title} {\bibinfo {title} {Competing states in the
+  two-dimensional frustrated kondo-necklace model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.106.205140} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {106}},\ \bibinfo
+  {pages} {205140} (\bibinfo {year} {2022})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ponsioen}\ \emph
+  {et~al.}(2023{\natexlab{a}})\citenamefont {Ponsioen}, \citenamefont {Chung},\
+  and\ \citenamefont {Corboz}}]{Ponsioen23_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Ponsioen}}, \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont
+  {Chung}},\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}},\ }\bibfield  {title} {\bibinfo {title} {Superconducting stripes in
+  the hole-doped three-band hubbard model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.108.205154} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {108}},\ \bibinfo
+  {pages} {205154} (\bibinfo {year} {2023}{\natexlab{a}})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Ponsioen}\ \emph
+  {et~al.}(2023{\natexlab{b}})\citenamefont {Ponsioen}, \citenamefont {Chung},\
+  and\ \citenamefont {Corboz}}]{Ponsioen23_iPEPS_appl2}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Ponsioen}}, \bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont
+  {Chung}},\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corboz}},\ }\bibfield  {title} {\bibinfo {title} {Superconducting stripes in
+  the hole-doped three-band hubbard model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.108.205154} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {108}},\ \bibinfo
+  {pages} {205154} (\bibinfo {year} {2023}{\natexlab{b}})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Weerda}\ and\ \citenamefont
+  {Rizzi}(2024)}]{Weerda24_FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.~L.}\ \bibnamefont
+  {Weerda}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},\
+  }\bibfield  {title} {\bibinfo {title} {Fractional quantum hall states with
+  variational projected entangled-pair states: A study of the bosonic
+  harper-hofstadter model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.109.L241117} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {109}},\
+  \bibinfo {pages} {L241117} (\bibinfo {year} {2024})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hasik}\ and\ \citenamefont
+  {Corboz}(2024)}]{Hasik24_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Hasik}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Corboz}},\
+  }\bibfield  {title} {\bibinfo {title} {Incommensurate order with
+  translationally invariant projected entangled-pair states: Spiral states and
+  quantum spin liquid on the anisotropic triangular lattice},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.133.176502} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {133}},\
+  \bibinfo {pages} {176502} (\bibinfo {year} {2024})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schmoll}\ \emph {et~al.}(2024)\citenamefont
+  {Schmoll}, \citenamefont {Naumann}, \citenamefont {Eisert},\ and\
+  \citenamefont {Iqbal}}]{schmoll2024_iPEPS_appl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Schmoll}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Naumann}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Eisert}},\ and\ \bibinfo
+  {author} {\bibfnamefont {Y.}~\bibnamefont {Iqbal}},\ }\href
+  {https://arxiv.org/abs/2407.07145} {\bibinfo {title} {Bathing in a sea of
+  candidate quantum spin liquids: From the gapless ruby to the gapped
+  maple-leaf lattice}} (\bibinfo {year} {2024}),\ \Eprint
+  {https://arxiv.org/abs/2407.07145} {arXiv:2407.07145 [cond-mat.str-el]}
+  \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Murg}\ \emph {et~al.}(2007)\citenamefont {Murg},
+  \citenamefont {Verstraete},\ and\ \citenamefont {Cirac}}]{Murg07fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {V.}~\bibnamefont
+  {Murg}}, \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\
+  and\ \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\
+  }\bibfield  {title} {\bibinfo {title} {Variational study of hard-core bosons
+  in a two-dimensional optical lattice using projected entangled pair states},\
+  }\href {https://doi.org/10.1103/PhysRevA.75.033605} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. A}\ }\textbf {\bibinfo {volume} {75}},\
+  \bibinfo {pages} {033605} (\bibinfo {year} {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Murg}\ \emph {et~al.}(2009)\citenamefont {Murg},
+  \citenamefont {Verstraete},\ and\ \citenamefont {Cirac}}]{Murg09fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {V.}~\bibnamefont
+  {Murg}}, \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\
+  and\ \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\
+  }\bibfield  {title} {\bibinfo {title} {Exploring frustrated spin systems
+  using projected entangled pair states},\ }\href
+  {https://doi.org/10.1103/PhysRevB.79.195119} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {79}},\ \bibinfo
+  {pages} {195119} (\bibinfo {year} {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lubasch}\ \emph
+  {et~al.}(2014{\natexlab{a}})\citenamefont {Lubasch}, \citenamefont {Cirac},\
+  and\ \citenamefont {Bañuls}}]{Lubasch_2014fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Lubasch}}, \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.-C.}\ \bibnamefont {Bañuls}},\
+  }\bibfield  {title} {\bibinfo {title} {Unifying projected entangled pair
+  state contractions},\ }\href {https://doi.org/10.1088/1367-2630/16/3/033014}
+  {\bibfield  {journal} {\bibinfo  {journal} {New Journal of Physics}\ }\textbf
+  {\bibinfo {volume} {16}},\ \bibinfo {pages} {033014} (\bibinfo {year}
+  {2014}{\natexlab{a}})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lubasch}\ \emph
+  {et~al.}(2014{\natexlab{b}})\citenamefont {Lubasch}, \citenamefont {Cirac},\
+  and\ \citenamefont {Ba\~nuls}}]{Lubasch2014fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Lubasch}}, \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.-C.}\ \bibnamefont {Ba\~nuls}},\
+  }\bibfield  {title} {\bibinfo {title} {Algorithms for finite projected
+  entangled pair states},\ }\href {https://doi.org/10.1103/PhysRevB.90.064425}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo
+  {volume} {90}},\ \bibinfo {pages} {064425} (\bibinfo {year}
+  {2014}{\natexlab{b}})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Scheb}\ and\ \citenamefont
+  {Noack}(2023)}]{Noack23_Hubbard_fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Scheb}}\ and\ \bibinfo {author} {\bibfnamefont {R.~M.}\ \bibnamefont
+  {Noack}},\ }\bibfield  {title} {\bibinfo {title} {Finite projected entangled
+  pair states for the hubbard model},\ }\href
+  {https://doi.org/10.1103/PhysRevB.107.165112} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {107}},\ \bibinfo
+  {pages} {165112} (\bibinfo {year} {2023})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {O’Rourke}\ and\ \citenamefont
+  {Chan}(2023)}]{ORourke2023_Rydberg_entanglement}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.~J.}\ \bibnamefont
+  {O’Rourke}}\ and\ \bibinfo {author} {\bibfnamefont {G.~K.-L.}\ \bibnamefont
+  {Chan}},\ }\bibfield  {title} {\bibinfo {title} {Entanglement in the quantum
+  phases of an unfrustrated rydberg atom array},\ }\href
+  {https://doi.org/https://doi.org/10.1038/s41467-023-41166-0} {\bibfield
+  {journal} {\bibinfo  {journal} {Nature Communications}\ }\textbf {\bibinfo
+  {volume} {14}},\ \bibinfo {pages} {5397} (\bibinfo {year}
+  {2023})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gray}(2018)}]{Gray2018}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Gray}},\ }\bibfield  {title} {\bibinfo {title} {quimb: A python package for
+  quantum information and many-body calculations},\ }\href
+  {https://doi.org/10.21105/joss.00819} {\bibfield  {journal} {\bibinfo
+  {journal} {Journal of Open Source Software}\ }\textbf {\bibinfo {volume}
+  {3}},\ \bibinfo {pages} {819} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Wang}\ \emph {et~al.}(2011)\citenamefont {Wang},
+  \citenamefont {Pi\ifmmode~\check{z}\else \v{z}\fi{}orn},\ and\ \citenamefont
+  {Verstraete}}]{Wang2011_sampling_TN}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Wang}}, \bibinfo {author} {\bibfnamefont {I.}~\bibnamefont
+  {Pi\ifmmode~\check{z}\else \v{z}\fi{}orn}},\ and\ \bibinfo {author}
+  {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\ }\bibfield  {title}
+  {\bibinfo {title} {Monte carlo simulation with tensor network states},\
+  }\href {https://doi.org/10.1103/PhysRevB.83.134421} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {83}},\
+  \bibinfo {pages} {134421} (\bibinfo {year} {2011})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2017)\citenamefont {Liu},
+  \citenamefont {Dong}, \citenamefont {Han}, \citenamefont {Guo},\ and\
+  \citenamefont {He}}]{Liu2017_gradient_fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {S.-J.}\ \bibnamefont {Dong}},
+  \bibinfo {author} {\bibfnamefont {Y.-J.}\ \bibnamefont {Han}}, \bibinfo
+  {author} {\bibfnamefont {G.-C.}\ \bibnamefont {Guo}},\ and\ \bibinfo {author}
+  {\bibfnamefont {L.}~\bibnamefont {He}},\ }\bibfield  {title} {\bibinfo
+  {title} {Gradient optimization of finite projected entangled pair states},\
+  }\href {https://doi.org/10.1103/PhysRevB.95.195154} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {95}},\
+  \bibinfo {pages} {195154} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2025)\citenamefont {Liu},
+  \citenamefont {Zhai}, \citenamefont {Peng}, \citenamefont {Gu},\ and\
+  \citenamefont {Chan}}]{liu2025accurate}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Zhai}}, \bibinfo
+  {author} {\bibfnamefont {R.}~\bibnamefont {Peng}}, \bibinfo {author}
+  {\bibfnamefont {Z.-C.}\ \bibnamefont {Gu}},\ and\ \bibinfo {author}
+  {\bibfnamefont {G.~K.}\ \bibnamefont {Chan}},\ }\bibfield  {title} {\bibinfo
+  {title} {Accurate simulation of the hubbard model with finite fermionic
+  projected entangled pair states},\ }\href@noop {} {\bibfield  {journal}
+  {\bibinfo  {journal} {arXiv preprint arXiv:2502.13454}\ } (\bibinfo {year}
+  {2025})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2018)\citenamefont {Liu},
+  \citenamefont {Dong}, \citenamefont {Wang}, \citenamefont {Han},
+  \citenamefont {An}, \citenamefont {Guo},\ and\ \citenamefont
+  {He}}]{Liu2018_fPEPS_SL}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Dong}}, \bibinfo
+  {author} {\bibfnamefont {C.}~\bibnamefont {Wang}}, \bibinfo {author}
+  {\bibfnamefont {Y.}~\bibnamefont {Han}}, \bibinfo {author} {\bibfnamefont
+  {H.}~\bibnamefont {An}}, \bibinfo {author} {\bibfnamefont {G.-C.}\
+  \bibnamefont {Guo}},\ and\ \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {He}},\ }\bibfield  {title} {\bibinfo {title} {Gapless spin liquid ground
+  state of the spin-$\frac{1}{2}$ ${J}_{1}\ensuremath{-}{J}_{2}$ heisenberg
+  model on square lattices},\ }\href
+  {https://doi.org/10.1103/PhysRevB.98.241109} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {98}},\ \bibinfo
+  {pages} {241109} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2021)\citenamefont {Liu},
+  \citenamefont {Huang}, \citenamefont {Gong},\ and\ \citenamefont
+  {Gu}}]{Liu2021_accurate_fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {Y.-Z.}\ \bibnamefont {Huang}},
+  \bibinfo {author} {\bibfnamefont {S.-S.}\ \bibnamefont {Gong}},\ and\
+  \bibinfo {author} {\bibfnamefont {Z.-C.}\ \bibnamefont {Gu}},\ }\bibfield
+  {title} {\bibinfo {title} {Accurate simulation for finite projected entangled
+  pair states in two dimensions},\ }\href
+  {https://doi.org/10.1103/PhysRevB.103.235155} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {103}},\ \bibinfo
+  {pages} {235155} (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2022)\citenamefont {Liu},
+  \citenamefont {Gong}, \citenamefont {Li}, \citenamefont {Poilblanc},
+  \citenamefont {Chen},\ and\ \citenamefont {Gu}}]{LIU2022_fPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {S.-S.}\ \bibnamefont {Gong}},
+  \bibinfo {author} {\bibfnamefont {Y.-B.}\ \bibnamefont {Li}}, \bibinfo
+  {author} {\bibfnamefont {D.}~\bibnamefont {Poilblanc}}, \bibinfo {author}
+  {\bibfnamefont {W.-Q.}\ \bibnamefont {Chen}},\ and\ \bibinfo {author}
+  {\bibfnamefont {Z.-C.}\ \bibnamefont {Gu}},\ }\bibfield  {title} {\bibinfo
+  {title} {Gapless quantum spin liquid and global phase diagram of the spin-1/2
+  j1-j2 square antiferromagnetic heisenberg model},\ }\href
+  {https://doi.org/https://doi.org/10.1016/j.scib.2022.03.010} {\bibfield
+  {journal} {\bibinfo  {journal} {Science Bulletin}\ }\textbf {\bibinfo
+  {volume} {67}},\ \bibinfo {pages} {1034} (\bibinfo {year}
+  {2022})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vieijra}\ \emph {et~al.}(2021)\citenamefont
+  {Vieijra}, \citenamefont {Haegeman}, \citenamefont {Verstraete},\ and\
+  \citenamefont {Vanderstraeten}}]{Vieijra21_directsampling_PEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Vieijra}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Haegeman}},
+  \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\ and\
+  \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont {Vanderstraeten}},\
+  }\bibfield  {title} {\bibinfo {title} {Direct sampling of projected
+  entangled-pair states},\ }\href {https://doi.org/10.1103/PhysRevB.104.235141}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo
+  {volume} {104}},\ \bibinfo {pages} {235141} (\bibinfo {year}
+  {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Sorella}\ \emph {et~al.}(2007)\citenamefont
+  {Sorella}, \citenamefont {Casula},\ and\ \citenamefont
+  {Rocca}}]{sorella2007weak}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Sorella}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Casula}},\
+  and\ \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Rocca}},\ }\bibfield
+   {title} {\bibinfo {title} {Weak binding between two aromatic rings: Feeling
+  the van der waals attraction by quantum monte carlo methods},\ }\href
+  {https://doi.org/https://doi.org/10.1063/1.2746035} {\bibfield  {journal}
+  {\bibinfo  {journal} {The Journal of chemical physics}\ }\textbf {\bibinfo
+  {volume} {127}},\ \bibinfo {pages} {014105} (\bibinfo {year}
+  {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Haegeman}\ \emph {et~al.}(2011)\citenamefont
+  {Haegeman}, \citenamefont {Cirac}, \citenamefont {Osborne}, \citenamefont
+  {Pi{\v{z}}orn}, \citenamefont {Verschelde},\ and\ \citenamefont
+  {Verstraete}}]{haegeman2011time}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Haegeman}}, \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},
+  \bibinfo {author} {\bibfnamefont {T.~J.}\ \bibnamefont {Osborne}}, \bibinfo
+  {author} {\bibfnamefont {I.}~\bibnamefont {Pi{\v{z}}orn}}, \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Verschelde}},\ and\ \bibinfo {author}
+  {\bibfnamefont {F.}~\bibnamefont {Verstraete}},\ }\bibfield  {title}
+  {\bibinfo {title} {Time-dependent variational principle for quantum
+  lattices},\ }\href
+  {https://doi.org/https://doi.org/10.1103/PhysRevLett.107.070601} {\bibfield
+  {journal} {\bibinfo  {journal} {Physical review letters}\ }\textbf {\bibinfo
+  {volume} {107}},\ \bibinfo {pages} {070601} (\bibinfo {year}
+  {2011})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Carleo}\ and\ \citenamefont
+  {Troyer}(2017)}]{Carleo17_NQS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Carleo}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Troyer}},\ }\bibfield  {title} {\bibinfo {title} {Solving the quantum
+  many-body problem with artificial neural networks},\ }\href
+  {https://doi.org/https://doi.org/10.1126/science.aag2302} {\bibfield
+  {journal} {\bibinfo  {journal} {Science}\ }\textbf {\bibinfo {volume}
+  {355}},\ \bibinfo {pages} {602} (\bibinfo {year} {2017})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Vanderstraeten}\ \emph {et~al.}(2019)\citenamefont
+  {Vanderstraeten}, \citenamefont {Haegeman},\ and\ \citenamefont
+  {Verstraete}}]{Vanderstraeten19TDVP}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Vanderstraeten}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Haegeman}},\ and\ \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
+  {Verstraete}},\ }\bibfield  {title} {\bibinfo {title} {{Tangent-space methods
+  for uniform matrix product states}},\ }\href
+  {https://doi.org/10.21468/SciPostPhysLectNotes.7} {\bibfield  {journal}
+  {\bibinfo  {journal} {SciPost Phys. Lect. Notes}\ ,\ \bibinfo {pages} {7}}
+  (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chen}\ and\ \citenamefont
+  {Heyl}(2024)}]{chen2024minSR}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Chen}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Heyl}},\
+  }\bibfield  {title} {\bibinfo {title} {Empowering deep neural quantum states
+  through efficient optimization},\ }\href
+  {https://doi.org/https://doi.org/10.1038/s41567-024-02566-1} {\bibfield
+  {journal} {\bibinfo  {journal} {Nature Physics}\ }\textbf {\bibinfo {volume}
+  {20}},\ \bibinfo {pages} {1476} (\bibinfo {year} {2024})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Liu}\ \emph {et~al.}(2024)\citenamefont {Liu},
+  \citenamefont {Du}, \citenamefont {Peng}, \citenamefont {Gray},\ and\
+  \citenamefont {Chan}}]{liu2024tensor}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.-Y.}\ \bibnamefont
+  {Liu}}, \bibinfo {author} {\bibfnamefont {S.-J.}\ \bibnamefont {Du}},
+  \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Peng}}, \bibinfo {author}
+  {\bibfnamefont {J.}~\bibnamefont {Gray}},\ and\ \bibinfo {author}
+  {\bibfnamefont {G.~K.-L.}\ \bibnamefont {Chan}},\ }\bibfield  {title}
+  {\bibinfo {title} {Tensor network computations that capture strict
+  variationality, volume law behavior, and the efficient representation of
+  neural network states},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {journal} {Physical Review Letters}\ }\textbf {\bibinfo {volume} {133}},\
+  \bibinfo {pages} {260404} (\bibinfo {year} {2024})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chen}\ \emph {et~al.}(2024)\citenamefont {Chen},
+  \citenamefont {Jiang}, \citenamefont {Hangleiter},\ and\ \citenamefont
+  {Schuch}}]{chen2024signproblem}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Chen}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Jiang}},
+  \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Hangleiter}},\ and\
+  \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont {Schuch}},\ }\href
+  {https://arxiv.org/abs/2404.19023} {\bibinfo {title} {Sign problem in tensor
+  network contraction}} (\bibinfo {year} {2024}),\ \Eprint
+  {https://arxiv.org/abs/2404.19023} {arXiv:2404.19023 [quant-ph]} \BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Stoudenmire}\ and\ \citenamefont
+  {White}(2010)}]{Stoudenmire_2010_METTS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.~M.}\ \bibnamefont
+  {Stoudenmire}}\ and\ \bibinfo {author} {\bibfnamefont {S.~R.}\ \bibnamefont
+  {White}},\ }\bibfield  {title} {\bibinfo {title} {Minimally entangled typical
+  thermal state algorithms},\ }\href
+  {https://doi.org/10.1088/1367-2630/12/5/055026} {\bibfield  {journal}
+  {\bibinfo  {journal} {New Journal of Physics}\ }\textbf {\bibinfo {volume}
+  {12}},\ \bibinfo {pages} {055026} (\bibinfo {year} {2010})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {McCulloch}(2007)}]{McCulloch_2007_DMRG_MPSMPO}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {I.~P.}\ \bibnamefont
+  {McCulloch}},\ }\bibfield  {title} {\bibinfo {title} {From density-matrix
+  renormalization group to matrix product states},\ }\href
+  {https://doi.org/10.1088/1742-5468/2007/10/P10014} {\bibfield  {journal}
+  {\bibinfo  {journal} {Journal of Statistical Mechanics: Theory and
+  Experiment}\ }\textbf {\bibinfo {volume} {2007}},\ \bibinfo {pages} {P10014}
+  (\bibinfo {year} {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {McGinley}\ \emph {et~al.}(2024)\citenamefont
+  {McGinley}, \citenamefont {Ho},\ and\ \citenamefont
+  {Malz}}]{mcginley2024measurement}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {McGinley}}, \bibinfo {author} {\bibfnamefont {W.~W.}\ \bibnamefont {Ho}},\
+  and\ \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Malz}},\ }\href
+  {https://doi.org/https://doi.org/10.48550/arXiv.2410.23248} {\bibinfo {title}
+  {Measurement-induced entanglement and complexity in random constant-depth 2d
+  quantum circuits}} (\bibinfo {year} {2024}),\ \Eprint
+  {https://arxiv.org/abs/2410.23248} {arXiv:2410.23248} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Or{\'u}s}\ and\ \citenamefont
+  {Wei}(2010)}]{orus2010visualizing}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Or{\'u}s}}\ and\ \bibinfo {author} {\bibfnamefont {T.-C.}\ \bibnamefont
+  {Wei}},\ }\bibfield  {title} {\bibinfo {title} {Visualizing elusive phase
+  transitions with geometric entanglement},\ }\href
+  {https://doi.org/https://doi.org/10.1103/PhysRevB.82.155120} {\bibfield
+  {journal} {\bibinfo  {journal} {Physical Review B}\ }\textbf {\bibinfo
+  {volume} {82}},\ \bibinfo {pages} {155120} (\bibinfo {year}
+  {2010})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ran}\ \emph {et~al.}(2012)\citenamefont {Ran},
+  \citenamefont {Li}, \citenamefont {Xi}, \citenamefont {Zhang},\ and\
+  \citenamefont {Su}}]{SU_1}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.-J.}\ \bibnamefont
+  {Ran}}, \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {Li}}, \bibinfo
+  {author} {\bibfnamefont {B.}~\bibnamefont {Xi}}, \bibinfo {author}
+  {\bibfnamefont {Z.}~\bibnamefont {Zhang}},\ and\ \bibinfo {author}
+  {\bibfnamefont {G.}~\bibnamefont {Su}},\ }\bibfield  {title} {\bibinfo
+  {title} {Optimized decimation of tensor networks with super-orthogonalization
+  for two-dimensional quantum lattice models},\ }\href
+  {https://doi.org/10.1103/PhysRevB.86.134429} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {86}},\ \bibinfo
+  {pages} {134429} (\bibinfo {year} {2012})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Jahromi}\ and\ \citenamefont {Or\'us}(2019)}]{SU_2}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~S.}\ \bibnamefont
+  {Jahromi}}\ and\ \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Or\'us}},\ }\bibfield  {title} {\bibinfo {title} {Universal tensor-network
+  algorithm for any infinite lattice},\ }\href
+  {https://doi.org/10.1103/PhysRevB.99.195105} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {99}},\ \bibinfo
+  {pages} {195105} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Tindall}\ and\ \citenamefont
+  {Fishman}(2023)}]{Belief_prop2023}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Tindall}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Fishman}},\ }\bibfield  {title} {\bibinfo {title} {{Gauging tensor networks
+  with belief propagation}},\ }\href
+  {https://doi.org/10.21468/SciPostPhys.15.6.222} {\bibfield  {journal}
+  {\bibinfo  {journal} {SciPost Phys.}\ }\textbf {\bibinfo {volume} {15}},\
+  \bibinfo {pages} {222} (\bibinfo {year} {2023})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vidal}(2003)}]{Vidal2004}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Vidal}},\ }\bibfield  {title} {\bibinfo {title} {Efficient classical
+  simulation of slightly entangled quantum computations},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.91.147902} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {91}},\
+  \bibinfo {pages} {147902} (\bibinfo {year} {2003})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chandra}\ and\ \citenamefont
+  {Doucot}(1988)}]{J1J2classic}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Chandra}}\ and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Doucot}},\ }\bibfield  {title} {\bibinfo {title} {Possible spin-liquid state
+  at large $s$ for the frustrated square heisenberg lattice},\ }\href
+  {https://doi.org/10.1103/PhysRevB.38.9335} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {38}},\ \bibinfo
+  {pages} {9335} (\bibinfo {year} {1988})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Dagotto}\ and\ \citenamefont
+  {Moreo}(1989)}]{J1J2classic2}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.}~\bibnamefont
+  {Dagotto}}\ and\ \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Moreo}},\ }\bibfield  {title} {\bibinfo {title} {Phase diagram of the
+  frustrated spin-1/2 heisenberg antiferromagnet in 2 dimensions},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.63.2148} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {63}},\ \bibinfo
+  {pages} {2148} (\bibinfo {year} {1989})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Shi}\ \emph {et~al.}(2006)\citenamefont {Shi},
+  \citenamefont {Duan},\ and\ \citenamefont {Vidal}}]{Shi06_TTN}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Y.-Y.}\ \bibnamefont
+  {Shi}}, \bibinfo {author} {\bibfnamefont {L.-M.}\ \bibnamefont {Duan}},\ and\
+  \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Vidal}},\ }\bibfield
+  {title} {\bibinfo {title} {Classical simulation of quantum many-body systems
+  with a tree tensor network},\ }\href
+  {https://doi.org/10.1103/PhysRevA.74.022320} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. A}\ }\textbf {\bibinfo {volume} {74}},\ \bibinfo
+  {pages} {022320} (\bibinfo {year} {2006})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Tagliacozzo}\ \emph {et~al.}(2009)\citenamefont
+  {Tagliacozzo}, \citenamefont {Evenbly},\ and\ \citenamefont
+  {Vidal}}]{Tagliacozzo09_TTN}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Tagliacozzo}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Evenbly}},\ and\ \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Vidal}},\ }\bibfield  {title} {\bibinfo {title} {Simulation of
+  two-dimensional quantum systems using a tree tensor network that exploits the
+  entropic area law},\ }\href {https://doi.org/10.1103/PhysRevB.80.235127}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo
+  {volume} {80}},\ \bibinfo {pages} {235127} (\bibinfo {year}
+  {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gerster}\ \emph {et~al.}(2017)\citenamefont
+  {Gerster}, \citenamefont {Rizzi}, \citenamefont {Silvi}, \citenamefont
+  {Dalmonte},\ and\ \citenamefont {Montangero}}]{Rizzi17_FQH_trees}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Gerster}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},
+  \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Silvi}}, \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Dalmonte}},\ and\ \bibinfo
+  {author} {\bibfnamefont {S.}~\bibnamefont {Montangero}},\ }\bibfield  {title}
+  {\bibinfo {title} {Fractional quantum hall effect in the interacting
+  hofstadter model via tensor networks},\ }\href
+  {https://doi.org/10.1103/PhysRevB.96.195123} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {96}},\ \bibinfo
+  {pages} {195123} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Wahl}\ \emph {et~al.}(2013)\citenamefont {Wahl},
+  \citenamefont {Tu}, \citenamefont {Schuch},\ and\ \citenamefont
+  {Cirac}}]{Wahl13_chiralPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.~B.}\ \bibnamefont
+  {Wahl}}, \bibinfo {author} {\bibfnamefont {H.-H.}\ \bibnamefont {Tu}},
+  \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont {Schuch}},\ and\ \bibinfo
+  {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\ }\bibfield  {title}
+  {\bibinfo {title} {Projected entangled-pair states can describe chiral
+  topological states},\ }\href {https://doi.org/10.1103/PhysRevLett.111.236805}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf
+  {\bibinfo {volume} {111}},\ \bibinfo {pages} {236805} (\bibinfo {year}
+  {2013})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Dubail}\ and\ \citenamefont
+  {Read}(2015)}]{Dublain15_nogo}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Dubail}}\ and\ \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont {Read}},\
+  }\bibfield  {title} {\bibinfo {title} {Tensor network trial states for chiral
+  topological phases in two dimensions and a no-go theorem in any dimension},\
+  }\href {https://doi.org/10.1103/PhysRevB.92.205307} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {92}},\
+  \bibinfo {pages} {205307} (\bibinfo {year} {2015})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Labuhn}\ \emph {et~al.}(2016)\citenamefont {Labuhn},
+  \citenamefont {Barredo}, \citenamefont {Ravets}, \citenamefont
+  {De~L{\'e}s{\'e}leuc}, \citenamefont {Macr{\`\i}}, \citenamefont {Lahaye},\
+  and\ \citenamefont {Browaeys}}]{labuhn2016_2dRysbergIsing}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Labuhn}}, \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Barredo}},
+  \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Ravets}}, \bibinfo
+  {author} {\bibfnamefont {S.}~\bibnamefont {De~L{\'e}s{\'e}leuc}}, \bibinfo
+  {author} {\bibfnamefont {T.}~\bibnamefont {Macr{\`\i}}}, \bibinfo {author}
+  {\bibfnamefont {T.}~\bibnamefont {Lahaye}},\ and\ \bibinfo {author}
+  {\bibfnamefont {A.}~\bibnamefont {Browaeys}},\ }\bibfield  {title} {\bibinfo
+  {title} {Tunable two-dimensional arrays of single rydberg atoms for realizing
+  quantum ising models},\ }\href
+  {https://doi.org/https://doi.org/10.1038/nature18274} {\bibfield  {journal}
+  {\bibinfo  {journal} {Nature}\ }\textbf {\bibinfo {volume} {534}},\ \bibinfo
+  {pages} {667} (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ebadi}\ \emph {et~al.}(2021)\citenamefont {Ebadi},
+  \citenamefont {Wang}, \citenamefont {Levine}, \citenamefont {Keesling},
+  \citenamefont {Semeghini}, \citenamefont {Omran}, \citenamefont {Bluvstein},
+  \citenamefont {Samajdar}, \citenamefont {Pichler}, \citenamefont {Ho} \emph
+  {et~al.}}]{ebadi2021_rydbergExperiment}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Ebadi}}, \bibinfo {author} {\bibfnamefont {T.~T.}\ \bibnamefont {Wang}},
+  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Levine}}, \bibinfo
+  {author} {\bibfnamefont {A.}~\bibnamefont {Keesling}}, \bibinfo {author}
+  {\bibfnamefont {G.}~\bibnamefont {Semeghini}}, \bibinfo {author}
+  {\bibfnamefont {A.}~\bibnamefont {Omran}}, \bibinfo {author} {\bibfnamefont
+  {D.}~\bibnamefont {Bluvstein}}, \bibinfo {author} {\bibfnamefont
+  {R.}~\bibnamefont {Samajdar}}, \bibinfo {author} {\bibfnamefont
+  {H.}~\bibnamefont {Pichler}}, \bibinfo {author} {\bibfnamefont {W.~W.}\
+  \bibnamefont {Ho}}, \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title}
+  {Quantum phases of matter on a 256-atom programmable quantum simulator},\
+  }\href {https://doi.org/https://doi.org/10.1038/s41586-021-03582-4}
+  {\bibfield  {journal} {\bibinfo  {journal} {Nature}\ }\textbf {\bibinfo
+  {volume} {595}},\ \bibinfo {pages} {227} (\bibinfo {year}
+  {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Tausendpfund}\ \emph {et~al.}()\citenamefont
+  {Tausendpfund}, \citenamefont {Krinitsin}, \citenamefont {Schmitt},\ and\
+  \citenamefont {Rizzi}}]{TTN.jl}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
+  {Tausendpfund}}, \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont
+  {Krinitsin}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Schmitt}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},\ }\href
+  {https://doi.org/0.5281/zenodo.14421855} {\bibinfo {title} {{TTN.jl -- A tree
+  tensor network library for calculating groundstates and solving time
+  evolution (0.1)}}},\ \bibinfo {howpublished} {Zenodo}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Nomura}(2021)}]{nomura2021helping}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont
+  {Nomura}},\ }\bibfield  {title} {\bibinfo {title} {Helping restricted
+  boltzmann machines with quantum-state representation by restoring symmetry},\
+  }\href {https://doi.org/https://doi.org/10.1088/1361-648X/abe268} {\bibfield
+  {journal} {\bibinfo  {journal} {Journal of Physics: Condensed Matter}\
+  }\textbf {\bibinfo {volume} {33}},\ \bibinfo {pages} {174003} (\bibinfo
+  {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Clark}\ \emph {et~al.}(2020)\citenamefont {Clark},
+  \citenamefont {Schine}, \citenamefont {Baum}, \citenamefont {Jia},\ and\
+  \citenamefont {Simon}}]{clark2020FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.~W.}\ \bibnamefont
+  {Clark}}, \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont {Schine}},
+  \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Baum}}, \bibinfo {author}
+  {\bibfnamefont {N.}~\bibnamefont {Jia}},\ and\ \bibinfo {author}
+  {\bibfnamefont {J.}~\bibnamefont {Simon}},\ }\bibfield  {title} {\bibinfo
+  {title} {Observation of laughlin states made of light},\ }\href
+  {https://doi.org/https://doi.org/10.1038/s41586-020-2318-5} {\bibfield
+  {journal} {\bibinfo  {journal} {Nature}\ }\textbf {\bibinfo {volume} {582}},\
+  \bibinfo {pages} {41} (\bibinfo {year} {2020})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {L{\'e}onard}\ \emph {et~al.}(2023)\citenamefont
+  {L{\'e}onard}, \citenamefont {Kim}, \citenamefont {Kwan}, \citenamefont
+  {Segura}, \citenamefont {Grusdt}, \citenamefont {Repellin}, \citenamefont
+  {Goldman},\ and\ \citenamefont {Greiner}}]{Greiner2023FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {L{\'e}onard}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Kim}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Kwan}}, \bibinfo {author}
+  {\bibfnamefont {P.}~\bibnamefont {Segura}}, \bibinfo {author} {\bibfnamefont
+  {F.}~\bibnamefont {Grusdt}}, \bibinfo {author} {\bibfnamefont
+  {C.}~\bibnamefont {Repellin}}, \bibinfo {author} {\bibfnamefont
+  {N.}~\bibnamefont {Goldman}},\ and\ \bibinfo {author} {\bibfnamefont
+  {M.}~\bibnamefont {Greiner}},\ }\bibfield  {title} {\bibinfo {title}
+  {Realization of a fractional quantum hall state with ultracold atoms},\
+  }\href {https://doi.org/https://doi.org/10.1038/s41586-023-06122-4}
+  {\bibfield  {journal} {\bibinfo  {journal} {Nature}\ }\textbf {\bibinfo
+  {volume} {619}},\ \bibinfo {pages} {495} (\bibinfo {year}
+  {2023})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lunt}\ \emph {et~al.}(2024)\citenamefont {Lunt},
+  \citenamefont {Hill}, \citenamefont {Reiter}, \citenamefont {Preiss},
+  \citenamefont {Ga\l{}ka},\ and\ \citenamefont {Jochim}}]{Jochim24_FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Lunt}}, \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont {Hill}}, \bibinfo
+  {author} {\bibfnamefont {J.}~\bibnamefont {Reiter}}, \bibinfo {author}
+  {\bibfnamefont {P.~M.}\ \bibnamefont {Preiss}}, \bibinfo {author}
+  {\bibfnamefont {M.}~\bibnamefont {Ga\l{}ka}},\ and\ \bibinfo {author}
+  {\bibfnamefont {S.}~\bibnamefont {Jochim}},\ }\bibfield  {title} {\bibinfo
+  {title} {Realization of a laughlin state of two rapidly rotating fermions},\
+  }\href {https://doi.org/10.1103/PhysRevLett.133.253401} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {133}},\
+  \bibinfo {pages} {253401} (\bibinfo {year} {2024})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Haque}\ \emph {et~al.}(2007)\citenamefont {Haque},
+  \citenamefont {Zozulya},\ and\ \citenamefont {Schoutens}}]{Haque07_EE_FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Haque}}, \bibinfo {author} {\bibfnamefont {O.}~\bibnamefont {Zozulya}},\
+  and\ \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Schoutens}},\
+  }\bibfield  {title} {\bibinfo {title} {Entanglement entropy in fermionic
+  laughlin states},\ }\href {https://doi.org/10.1103/PhysRevLett.98.060401}
+  {\bibfield  {journal} {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf
+  {\bibinfo {volume} {98}},\ \bibinfo {pages} {060401} (\bibinfo {year}
+  {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Nielsen}\ \emph {et~al.}(2013)\citenamefont
+  {Nielsen}, \citenamefont {Sierra},\ and\ \citenamefont
+  {Cirac}}]{nielsen2013local_FQH}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~E.}\ \bibnamefont
+  {Nielsen}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Sierra}},\
+  and\ \bibinfo {author} {\bibfnamefont {J.~I.}\ \bibnamefont {Cirac}},\
+  }\bibfield  {title} {\bibinfo {title} {Local models of fractional quantum
+  hall states in lattices and physical implementation},\ }\href
+  {https://doi.org/https://doi.org/10.1038/ncomms3864} {\bibfield  {journal}
+  {\bibinfo  {journal} {Nature communications}\ }\textbf {\bibinfo {volume}
+  {4}},\ \bibinfo {pages} {2864} (\bibinfo {year} {2013})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Naumann}\ \emph {et~al.}(2024)\citenamefont
+  {Naumann}, \citenamefont {Weerda}, \citenamefont {Rizzi}, \citenamefont
+  {Eisert},\ and\ \citenamefont {Schmoll}}]{Weerda24_variPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Naumann}}, \bibinfo {author} {\bibfnamefont {E.~L.}\ \bibnamefont {Weerda}},
+  \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}}, \bibinfo
+  {author} {\bibfnamefont {J.}~\bibnamefont {Eisert}},\ and\ \bibinfo {author}
+  {\bibfnamefont {P.}~\bibnamefont {Schmoll}},\ }\bibfield  {title} {\bibinfo
+  {title} {{An introduction to infinite projected entangled-pair state methods
+  for variational ground state simulations using automatic differentiation}},\
+  }\href {https://doi.org/10.21468/SciPostPhysLectNotes.86} {\bibfield
+  {journal} {\bibinfo  {journal} {SciPost Phys. Lect. Notes}\ ,\ \bibinfo
+  {pages} {86}} (\bibinfo {year} {2024})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Banerjee}\ \emph {et~al.}(2023)\citenamefont
+  {Banerjee}, \citenamefont {Zhu},\ and\ \citenamefont
+  {Lin}}]{banerjee2023electromagnetic}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Banerjee}}, \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {Zhu}},\ and\
+  \bibinfo {author} {\bibfnamefont {S.-Z.}\ \bibnamefont {Lin}},\ }\bibfield
+  {title} {\bibinfo {title} {Electromagnetic signatures of a chiral quantum
+  spin liquid},\ }\href
+  {https://doi.org/https://doi.org/10.1038/s41535-023-00595-2} {\bibfield
+  {journal} {\bibinfo  {journal} {npj Quantum Materials}\ }\textbf {\bibinfo
+  {volume} {8}},\ \bibinfo {pages} {63} (\bibinfo {year} {2023})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Bulaevskii}\ \emph {et~al.}(2008)\citenamefont
+  {Bulaevskii}, \citenamefont {Batista}, \citenamefont {Mostovoy},\ and\
+  \citenamefont {Khomskii}}]{Khomskii08_edgecurrent}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.~N.}\ \bibnamefont
+  {Bulaevskii}}, \bibinfo {author} {\bibfnamefont {C.~D.}\ \bibnamefont
+  {Batista}}, \bibinfo {author} {\bibfnamefont {M.~V.}\ \bibnamefont
+  {Mostovoy}},\ and\ \bibinfo {author} {\bibfnamefont {D.~I.}\ \bibnamefont
+  {Khomskii}},\ }\bibfield  {title} {\bibinfo {title} {Electronic orbital
+  currents and polarization in mott insulators},\ }\href
+  {https://doi.org/10.1103/PhysRevB.78.024402} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {78}},\ \bibinfo
+  {pages} {024402} (\bibinfo {year} {2008})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Lahaye}\ \emph {et~al.}(2009)\citenamefont {Lahaye},
+  \citenamefont {Menotti}, \citenamefont {Santos}, \citenamefont {Lewenstein},\
+  and\ \citenamefont {Pfau}}]{Lahaye_2009_dipolar_gases}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Lahaye}}, \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Menotti}},
+  \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont {Santos}}, \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Lewenstein}},\ and\ \bibinfo
+  {author} {\bibfnamefont {T.}~\bibnamefont {Pfau}},\ }\bibfield  {title}
+  {\bibinfo {title} {The physics of dipolar bosonic quantum gases},\ }\href
+  {https://doi.org/10.1088/0034-4885/72/12/126401} {\bibfield  {journal}
+  {\bibinfo  {journal} {Reports on Progress in Physics}\ }\textbf {\bibinfo
+  {volume} {72}},\ \bibinfo {pages} {126401} (\bibinfo {year}
+  {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {O'Rourke}\ \emph {et~al.}(2018)\citenamefont
+  {O'Rourke}, \citenamefont {Li},\ and\ \citenamefont
+  {Chan}}]{ORourke2018_PEPO1}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.~J.}\ \bibnamefont
+  {O'Rourke}}, \bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont {Li}},\ and\
+  \bibinfo {author} {\bibfnamefont {G.~K.-L.}\ \bibnamefont {Chan}},\
+  }\bibfield  {title} {\bibinfo {title} {Efficient representation of long-range
+  interactions in tensor network algorithms},\ }\href
+  {https://doi.org/10.1103/PhysRevB.98.205127} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {98}},\ \bibinfo
+  {pages} {205127} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {O'Rourke}\ and\ \citenamefont
+  {Chan}(2020)}]{ORourke2020_PEPO2}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.~J.}\ \bibnamefont
+  {O'Rourke}}\ and\ \bibinfo {author} {\bibfnamefont {G.~K.-L.}\ \bibnamefont
+  {Chan}},\ }\bibfield  {title} {\bibinfo {title} {Simplified and improved
+  approach to tensor network operators in two dimensions},\ }\href
+  {https://doi.org/10.1103/PhysRevB.101.205142} {\bibfield  {journal} {\bibinfo
+   {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume} {101}},\ \bibinfo
+  {pages} {205142} (\bibinfo {year} {2020})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Samajdar}\ \emph {et~al.}(2020)\citenamefont
+  {Samajdar}, \citenamefont {Ho}, \citenamefont {Pichler}, \citenamefont
+  {Lukin},\ and\ \citenamefont {Sachdev}}]{Samajdar2020_Rydberg}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Samajdar}}, \bibinfo {author} {\bibfnamefont {W.~W.}\ \bibnamefont {Ho}},
+  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Pichler}}, \bibinfo
+  {author} {\bibfnamefont {M.~D.}\ \bibnamefont {Lukin}},\ and\ \bibinfo
+  {author} {\bibfnamefont {S.}~\bibnamefont {Sachdev}},\ }\bibfield  {title}
+  {\bibinfo {title} {Complex density wave orders and quantum phase transitions
+  in a model of square-lattice rydberg atom arrays},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.124.103601} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {124}},\
+  \bibinfo {pages} {103601} (\bibinfo {year} {2020})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Samajdar}\ \emph {et~al.}(2021)\citenamefont
+  {Samajdar}, \citenamefont {Ho}, \citenamefont {Pichler}, \citenamefont
+  {Lukin},\ and\ \citenamefont {Sachdev}}]{samajdar2021_ryd_kagome}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Samajdar}}, \bibinfo {author} {\bibfnamefont {W.~W.}\ \bibnamefont {Ho}},
+  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Pichler}}, \bibinfo
+  {author} {\bibfnamefont {M.~D.}\ \bibnamefont {Lukin}},\ and\ \bibinfo
+  {author} {\bibfnamefont {S.}~\bibnamefont {Sachdev}},\ }\bibfield  {title}
+  {\bibinfo {title} {Quantum phases of rydberg atoms on a kagome lattice},\
+  }\href {https://doi.org/https://doi.org/10.1073/pnas.2015785118} {\bibfield
+  {journal} {\bibinfo  {journal} {Proceedings of the National Academy of
+  Sciences}\ }\textbf {\bibinfo {volume} {118}},\ \bibinfo {pages}
+  {e2015785118} (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Verresen}\ \emph {et~al.}(2021)\citenamefont
+  {Verresen}, \citenamefont {Lukin},\ and\ \citenamefont
+  {Vishwanath}}]{Verresen21_topoRyd}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Verresen}}, \bibinfo {author} {\bibfnamefont {M.~D.}\ \bibnamefont
+  {Lukin}},\ and\ \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Vishwanath}},\ }\bibfield  {title} {\bibinfo {title} {Prediction of toric
+  code topological order from rydberg blockade},\ }\href
+  {https://doi.org/10.1103/PhysRevX.11.031005} {\bibfield  {journal} {\bibinfo
+  {journal} {Phys. Rev. X}\ }\textbf {\bibinfo {volume} {11}},\ \bibinfo
+  {pages} {031005} (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Semeghini}\ \emph {et~al.}(2021)\citenamefont
+  {Semeghini}, \citenamefont {Levine}, \citenamefont {Keesling}, \citenamefont
+  {Ebadi}, \citenamefont {Wang}, \citenamefont {Bluvstein}, \citenamefont
+  {Verresen}, \citenamefont {Pichler}, \citenamefont {Kalinowski},
+  \citenamefont {Samajdar}, \citenamefont {Omran}, \citenamefont {Sachdev},
+  \citenamefont {Vishwanath}, \citenamefont {Greiner}, \citenamefont
+  {Vuletić},\ and\ \citenamefont {Lukin}}]{Semenghini21_topoRyd_Exp}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Semeghini}}, \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Levine}},
+  \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Keesling}}, \bibinfo
+  {author} {\bibfnamefont {S.}~\bibnamefont {Ebadi}}, \bibinfo {author}
+  {\bibfnamefont {T.~T.}\ \bibnamefont {Wang}}, \bibinfo {author}
+  {\bibfnamefont {D.}~\bibnamefont {Bluvstein}}, \bibinfo {author}
+  {\bibfnamefont {R.}~\bibnamefont {Verresen}}, \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Pichler}}, \bibinfo {author} {\bibfnamefont
+  {M.}~\bibnamefont {Kalinowski}}, \bibinfo {author} {\bibfnamefont
+  {R.}~\bibnamefont {Samajdar}}, \bibinfo {author} {\bibfnamefont
+  {A.}~\bibnamefont {Omran}}, \bibinfo {author} {\bibfnamefont
+  {S.}~\bibnamefont {Sachdev}}, \bibinfo {author} {\bibfnamefont
+  {A.}~\bibnamefont {Vishwanath}}, \bibinfo {author} {\bibfnamefont
+  {M.}~\bibnamefont {Greiner}}, \bibinfo {author} {\bibfnamefont
+  {V.}~\bibnamefont {Vuletić}},\ and\ \bibinfo {author} {\bibfnamefont
+  {M.~D.}\ \bibnamefont {Lukin}},\ }\bibfield  {title} {\bibinfo {title}
+  {Probing topological spin liquids on a programmable quantum simulator},\
+  }\href {https://doi.org/https://doi.org/10.1126/science.abi8794} {\bibfield
+  {journal} {\bibinfo  {journal} {Science}\ }\textbf {\bibinfo {volume}
+  {374}},\ \bibinfo {pages} {1242} (\bibinfo {year} {2021})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Randall}\ \emph {et~al.}(2021)\citenamefont
+  {Randall}, \citenamefont {Bradley}, \citenamefont {Van Der~Gronden},
+  \citenamefont {Galicia}, \citenamefont {Abobeih}, \citenamefont {Markham},
+  \citenamefont {Twitchen}, \citenamefont {Machado}, \citenamefont {Yao},\ and\
+  \citenamefont {Taminiau}}]{NV_centers1}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Randall}}, \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Bradley}},
+  \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Van Der~Gronden}},
+  \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Galicia}}, \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Abobeih}}, \bibinfo {author}
+  {\bibfnamefont {M.}~\bibnamefont {Markham}}, \bibinfo {author} {\bibfnamefont
+  {D.}~\bibnamefont {Twitchen}}, \bibinfo {author} {\bibfnamefont
+  {F.}~\bibnamefont {Machado}}, \bibinfo {author} {\bibfnamefont
+  {N.}~\bibnamefont {Yao}},\ and\ \bibinfo {author} {\bibfnamefont
+  {T.}~\bibnamefont {Taminiau}},\ }\bibfield  {title} {\bibinfo {title}
+  {Many-body--localized discrete time crystal with a programmable spin-based
+  quantum simulator},\ }\href
+  {https://doi.org/https://doi.org/10.1126/science.abk0603} {\bibfield
+  {journal} {\bibinfo  {journal} {Science}\ }\textbf {\bibinfo {volume}
+  {374}},\ \bibinfo {pages} {1474} (\bibinfo {year} {2021})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Cai}\ \emph {et~al.}(2013)\citenamefont {Cai},
+  \citenamefont {Retzker}, \citenamefont {Jelezko},\ and\ \citenamefont
+  {Plenio}}]{NV_centers2}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Cai}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Retzker}},
+  \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Jelezko}},\ and\ \bibinfo
+  {author} {\bibfnamefont {M.~B.}\ \bibnamefont {Plenio}},\ }\bibfield  {title}
+  {\bibinfo {title} {A large-scale quantum simulator on a diamond surface at
+  room temperature},\ }\href
+  {https://doi.org/https://doi.org/10.1038/nphys2519} {\bibfield  {journal}
+  {\bibinfo  {journal} {Nature Physics}\ }\textbf {\bibinfo {volume} {9}},\
+  \bibinfo {pages} {168} (\bibinfo {year} {2013})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Naumann}\ \emph {et~al.}(2025)\citenamefont
+  {Naumann}, \citenamefont {Weerda}, \citenamefont {Eisert}, \citenamefont
+  {Rizzi},\ and\ \citenamefont
+  {Schmoll}}]{naumann2025variationallyoptimizinginfiniteprojected}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Naumann}}, \bibinfo {author} {\bibfnamefont {E.~L.}\ \bibnamefont {Weerda}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Eisert}}, \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},\ and\ \bibinfo {author}
+  {\bibfnamefont {P.}~\bibnamefont {Schmoll}},\ }\href
+  {https://arxiv.org/abs/2502.10298} {\bibinfo {title} {Variationally
+  optimizing infinite projected entangled-pair states at large bond dimensions:
+  A split-ctmrg approach}} (\bibinfo {year} {2025}),\ \Eprint
+  {https://arxiv.org/abs/2502.10298} {arXiv:2502.10298} \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Felser}\ \emph {et~al.}(2021)\citenamefont {Felser},
+  \citenamefont {Notarnicola},\ and\ \citenamefont {Montangero}}]{augm_trees}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Felser}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Notarnicola}},\ and\ \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Montangero}},\ }\bibfield  {title} {\bibinfo {title} {Efficient tensor
+  network ansatz for high-dimensional quantum many-body problems},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.126.170603} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. Lett.}\ }\textbf {\bibinfo {volume} {126}},\
+  \bibinfo {pages} {170603} (\bibinfo {year} {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Alcalde~Puente}\ \emph
+  {et~al.}(2025{\natexlab{a}})\citenamefont {Alcalde~Puente}, \citenamefont
+  {Weerda},\ and\ \citenamefont {Schr\"oder}}]{quantumNaturalfPEPS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Alcalde~Puente}}, \bibinfo {author} {\bibfnamefont {E.~L.}\ \bibnamefont
+  {Weerda}},\ and\ \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
+  {Schr\"oder}},\ }\href@noop {} {\bibinfo {title} {Quantum natural finite
+  peps}},\ \bibinfo {howpublished} {Will be available after publication and
+  before that, upon request.} (\bibinfo {year}
+  {2025}{\natexlab{a}})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Alcalde~Puente}(2025)}]{quantumNaturalgradient}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Alcalde~Puente}},\ }\href
+  {https://github.com/danielalcalde/QuantumNaturalGradient.jl} {\bibinfo
+  {title} {Quantum natural gradient}},\ \bibinfo {howpublished}
+  {https://github.com/danielalcalde/QuantumNaturalGradient.jl} (\bibinfo {year}
+  {2025})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Fishman}\ \emph
+  {et~al.}(2022{\natexlab{a}})\citenamefont {Fishman}, \citenamefont {White},\
+  and\ \citenamefont {Stoudenmire}}]{itensor}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Fishman}}, \bibinfo {author} {\bibfnamefont {S.~R.}\ \bibnamefont {White}},\
+  and\ \bibinfo {author} {\bibfnamefont {E.~M.}\ \bibnamefont {Stoudenmire}},\
+  }\bibfield  {title} {\bibinfo {title} {{The ITensor Software Library for
+  Tensor Network Calculations}},\ }\href
+  {https://doi.org/10.21468/SciPostPhysCodeb.4} {\bibfield  {journal} {\bibinfo
+   {journal} {SciPost Phys. Codebases}\ ,\ \bibinfo {pages} {4}} (\bibinfo
+  {year} {2022}{\natexlab{a}})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Fishman}\ \emph
+  {et~al.}(2022{\natexlab{b}})\citenamefont {Fishman}, \citenamefont {White},\
+  and\ \citenamefont {Stoudenmire}}]{itensor-r0.3}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Fishman}}, \bibinfo {author} {\bibfnamefont {S.~R.}\ \bibnamefont {White}},\
+  and\ \bibinfo {author} {\bibfnamefont {E.~M.}\ \bibnamefont {Stoudenmire}},\
+  }\bibfield  {title} {\bibinfo {title} {{Codebase release 0.3 for ITensor}},\
+  }\href {https://doi.org/10.21468/SciPostPhysCodeb.4-r0.3} {\bibfield
+  {journal} {\bibinfo  {journal} {SciPost Phys. Codebases}\ ,\ \bibinfo {pages}
+  {4}} (\bibinfo {year} {2022}{\natexlab{b}})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Alcalde~Puente}\ \emph
+  {et~al.}(2025{\natexlab{b}})\citenamefont {Alcalde~Puente}, \citenamefont
+  {Weerda}, \citenamefont {Schröder},\ and\ \citenamefont
+  {Rizzi}}]{peps2025zenodo}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Alcalde~Puente}}, \bibinfo {author} {\bibfnamefont {E.~L.}\ \bibnamefont
+  {Weerda}}, \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Schröder}},\
+  and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},\ }\bibfield
+   {title} {\bibinfo {title} {Data for "efficient optimization and conceptual
+  barriers in variational finite projected entangled-pair states"},\ }\href
+  {https://doi.org/10.5281/zenodo.15046369} {10.5281/zenodo.15046369} (\bibinfo
+  {year} {2025}{\natexlab{b}})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {{J\"{u}lich Supercomputing Centre}}(2021)}]{JUWELS}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibnamefont {{J\"{u}lich
+  Supercomputing Centre}}},\ }\bibfield  {title} {\bibinfo {title} {{JUWELS
+  Cluster and Booster: Exascale pathfinder with modular supercomputing
+  architecture at JSC}},\ }\href {https://doi.org/10.17815/jlsrf-7-183}
+  {\bibfield  {journal} {\bibinfo  {journal} {J. Large-Scale Rec. Fac.}\
+  }\textbf {\bibinfo {volume} {7}},\ \bibinfo {pages} {A183} (\bibinfo {year}
+  {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {{J{\"u}lich Supercomputing
+  Centre}}(2021)}]{JURECA2021}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibnamefont {{J{\"u}lich
+  Supercomputing Centre}}},\ }\bibfield  {title} {\bibinfo {title} {{JURECA:
+  Data centric and booster modules implementing the modular supercomputing
+  architecture at JSC}},\ }\href {https://doi.org/10.17815/jlsrf-7-182}
+  {\bibfield  {journal} {\bibinfo  {journal} {J. Large-Scale Res. Fac.}\
+  }\textbf {\bibinfo {volume} {7}},\ \bibinfo {pages} {A182} (\bibinfo {year}
+  {2021})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ferris}\ and\ \citenamefont
+  {Vidal}(2012)}]{Vidal12_sampling}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~J.}\ \bibnamefont
+  {Ferris}}\ and\ \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Vidal}},\
+  }\bibfield  {title} {\bibinfo {title} {Perfect sampling with unitary tensor
+  networks},\ }\href {https://doi.org/10.1103/PhysRevB.85.165146} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume}
+  {85}},\ \bibinfo {pages} {165146} (\bibinfo {year} {2012})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Krinitsin}\ \emph {et~al.}(2024)\citenamefont
+  {Krinitsin}, \citenamefont {Tausendpfund}, \citenamefont {Rizzi},
+  \citenamefont {Heyl},\ and\ \citenamefont
+  {Schmitt}}]{krinitsin2024_rougheningdynamicsinterfacestwodimensional}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.}~\bibnamefont
+  {Krinitsin}}, \bibinfo {author} {\bibfnamefont {N.}~\bibnamefont
+  {Tausendpfund}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Rizzi}},
+  \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Heyl}},\ and\ \bibinfo
+  {author} {\bibfnamefont {M.}~\bibnamefont {Schmitt}},\ }\href
+  {https://arxiv.org/abs/2412.10145} {\bibinfo {title} {Roughening dynamics of
+  interfaces in two-dimensional quantum matter}} (\bibinfo {year} {2024}),\
+  \Eprint {https://arxiv.org/abs/2412.10145} {arXiv:2412.10145 [quant-ph]}
+  \BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schmitt}\ and\ \citenamefont
+  {Heyl}(2020)}]{schmitt2020quantum}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Schmitt}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {Heyl}},\
+  }\bibfield  {title} {\bibinfo {title} {Quantum many-body dynamics in two
+  dimensions with artificial neural networks},\ }\href
+  {https://doi.org/https://doi.org/10.1103/PhysRevLett.125.100503} {\bibfield
+  {journal} {\bibinfo  {journal} {Physical Review Letters}\ }\textbf {\bibinfo
+  {volume} {125}},\ \bibinfo {pages} {100503} (\bibinfo {year}
+  {2020})}\BibitemShut {NoStop}%
+\end{thebibliography}%

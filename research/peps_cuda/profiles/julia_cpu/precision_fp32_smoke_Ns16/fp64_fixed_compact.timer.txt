@@ -1,0 +1,21 @@
+──────────────────────────────────────────────────────────────────────────────────────
+                                             Time                    Allocations      
+                                    ───────────────────────   ────────────────────────
+         Tot / % measured:               19.6s /  22.7%           4.22GiB /  30.4%    
+
+Section                     ncalls     time    %tot     avg     alloc    %tot      avg
+──────────────────────────────────────────────────────────────────────────────────────
+fixed_compact_Oks_and_Eks        1    3.77s   84.6%   3.77s   1.16GiB   90.5%  1.16GiB
+  energy                        16    1.34s   30.0%  83.7ms    154MiB   11.8%  9.65MiB
+    fourbody                    16    520ms   11.7%  32.5ms   65.8MiB    5.0%  4.11MiB
+    horizontal                  16    342ms    7.7%  21.4ms   51.3MiB    3.9%  3.20MiB
+    fourbody_envs               16   63.6ms    1.4%  3.98ms   15.6MiB    1.2%  0.98MiB
+  compact_log_gradients         16    1.24s   27.9%  77.7ms    780MiB   59.4%  48.7MiB
+  precomp_sHψ_elems             16    843ms   18.9%  52.7ms    153MiB   11.7%  9.57MiB
+  vertical_envs                 16    262ms    5.9%  16.4ms   88.6MiB    6.8%  5.54MiB
+  horizontal_envs               16   75.9ms    1.7%  4.74ms   12.3MiB    0.9%   787KiB
+direct_solve                     1    467ms   10.5%   467ms    109MiB    8.3%   109MiB
+direct_T                         1    150ms    3.4%   150ms   11.5MiB    0.9%  11.5MiB
+direct_theta_dot                 1   51.8ms    1.2%  51.8ms   2.56MiB    0.2%  2.56MiB
+direct_mean                      1   20.1ms    0.4%  20.1ms   1.45MiB    0.1%  1.45MiB
+──────────────────────────────────────────────────────────────────────────────────────

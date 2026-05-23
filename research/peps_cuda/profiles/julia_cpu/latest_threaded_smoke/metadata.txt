@@ -1,0 +1,8 @@
+timestamp=2026-05-15T08:39:25.705
+julia_version=1.11.5
+threads=4
+blas_threads=4
+sample_nr=2
+maxiter=1
+threaded=true
+compiled_modules_note=run with --compiled-modules=no for this reference harness

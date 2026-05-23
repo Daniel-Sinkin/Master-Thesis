@@ -1,0 +1,26 @@
+────────────────────────────────────────────────────────────────────────────────────
+                                           Time                    Allocations      
+                                  ───────────────────────   ────────────────────────
+        Tot / % measured:              5.68s /  96.3%           11.3GiB /  99.9%    
+
+Section                   ncalls     time    %tot     avg     alloc    %tot      avg
+────────────────────────────────────────────────────────────────────────────────────
+compact_Oks_and_Eks            1    5.25s   96.0%   5.25s   11.1GiB   98.7%  11.1GiB
+  sampling                 1.02k    2.71s   49.6%  2.65ms   6.08GiB   54.0%  6.08MiB
+    env_sample             4.10k    1.27s   23.3%   311μs   2.99GiB   26.6%   765KiB
+    env_top                3.07k    691ms   12.6%   225μs   1.72GiB   15.3%   586KiB
+    env_row                4.10k   97.6ms    1.8%  23.8μs    221MiB    1.9%  55.3KiB
+  energy                   1.02k    946ms   17.3%   924μs   1.56GiB   13.9%  1.56MiB
+    fourbody_envs          1.02k    379ms    6.9%   370μs    792MiB    6.9%   792KiB
+    fourbody               1.02k    280ms    5.1%   273μs    380MiB    3.3%   380KiB
+    horizontal             1.02k    231ms    4.2%   226μs    397MiB    3.4%   397KiB
+  vertical_envs            1.02k    880ms   16.1%   859μs   2.09GiB   18.6%  2.09MiB
+  horizontal_envs          1.02k    272ms    5.0%   265μs    564MiB    4.9%   564KiB
+  compact_log_gradients    1.02k    254ms    4.6%   248μs    495MiB    4.3%   495KiB
+  precomp_sHψ_elems        1.02k    183ms    3.3%   178μs    353MiB    3.1%   353KiB
+direct_solve                   1    181ms    3.3%   181ms   25.6MiB    0.2%  25.6MiB
+direct_T                       1   34.9ms    0.6%  34.9ms    113MiB    1.0%   113MiB
+double_layer_envs              1   3.24ms    0.1%  3.24ms   8.36MiB    0.1%  8.36MiB
+direct_theta_dot               1    694μs    0.0%   694μs   26.2KiB    0.0%  26.2KiB
+direct_mean                    1    610μs    0.0%   610μs   10.2KiB    0.0%  10.2KiB
+────────────────────────────────────────────────────────────────────────────────────

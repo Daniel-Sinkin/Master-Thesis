@@ -1,0 +1,25 @@
+──────────────────────────────────────────────────────────────────────────────────────
+                                             Time                    Allocations      
+                                    ───────────────────────   ────────────────────────
+         Tot / % measured:              53.0ms /  62.6%           41.5MiB /  87.4%    
+
+Section                     ncalls     time    %tot     avg     alloc    %tot      avg
+──────────────────────────────────────────────────────────────────────────────────────
+integrator                       1   33.2ms  100.0%  33.2ms   36.3MiB  100.0%  36.3MiB
+  NaturalGradient                1   32.7ms   98.6%  32.7ms   35.7MiB   98.4%  35.7MiB
+    Oks_and_Eks                  1   31.6ms   95.1%  31.6ms   35.7MiB   98.4%  35.7MiB
+      Oks_and_Eks                1   29.0ms   87.3%  29.0ms   33.4MiB   92.1%  33.4MiB
+        sampling                 8   15.5ms   46.7%  1.94ms   19.2MiB   52.9%  2.40MiB
+          env_sample            24   7.79ms   23.5%   325μs   9.59MiB   26.5%   409KiB
+          env_top               16   1.86ms    5.6%   116μs   4.30MiB   11.9%   276KiB
+          env_row               24    405μs    1.2%  16.9μs    731KiB    2.0%  30.5KiB
+        energy                   8   3.75ms   11.3%   468μs   1.88MiB    5.2%   240KiB
+          horizontal             8   2.34ms    7.1%   293μs   1.77MiB    4.9%   226KiB
+        log_gradients            8   3.28ms    9.9%   410μs   2.61MiB    7.2%   334KiB
+        vertical_envs            8   2.82ms    8.5%   353μs   5.97MiB   16.5%   764KiB
+        precomp_sHψ_elems        8   2.36ms    7.1%   295μs   1.73MiB    4.8%   221KiB
+        horizontal_envs          8   1.19ms    3.6%   148μs   1.99MiB    5.5%   255KiB
+      double_layer_envs          1   2.60ms    7.8%  2.60ms   2.28MiB    6.3%  2.28MiB
+    jacobi_mean                  1   1.03ms    3.1%  1.03ms   7.78KiB    0.0%  7.78KiB
+    solver                       1   76.8μs    0.2%  76.8μs   15.5KiB    0.0%  15.5KiB
+──────────────────────────────────────────────────────────────────────────────────────

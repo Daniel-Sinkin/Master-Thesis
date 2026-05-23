@@ -1,0 +1,11 @@
+timestamp=2026-05-15T22:21:56.433
+julia_version=1.11.5
+threads=1
+blas_threads=1
+samples=1024
+sample_seed=9001
+lx=4
+ly=4
+bond_dim=3
+comparison=fixed FP64-generated sample set; FP32 PEPS parameters are rounded from FP64
+regularization=multiply_algebraic_spectrum!(alpha=3.0)

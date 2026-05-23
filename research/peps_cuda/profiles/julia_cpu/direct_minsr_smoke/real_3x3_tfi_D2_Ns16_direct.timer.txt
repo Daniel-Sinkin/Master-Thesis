@@ -1,0 +1,24 @@
+────────────────────────────────────────────────────────────────────────────────────
+                                           Time                    Allocations      
+                                  ───────────────────────   ────────────────────────
+        Tot / % measured:              3.79s /  56.1%            198MiB /  60.3%    
+
+Section                   ncalls     time    %tot     avg     alloc    %tot      avg
+────────────────────────────────────────────────────────────────────────────────────
+compact_Oks_and_Eks            1    1.42s   67.0%   1.42s    102MiB   85.3%   102MiB
+  compact_log_gradients       16    1.09s   51.2%  68.1ms   33.5MiB   28.0%  2.10MiB
+  sampling                    16   45.8ms    2.2%  2.86ms   38.4MiB   32.1%  2.40MiB
+    env_sample                48   20.2ms    0.9%   420μs   19.2MiB   16.0%   409KiB
+    env_top                   32   8.84ms    0.4%   276μs   8.61MiB    7.2%   276KiB
+    env_row                   48   1.93ms    0.1%  40.2μs   1.43MiB    1.2%  30.5KiB
+  vertical_envs               16   12.4ms    0.6%   774μs   11.9MiB   10.0%   764KiB
+  energy                      16   7.86ms    0.4%   491μs   3.76MiB    3.1%   240KiB
+    horizontal                16   6.26ms    0.3%   391μs   3.54MiB    3.0%   226KiB
+  precomp_sHψ_elems           16   5.85ms    0.3%   366μs   3.46MiB    2.9%   221KiB
+  horizontal_envs             16   5.22ms    0.2%   326μs   3.98MiB    3.3%   255KiB
+direct_T                       1    466ms   21.9%   466ms   11.3MiB    9.5%  11.3MiB
+direct_theta_dot               1    177ms    8.3%   177ms   2.55MiB    2.1%  2.55MiB
+direct_mean                    1   52.7ms    2.5%  52.7ms   1.43MiB    1.2%  1.43MiB
+double_layer_envs              1   5.95ms    0.3%  5.95ms   2.28MiB    1.9%  2.28MiB
+direct_solve                   1    273μs    0.0%   273μs   19.2KiB    0.0%  19.2KiB
+────────────────────────────────────────────────────────────────────────────────────

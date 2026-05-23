@@ -1,0 +1,27 @@
+──────────────────────────────────────────────────────────────────────────────────────
+                                             Time                    Allocations      
+                                    ───────────────────────   ────────────────────────
+         Tot / % measured:               143ms /  63.7%            126MiB /  88.7%    
+
+Section                     ncalls     time    %tot     avg     alloc    %tot      avg
+──────────────────────────────────────────────────────────────────────────────────────
+integrator                       1   91.1ms  100.0%  91.1ms    112MiB  100.0%   112MiB
+  NaturalGradient                1   90.3ms   99.1%  90.3ms    111MiB   99.0%   111MiB
+    Oks_and_Eks                  1   89.0ms   97.7%  89.0ms    111MiB   99.0%   111MiB
+      Oks_and_Eks                1   83.7ms   91.8%  83.7ms    105MiB   94.4%   105MiB
+        sampling                 8   34.8ms   38.3%  4.36ms   47.4MiB   42.4%  5.92MiB
+          env_sample            32   19.6ms   21.5%   612μs   23.2MiB   20.8%   742KiB
+          env_top               24   6.45ms    7.1%   269μs   13.4MiB   12.0%   572KiB
+          env_row               32   3.42ms    3.8%   107μs   1.61MiB    1.4%  51.6KiB
+        energy                   8   22.4ms   24.6%  2.80ms   20.6MiB   18.4%  2.57MiB
+          fourbody               8   17.1ms   18.7%  2.13ms   11.4MiB   10.2%  1.43MiB
+          fourbody_envs          8   2.62ms    2.9%   327μs   5.81MiB    5.2%   743KiB
+          horizontal             8   1.87ms    2.0%   233μs   2.96MiB    2.6%   379KiB
+        vertical_envs            8   8.84ms    9.7%  1.10ms   16.6MiB   14.9%  2.08MiB
+        precomp_sHψ_elems        8   8.70ms    9.6%  1.09ms   11.1MiB    9.9%  1.39MiB
+        horizontal_envs          8   5.51ms    6.1%   689μs   4.35MiB    3.9%   557KiB
+        log_gradients            8   3.14ms    3.4%   393μs   5.37MiB    4.8%   688KiB
+      double_layer_envs          1   5.29ms    5.8%  5.29ms   5.14MiB    4.6%  5.14MiB
+    jacobi_mean                  1   1.03ms    1.1%  1.03ms   15.7KiB    0.0%  15.7KiB
+    solver                       1    208μs    0.2%   208μs   39.6KiB    0.0%  39.6KiB
+──────────────────────────────────────────────────────────────────────────────────────
